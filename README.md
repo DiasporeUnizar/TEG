@@ -16,7 +16,7 @@ The library is local to this repository (not published yet) and can be installed
 ```$ pip install dist/tegdet-0.1.0-py3-none-any.whl```
 
 ## Usage
-The ```test''' folder already includes an example of how to use the library, it is a revised version of the ```detector_comparer.py``` module.
+The ```test``` folder already includes an example of how to use the library, it is a revised version of the ```detector_comparer.py``` module.
 
 ## Reference
 The creation of the library and the structure of the repository follows this  [guide](https://medium.com/analytics-vidhya/how-to-create-a-python-library-7d5aea80cc3f).
