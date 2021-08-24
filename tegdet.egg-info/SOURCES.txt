@@ -1,0 +1,13 @@
+README.md
+setup.py
+tegdet/TEG.py
+tegdet/__init__.py
+tegdet/graph_comparison.py
+tegdet/graph_discovery.py
+tegdet.egg-info/PKG-INFO
+tegdet.egg-info/SOURCES.txt
+tegdet.egg-info/dependency_links.txt
+tegdet.egg-info/requires.txt
+tegdet.egg-info/top_level.txt
+test/__init__.py
+test/test_detector_comparer_TEG.py

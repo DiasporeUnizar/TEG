@@ -1,0 +1,10 @@
+Metadata-Version: 1.2
+Name: tegdet
+Version: 0.1.0
+Summary: Time Evolving Graph detectors library
+Home-page: UNKNOWN
+Author: Diaspore team
+License: MIT
+Description: UNKNOWN
+Platform: UNKNOWN
+Requires-Python: >=3
