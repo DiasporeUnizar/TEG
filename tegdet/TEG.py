@@ -33,17 +33,17 @@ from tegdet.graph_comparison import GraphComparator, GraphHammingDissimilarity, 
 
 
 class TEG():
-    N_OBS_PER_PERIOD = 336
-    N_BINS = 30
-    ALPHA = 5
+    _N_OBS_PER_PERIOD = 336
+    _N_BINS = 30
+    _ALPHA = 5
 
-    def __init__(self, metric, n_bins=N_BINS, alpha=ALPHA, n_obs_per_period=N_OBS_PER_PERIOD):
+    def __init__(self, metric, n_bins=_N_BINS, alpha=_ALPHA, n_obs_per_period=_N_OBS_PER_PERIOD):
         self.metric = metric
         self.n_bins = n_bins
         self.alpha = alpha
         self.n_obs_per_period= n_obs_per_period
-        self.baseline = None
-        self.global_graph= None
+        self._baseline = None
+        self._global_graph= None
 
     def get_training_dataset(self,train_ds_path):
 
@@ -53,7 +53,7 @@ class TEG():
         t0 = time()
         usages = training_dataset['Usage']
         teg = TEGdetector(usages, self.n_bins)
-        self.baseline, self.global_graph = teg.buildModel(self.metric, usages, int(len(training_dataset.index) / self.n_obs_per_period))
+        self._baseline, self._global_graph = teg.buildModel(self.metric, usages, int(len(training_dataset.index) / self.n_obs_per_period))
 
         return teg, time() - t0
 
@@ -64,8 +64,8 @@ class TEG():
     def predict(self, testing_dataset, model):
         t0 = time()
         usages = testing_dataset['Usage']
-        test = model.makePrediction(self.baseline, self.global_graph, self.metric, usages, int(len(testing_dataset.index) / self.n_obs_per_period))
-        n_outliers = model.computeOutliers(self.baseline, test, 100 - self.alpha)
+        test = model.makePrediction(self._baseline, self._global_graph, self.metric, usages, int(len(testing_dataset.index) / self.n_obs_per_period))
+        n_outliers = model.computeOutliers(self._baseline, test, 100 - self.alpha)
 
         return n_outliers, int(len(testing_dataset.index) / self.n_obs_per_period), time() - t0
 

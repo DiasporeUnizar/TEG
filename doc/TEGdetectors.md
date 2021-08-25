@@ -10,18 +10,21 @@ The ```tegdet``` package includes the  modules that implements the TEG detectors
 ## TEG module
 TEG module includes three classes:
 
-- ```TEG``` is the main class to be used from the user point of view.
+- ```TEG``` is the API to be used from the user point of view.
 
 | attribute         | description                                                                                       |
 |------------------ |------------------------------------------------------------------------------------------------   |
-| N_OBS_PER_PERIOD  | Number of observations per period (e.g., number of observation per week).<br>Default value=336    |
-| N_BINS            | Level of discretization of real valued observations (number of levels). <br>Default value=30.     |
-| ALPHA             | Level of discretization of real valued observations (number of levels). <br>Default value=30.     |
+| _N_OBS_PER_PERIOD  | Number of observations per period (e.g., number of observation per week).<br>Private attribute. Value=336    |
+| _N_BINS            | Level of discretization of real valued observations (number of levels). <br>Private attribute. Value=30.     |
+| _ALPHA             | Level of discretization of real valued observations (number of levels). <br>Private attribute. Value=5.      |
 | metric            | Dissimilarity metric used to compare two graphs.<br>Input parameter.                              |
-| n_bins            | Level of discretization of real valued observations (number of levels). <br>Input parameter.      |
-| alpha             | Level of discretization of real valued observations (number of levels). <br>Input parameter.      |
-| n_obs_per_period  | Number of observation per period.<br><br>Input parameter.                                         |
+| n_bins            | Level of discretization of real valued observations (number of levels). <br>Input parameter. Default value= _N_OBS_PER_PERIOD    |
+| alpha             | Level of discretization of real valued observations (number of levels). <br>Input parameter. Default value= _N_BINS     |
+| n_obs_per_period  | Number of observation per period.<br>Input parameter. Default value= _ALPHA                                             |
+| _baseline         | Baseline distribution of the training period. Private attribute				|
+| _global_graph	   | Global graph associated to the training period. Private attribute.				|
 
+                                                                                                     
 ## Graph discovery module
 
 
