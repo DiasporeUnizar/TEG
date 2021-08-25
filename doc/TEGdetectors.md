@@ -28,10 +28,11 @@ TEG module includes three classes:
 | _global_graph	   | Global graph associated to the training period. Private attribute.				|
 
 | method            					  |    description														|
-|----------------------------------------------------- |------------------------------------------------------------------------------------------------   |
-| __init__(metric, n_bins=_N_BINS, alpha=_ALPHA, n_obs_per_period=_N_OBS_PER_PERIOD)	| Constructor that initializes the TEG detector input parameters		|
-| get_training_dataset(train_ds_path): DataFrame 	| Loads the training dataset as a   ```pandas``` Dataframe			|
-| build_model(training_dataset): TEGdetector, float	|                |
+|------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
+| \__init__(metric, n_bins=_N_BINS, alpha=_ALPHA, n_obs_per_period=_N_OBS_PER_PERIOD)	| Constructor that initializes the TEG detector input parameters		|
+| get_training_dataset(train_ds_path): DataFrame 	| Loads the training dataset from ```train_ds_path``` csv file and returns it as a   ```pandas``` Dataframe			|
+| build_model(training_dataset): TEGdetector, float	|  Builds the prediction model based on the ```training_dataset``` (```Dataframe``` type)  and returns it as ```TEGdetector```
+together with the time to build the model (```float``` type)         |
 | get_testing_dataset(test_ds_path): DataFrame	|		|
 | predict(testing_dataset, model): int, int, float			|		|
 | compute_confusion_matrix(testing_len, predictions, is_attack_behavior): dict |			|
