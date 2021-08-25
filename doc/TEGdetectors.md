@@ -38,7 +38,27 @@ TEG module includes three classes:
 | print_metrics(detector, attack, perf, cm)		|  Prints the performance metrics  ```perf```(dict type including the time to build the model and the time to make predictions) and the confusion matrix ```cm``` (dict type) print on the standard output. The first two parameters to be provided are:  the  dissimilarity metric ```detector``` (used to create the TEG detector, string type) and the name of the scenario ```attack``` (string type)		|
 | metrics_to_csv(detector, attack, perf, cm, results_csv_path)	| Save the performance metrics  ```perf```(dict type including the time to build the model and the time to make predictions) and the confusion matrix ```cm``` (dict type) print on the csv file ```results_csv_path```. The first two parameters to be provided are:  the  dissimilarity metric ```detector``` (used to create the TEG detector, string type) and the name of the scenario ```attack``` (string type)				|
 
-                                                                                 
+ 
+- ```TEGdetector```  class 
+
+| attribute         | description                                                                                       |
+|------------------ |------------------------------------------------------------------------------------------------   |
+| le 			| LevelExtractor instance	|
+ 
+| method            					  |    description														|
+|------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
+| \_\_init__(self, usages, n_bins) |	|
+| sumGraph(self, gr1, gr2)	|	|
+| getGlobalGraph(self, graphs) | 	|
+| generateTEG(self, usagesClassified, n_periods) |	|
+| computeGraphDist(self, gr1, gr2, metric) |	|
+| buildModel(self, metric, usages, n_periods) |	|
+| makePrediction(self, baseline, global_graph, metric, usages, n_periods) |	|
+| computeOutliers(self, model, test, sigLevel) |	|
+
+- ```LevelExtractor``` class
+
+                                                                                
 ## Graph discovery module
 
 
