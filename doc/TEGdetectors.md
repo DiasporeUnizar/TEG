@@ -102,7 +102,7 @@ from the dataset:
 This modules include classes enable to compare two graphs and compute the "difference" between them according to a 
 given measure. 
 
-- ```GraphComparator``` is the superclass
+- ```GraphComparator``` is the superclass (actually never instantiated)
 
 | attribute         | description                                                                                       |
 |------------------ |------------------------------------------------------------------------------------------------   |
@@ -115,3 +115,7 @@ given measure.
 | expandGraph(graph, position, vertex)	|	|
 | normalizeGraphs( )	|	|
 | compareGraphs( )	|	|
+
+- The rest of the classes are subclasses of ```GraphComparator``` that override the method ```compareGraphs()```. Each subclass implements a different similarity
+metric according to the following Table.
+
