@@ -7,12 +7,6 @@ Classes that enable to compare two graphs and compute the "difference" between t
 given measure
 
 
-Changes: 
-
--- Expansion of the global graph recovered
--- Cosine dissimilarity:  penalization of missing arcs
--- New graph comparison measures added 
-
 """
 
 import numpy as np

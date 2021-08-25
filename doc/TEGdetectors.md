@@ -47,19 +47,71 @@ TEG module includes three classes:
  
 | method            					  |    description														|
 |------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
-| \_\_init__(self, usages, n_bins) |	|
-| sumGraph(self, gr1, gr2)	|	|
-| getGlobalGraph(self, graphs) | 	|
-| generateTEG(self, usagesClassified, n_periods) |	|
-| computeGraphDist(self, gr1, gr2, metric) |	|
-| buildModel(self, metric, usages, n_periods) |	|
-| makePrediction(self, baseline, global_graph, metric, usages, n_periods) |	|
-| computeOutliers(self, model, test, sigLevel) |	|
+| \_\_init__(usages, n_bins) |	|
+| sumGraph(gr1, gr2)	|	|
+| getGlobalGraph(graphs) | 	|
+| generateTEG(usagesClassified, n_periods) |	|
+| computeGraphDist(gr1, gr2, metric) |	|
+| buildModel(metric, usages, n_periods) |	|
+| makePrediction(baseline, global_graph, metric, usages, n_periods) |	|
+| computeOutliers(model, test, sigLevel) |	|
 
 - ```LevelExtractor``` class
 
+| attribute         | description                                                                                       |
+|------------------ |------------------------------------------------------------------------------------------------   |
+| level 			| 	|
+| step			| 	|
+| minValue			|	|
+ 
+| method            					  |    description														|
+|------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
+| \_\_init__(minValue, step, n_bins) |		|
+| getLevel(usages)	|	|
                                                                                 
 ## Graph discovery module
+This module includes two classes that enable to generate a causal graph (node frequency list, adjacency-frequency matrix)
+from the dataset:
 
+
+- ```Graph```
+
+| attribute         | description                                                                                       |
+|------------------ |------------------------------------------------------------------------------------------------   |
+| nodes 			| 	|
+| nodesFreq		| 	|
+| matrix			|	|
+
+| method            					  |    description														|
+|------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
+| \_\_init__( ) 	|		|
+
+- ```GraphGenerator```
+
+| attribute         | description                                                                                       |
+|------------------ |------------------------------------------------------------------------------------------------   |
+| graph 			| 	|
+
+| method            					  |    description														|
+|------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
+| \_\_init__( ) 	|		|
+| getIndex(element)	|	|
+| generateGraph(eventlog)		|	|
 
 ## Graph comparison module
+This modules include classes enable to compare two graphs and compute the "difference" between them according to a 
+given measure. 
+
+- ```GraphComparator``` is the superclass
+
+| attribute         | description                                                                                       |
+|------------------ |------------------------------------------------------------------------------------------------   |
+| graph1 			| 	|
+| graph2 			| 	|
+
+| method            					  |    description														|
+|------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
+| \_\_init__(gr1, gr2)	|		|
+| expandGraph(graph, position, vertex)	|	|
+| normalizeGraphs( )	|	|
+| compareGraphs( )	|	|
