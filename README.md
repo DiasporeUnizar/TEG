@@ -14,7 +14,7 @@ The TEG library can be directly installed   using ```pip install tegdet-0.1.0-py
 - *setup.py*:  this file  contains all the package metadata information. 
  
 ## How to install the library
-The library is local to this repository (not published yet) and can be installed using the command:
+The library is local to this repository (not published yet in the official PyPI repository) and can be installed using the command:
 
 ```$ pip install dist/tegdet-0.1.0-py3-none-any.whl```
 
