@@ -35,8 +35,8 @@ TEG module includes three classes:
 | get_testing_dataset(test_ds_path): DataFrame	| Loads the testing dataset from ```test_ds_path``` csv file and returns it as a   ```pandas``` Dataframe			|
 | predict(testing_dataset, model): int, int, float		| Makes predictions on the ```testing_dataset``` using the model (TEGdetector type). It returns three values: number of outliers and total number of observations (int type), and the time to make predictions (float type)		|
 | compute_confusion_matrix(testing_len, predictions, is_attack_behavior): dict |	 Computes the confusion matrix based on the number of observations ```testing_len```, number of outliers ```predictions```and the type of scenario (boolean parameter indicating whether the testing dataset represents an attack scenario or not). It returns the confusion matrix as a dictionary type. 		|
-| print_metrics(detector, attack, perf, cm)		|				|
-| metrics_to_csv(detector, attack, perf, cm,results_csv_path)	|				|
+| print_metrics(detector, attack, perf, cm)		|  Prints the performance metrics  ```perf```(dict type including the time to build the model and the time to make predictions) and the confusion matrix ```cm``` (dict type) print on the standard output. The first two parameters to be provided are:  the  dissimilarity metric ```detector``` (used to create the TEG detector, string type) and the name of the scenario ```attack``` (string type)		|
+| metrics_to_csv(detector, attack, perf, cm, results_csv_path)	| Save the performance metrics  ```perf```(dict type including the time to build the model and the time to make predictions) and the confusion matrix ```cm``` (dict type) print on the csv file ```results_csv_path```. The first two parameters to be provided are:  the  dissimilarity metric ```detector``` (used to create the TEG detector, string type) and the name of the scenario ```attack``` (string type)				|
 
                                                                                  
 ## Graph discovery module
