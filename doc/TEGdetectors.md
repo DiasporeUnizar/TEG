@@ -27,16 +27,16 @@ TEG module includes three classes:
 | _baseline         | Baseline distribution of the training period. Private attribute				|
 | _global_graph	   | Global graph associated to the training period. Private attribute.				|
 
-| method              |    description														|
-|---------------------- |------------------------------------------------------------------------------------------------   |
-| __init()			|			|
-| get_training_dataset() |			|
-| build_model()			|                |
-| get_testing_dataset()	|		|
-| predict()				|		|
-| compute_confusion_matrix |			|
-| print_metrics()		|				|
-| metrics_to_csv()	|				|
+| method            					  |    description														|
+|----------------------------------------------------- |------------------------------------------------------------------------------------------------   |
+| __init__(metric, n_bins=_N_BINS, alpha=_ALPHA, n_obs_per_period=_N_OBS_PER_PERIOD)	| Constructor that initializes the TEG detector input parameters		|
+| get_training_dataset(train_ds_path): DataFrame 	| Loads the training dataset as a   ```pandas``` Dataframe			|
+| build_model(training_dataset): TEGdetector, float	|                |
+| get_testing_dataset(test_ds_path): DataFrame	|		|
+| predict(testing_dataset, model): int, int, float			|		|
+| compute_confusion_matrix(testing_len, predictions, is_attack_behavior): dict |			|
+| print_metrics(detector, attack, perf, cm)		|				|
+| metrics_to_csv(detector, attack, perf, cm,results_csv_path)	|				|
 
                                                                                  
 ## Graph discovery module
