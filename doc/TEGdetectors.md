@@ -13,7 +13,7 @@ TEG module includes three classes:
 - ```TEG``` is the API class to be used from the user point of view.
 
 | attribute  (public)       | description                                                                                       |
-|--------------------- |------------------------------------------------------------------------------------------------   |
+|--------------------- |--------------------------------------------------------------------------------------------------------------------------------   |
 | metric: string            | Dissimilarity metric used to compare two graphs. Input parameter.                              |
 | n_bins: int            | Level of discretization of real valued observations (number of levels). Input parameter. Default value=  _N_BINS    |
 | alpha: int             |  Significance level. Input parameter. Default value=  _ALPHA   |
@@ -32,10 +32,10 @@ TEG module includes three classes:
 | method            					  |    description														|
 |----------------------------------------------------------------------------------------------- |----------------------------------------------------------------------------------   |
 | \_\_init__(metric: string, n_bins: int =_N_BINS, alpha: int =_ALPHA, n_obs_per_period: int =_N_OBS_PER_PERIOD)	| Constructor that initializes the TEG input parameters		|
-| get_training_dataset(train_ds_path): DataFrame 	| Loads the training dataset from ```train_ds_path``` csv file and returns it as a   ```pandas``` Dataframe			|
-| build_model(training_dataset): TEGdetector, float	|  Builds the prediction model based on the ```training_dataset``` (Dataframe type)  and returns it as ```TEGdetector``` together with the time to build the model (float type)         |
-| get_testing_dataset(test_ds_path): DataFrame	| Loads the testing dataset from ```test_ds_path``` csv file and returns it as a   ```pandas``` Dataframe			|
-| predict(testing_dataset, model): int, int, float		| Makes predictions on the ```testing_dataset``` using the model (TEGdetector type). It returns three values: number of outliers and total number of observations (int type), and the time to make predictions (float type)		|
+| get_training_dataset(train_ds_path: string): DataFrame 	| Loads the training dataset from ```train_ds_path``` csv file and returns it as a   ```pandas``` Dataframe			|
+| build_model(training_dataset: Dataframe): TEGdetector, float	|  Builds the prediction model based on the ```training_dataset``` and returns it together with the time to build the model          |
+| get_testing_dataset(test_ds_path: string): DataFrame	| Loads the testing dataset from ```test_ds_path``` csv file and returns it as a   ```pandas``` Dataframe			|
+| predict(testing_dataset: Dataframe, model: TEGDetector): int, int, float		| Makes predictions on the ```testing_dataset``` using the model. It returns three values: number of outliers and total number of observations (int type), and the time to make predictions (float type)		|
 | compute_confusion_matrix(testing_len, predictions, is_attack_behavior): dict |	 Computes the confusion matrix based on the total number of observations ```testing_len```, number of outliers ```predictions```and the type of scenario (boolean parameter indicating whether the testing dataset represents an attack scenario or not). It returns the confusion matrix as a dictionary type. __NOTE: The testing dataset can be either a normal scenario (i.e., no attacks) or an attack scenario (all the observations are attacks)__		|
 | print_metrics(detector, attack, perf, cm)		|  Prints the performance metrics  ```perf```(dict type including the time to build the model and the time to make predictions) and the confusion matrix ```cm``` (dict type) print on the standard output. The first two parameters to be provided are:  the  dissimilarity metric ```detector``` (used to create the TEG detector, string type) and the name of the scenario ```attack``` (string type)		|
 | metrics_to_csv(detector, attack, perf, cm, results_csv_path)	| Save the performance metrics  ```perf```(dict type including the time to build the model and the time to make predictions) and the confusion matrix ```cm``` (dict type) print on the csv file ```results_csv_path```. The first two parameters to be provided are:  the  dissimilarity metric ```detector``` (used to create the TEG detector, string type) and the name of the scenario ```attack``` (string type)				|
