@@ -120,4 +120,4 @@ given measure.
 - The rest of the classes are subclasses of ```GraphComparator``` that override the method ```compareGraphs()```. Each subclass implements a different similarity
 metric according to the following Table.
 
- 
+  <img src="https://github.com/DiasporeUnizar/TEG/blob/master/doc/metricsTable.png" width="1000">
