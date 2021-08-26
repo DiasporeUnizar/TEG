@@ -77,27 +77,27 @@ from the dataset:
 
 - ```Graph```
 
-| attribute         | description                                                                                       |
-|------------------ |------------------------------------------------------------------------------------------------   |
-| nodes 			| 	|
-| nodesFreq		| 	|
-| matrix			|	|
+| attribute 						        | description                                                                                       |
+|------------------------------------------------------ |------------------------------------------------------------------------------------------------   |
+| nodes: numpy array of int 			|  nodes of the graph	|
+| nodesFreq: numpy array of int			|  node frequencies	|
+| matrix: numpy array of int			|  adjacency-frequency matrix	|
 
 | method            					  |    description														|
 |------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
-| \_\_init__( ) 	|		|
+| \_\_init__( ) 							|	Constructor that initializes the Graph 	|
 
 - ```GraphGenerator```
 
 | attribute         | description                                                                                       |
 |------------------ |------------------------------------------------------------------------------------------------   |
-| graph 			| 	|
+| graph: Graph 	| graph	|
 
-| method            					  |    description														|
-|------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
-| \_\_init__( ) 	|		|
-| getIndex(element)	|	|
-| generateGraph(eventlog)		|	|
+| method            					 	 |    description														|
+|-------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
+| \_\_init__( ) 							|	Constructor that initializes the GraphGenerator	|
+| getIndex(element): int					|	|
+| generateGraph(eventlog: Dataframe)		|	|
 
 ## Graph comparison module
 This modules include classes enable to compare two graphs and compute the "difference" between them according to a 
