@@ -14,24 +14,24 @@ TEG module includes three classes:
 
 | attribute  (public)       | description                                                                                       |
 |--------------------- |------------------------------------------------------------------------------------------------   |
-| metric            | Dissimilarity metric used to compare two graphs.<br>Input parameter.                              |
-| n_bins            | Level of discretization of real valued observations (number of levels). <br>Input parameter. Default value= _N_OBS_PER_PERIOD    |
-| alpha             | Level of discretization of real valued observations (number of levels). <br>Input parameter. Default value= _N_BINS     |
-| n_obs_per_period  | Number of observation per period.<br>Input parameter. Default value= _ALPHA                                             |
+| metric: string            | Dissimilarity metric used to compare two graphs. Input parameter.                              |
+| n_bins: int            | Level of discretization of real valued observations (number of levels). Input parameter. Default value=  _N_BINS    |
+| alpha: int             |  Significance level. Input parameter. Default value=  _ALPHA   |
+| n_obs_per_period: int  | Number of observation per period. Input parameter. Default value= _N_OBS_PER_PERIOD                                            |
 
 
 | attribute  (private)       | description                                                                                       |
 |---------------------- |------------------------------------------------------------------------------------------------   |
-| _N_OBS_PER_PERIOD  | Number of observations per period (e.g., number of observation per week).<br>Value=336    |
-| _N_BINS            | Level of discretization of real valued observations (number of levels). <br>Value=30.     |
-| _ALPHA             | Level of discretization of real valued observations (number of levels). <br>Value=5.      |
-| _baseline         | Baseline distribution of the training period. Private attribute				|
-| _global_graph	   | Global graph associated to the training period. Private attribute.				|
+| _N_OBS_PER_PERIOD: int  | Number of observations per period. Value=336    |
+| _N_BINS: int            | Level of discretization of real valued observations (number of levels). Value=30.     |
+| _ALPHA: int             | Significance level. Value=5.      |
+| _baseline:  numpy array of float        | Baseline distribution of the training period. 				|
+| _global_graph: Graph	   | Global graph associated to the training period. 				|
 
 
 | method            					  |    description														|
-|------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
-| \_\_init__(metric, n_bins=_N_BINS, alpha=_ALPHA, n_obs_per_period=_N_OBS_PER_PERIOD)	| Constructor that initializes the TEG input parameters		|
+|----------------------------------------------------------------------------------------------- |----------------------------------------------------------------------------------   |
+| \_\_init__(metric: string, n_bins: int =_N_BINS, alpha: int =_ALPHA, n_obs_per_period: int =_N_OBS_PER_PERIOD)	| Constructor that initializes the TEG input parameters		|
 | get_training_dataset(train_ds_path): DataFrame 	| Loads the training dataset from ```train_ds_path``` csv file and returns it as a   ```pandas``` Dataframe			|
 | build_model(training_dataset): TEGdetector, float	|  Builds the prediction model based on the ```training_dataset``` (Dataframe type)  and returns it as ```TEGdetector``` together with the time to build the model (float type)         |
 | get_testing_dataset(test_ds_path): DataFrame	| Loads the testing dataset from ```test_ds_path``` csv file and returns it as a   ```pandas``` Dataframe			|
@@ -50,8 +50,8 @@ TEG module includes three classes:
 | method            					  |    description														|
 |------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
 | \_\_init__(usages, n_bins) | Constructor that initializes the TEGdetector based on the training dataset ```usage``` (Dataframe type) and ```n_bins``` |
-| sumGraph(gr1, gr2)	| *Adds* to graph ```gr1``` the graph ```gr2```. __Pre-Condition: ```gr1``` nodes set includes the ```gr2```node set__ 	|
-| getGlobalGraph(graphs): Graph | Creates a *global graph* as the sum of a list of ```graphs``` (Graph type) |	|
+| sumGraph(gr1, gr2)	| Adds to graph ```gr1``` the graph ```gr2```. __Pre-Condition: ```gr1``` nodes set includes the ```gr2```node set__ 	|
+| getGlobalGraph(graphs): Graph | Creates and returns a *global graph* as the sum of a list of ```graphs``` (Graph type) |	|
 | generateTEG(usagesClassified, n_periods): list of Graph | Generates the time evolving graph series (list of Graph type) from the discretized observations ```usagesClassified``` (```numpy``` Array of int) and the number of periods ```n_period```	|
 | computeGraphDist(gr1, gr2, metric): float | Computes the distance (float type) between two graphs ```gr1``` and ```gr2``` (type Graph) using the dissimilarity ```metric```	|
 | buildModel(metric, usages, n_periods): ```numpy``` Array of float, Graph | Builds the prediction model based on the dissimilarity ```metric```, observation set ```usages``` (Dataframe type) and number of periods ```n_periods```. It returns the distribution of the dissimilarities (```numpy``` Array of float) and the global graph (Graph type)	|

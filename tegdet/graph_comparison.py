@@ -8,8 +8,8 @@ given measure
 
 
 """
-
 import numpy as np
+
 from math import sqrt
 from scipy.stats import entropy #it is used to compute the KLD measure
 from scipy.spatial import distance #it is used to compute several distances
@@ -18,7 +18,7 @@ DEBUG = True
 
 
 class GraphComparator:
-    """Operator that compares two graphs"""
+    """ Operator that compares two graphs """
 
     def __init__(self,gr1,gr2):
         # First operand
@@ -55,7 +55,6 @@ class GraphComparator:
             if (second.nodes.size > i) and (second.nodes[i] != nodesU[i]) or (
                     second.nodes.size <= i):
                 self.expandGraph(second, i, nodesU[i])
-
 
     def compareGraphs(self):  # signature only because it is overriden
         return 0
