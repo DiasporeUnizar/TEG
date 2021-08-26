@@ -97,7 +97,7 @@ from the dataset:
 |-------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
 | \_\_init__( ) 							| Constructor that initializes the GraphGenerator attribute (empty Graph)	|
 | getIndex(element: int): int				| Retuns the index (int type) of the matrix row/column based on ```element```	|
-| generateGraph(eventlog: Dataframe)		| Generates the  ```graph``` from the ```eventlog```. __Pre-condition: the ```eventlog``` includes observations related to one caseID	|
+| generateGraph(eventlog: Dataframe)		| Generates the  ```graph``` from the ```eventlog```. __Pre-condition: the ```eventlog``` includes observations related to one caseID__	|
 
 ## Graph comparison module
 This modules include classes enable to compare two graphs and compute the "difference" between them according to a 
@@ -105,17 +105,17 @@ given measure.
 
 - ```GraphComparator``` is the superclass (actually never instantiated)
 
-| attribute         | description                                                                                       |
-|------------------ |------------------------------------------------------------------------------------------------   |
-| graph1 			| 	|
-| graph2 			| 	|
+| attribute        	 | description                                                                                       |
+|-------------------------|------------------------------------------------------------------------------------------------   |
+| graph1: Graph 	|  first operator	|
+| graph2: Graph 	|  second operator	|
 
 | method            					  |    description														|
 |------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
-| \_\_init__(gr1, gr2)	|		|
-| expandGraph(graph, position, vertex)	|	|
-| normalizeGraphs( )	|	|
-| compareGraphs( )	|	|
+| \_\_init__(gr1: Graph, gr2: Graph)				|	Constructor that initializes the GraphComparator attributes as ```gr1``` and ```gr2```, respectively	|
+| expandGraph(graph: Graph, position, vertex)	|	|
+| normalizeGraphs( )			|	|
+| compareGraphs( )			| Signature only (it is overriden)	|
 
 - The rest of the classes are subclasses of ```GraphComparator``` that override the method ```compareGraphs()```. Each subclass implements a different similarity
 metric according to the following Table.
