@@ -1,12 +1,14 @@
 """
 @Author: Simona Bernardi, Raúl Javierre
-@Date: 23/08/2021
+@Date: 26/08/2021
 
 Time-Evolving-Graph detector Version 0.1.0
 This modules includes the following classes:
-- TEG: 
+
+- TEG
 - LevelExtractor
 - TEGdetector
+
 that implements the detectors based on TEG.
 
 """
@@ -80,18 +82,18 @@ class TEG():
 
         return cm
 
-    def print_metrics(self, detector, attack, perf, cm):
+    def print_metrics(self, detector, scenario, perf, cm):
         print("Detector:\t\t\t", detector)
-        print("Attack:\t\t\t\t", attack)
+        print("Scenario:\t\t\t\t", scenario)
         print("Exec. time of model creation:\t", perf['tmc'], "seconds")
         print("Exec. time of model prediction:\t", perf['tmp'], "seconds")
         print("Confusion matrix:\t\n\n", cm)
 
-    def metrics_to_csv(self, detector, attack, perf, cm,results_csv_path):
+    def metrics_to_csv(self, detector, scenario, perf, cm,results_csv_path):
 
         df = pd.DataFrame({
                            'detector': detector,
-                           'attack': attack,
+                           'scenario': scenario,
                            'time_model_creation': perf['tmc'],
                            'time_model_prediction': perf['tmp'],
                            'n_tp': cm['n_tp'],
