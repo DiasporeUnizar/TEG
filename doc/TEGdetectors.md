@@ -117,7 +117,11 @@ given measure.
 | normalizeGraphs( )							| Compares the nodes of the two graphs and possibly expand them	|
 | compareGraphs( )							| Signature only (it is overriden)	|
 
-- The rest of the classes are subclasses of ```GraphComparator``` that override the method ```compareGraphs()```. Each subclass implements a different similarity
-metric according to the following Table.
+The rest of the classes are subclasses of ```GraphComparator``` that override the method ```compareGraphs()```. Each subclass ```Graph```__Metric__```Dissimilarity``` implements the dissimilarity metric included in the following Table. 
 
-  <img src="https://github.com/DiasporeUnizar/TEG/blob/master/doc/metricsTable.png" width="1000">
+- The __Hamming__ metric is computed considering two vectors *P* and *Q* obtained by flattening the incidence-frequency matrices of the two graphs
+- The __Cosine__ metric is computed considering two vectors *P* and *Q* obtained by flattening the node-frequency and the incidence-frequency matrices of the two graphs
+- The rest of the metrics are computed considering two vectors *P* and *Q* obtained by converting the incidence-frequency 
+matrices of the two graphs into relative frequencies and flattening them.
+
+  <img src="https://github.com/DiasporeUnizar/TEG/blob/master/doc/metricsTable.png" width="700">
