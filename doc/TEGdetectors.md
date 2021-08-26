@@ -61,14 +61,14 @@ TEG module includes three classes:
 
 | attribute         | description                                                                                       |
 |------------------ |------------------------------------------------------------------------------------------------   |
-| level 		| Number of discretization levels	|
-| step			| Discretization step	|
-| minValue		| Minimum value of the training observation set	|
+| level: numpy array of int 		| Discretization levels	|
+| step: int					| Discretization step	|
+| minValue	: float			| Minimum value of the training observation set	|
  
 | method            					  |    description														|
 |------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
-| \_\_init__(minValue, step, n_bins) |		|
-| getLevel(usages)	|	|
+| \_\_init__(minValue: float, step: int, n_bins: int) |	Constructor that initializes the LevelExtractor 	|
+| getLevel(usages: Dataframe): numpy array of int	| Discretizes the real valued observations of ```usages``` according to the discretization levels and returns the discretized usages	|
                                                                                 
 ## Graph discovery module
 This module includes two classes that enable to generate a causal graph (node frequency list, adjacency-frequency matrix)
