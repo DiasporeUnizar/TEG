@@ -112,10 +112,10 @@ given measure.
 
 | method            					  |    description														|
 |------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
-| \_\_init__(gr1: Graph, gr2: Graph)				|	Constructor that initializes the GraphComparator attributes as ```gr1``` and ```gr2```, respectively	|
-| expandGraph(graph: Graph, position, vertex)	|	|
-| normalizeGraphs( )			|	|
-| compareGraphs( )			| Signature only (it is overriden)	|
+| \_\_init__(gr1: Graph, gr2: Graph)				| Constructor that initializes the GraphComparator attributes as ```gr1``` and ```gr2```, respectively	|
+| expandGraph(graph: Graph, position: int, vertex: int) | Expands ```graph``` by inserting a new node ```vertex``` in ```position```. The new added fictious node	has frequency -1. The new added row and column of the adjacency matrix have -1 entries |
+| normalizeGraphs( )							| Compares the nodes of the two graphs and possibly expand them	|
+| compareGraphs( )							| Signature only (it is overriden)	|
 
 - The rest of the classes are subclasses of ```GraphComparator``` that override the method ```compareGraphs()```. Each subclass implements a different similarity
 metric according to the following Table.
