@@ -37,8 +37,7 @@ TEG module includes three classes:
 | get_testing_dataset(test_ds_path: string): DataFrame	| Loads the testing dataset from ```test_ds_path``` csv file and returns it as a   ```pandas``` Dataframe			|
 | predict(testing_dataset: Dataframe, model: TEGDetector): int, int, float		| Makes predictions on the ```testing_dataset``` using the model. It returns three values: number of outliers and total number of observations (int type), and the time to make predictions (float type)		|
 | compute_confusion_matrix(testing_len: int, predictions: int, is_attack_behavior: bool): dict |	 Computes the confusion matrix based on the total number of observations ```testing_len```, number of outliers ```predictions```and the type of scenario (boolean parameter indicating whether the testing dataset represents an attack scenario or not). It returns the confusion matrix as a dictionary type. __NOTE: The testing dataset can be either a normal scenario (i.e., no attacks) or an attack scenario (all the observations are attacks)__		|
-| print_metrics(detector: string, scenario: string, perf: dict, cm: dict)		|  Prints the performance metrics  ```perf```(dict type including the time to build the model and the time to make predictions) and the confusion matrix ```cm```  on the standard output. The first two parameters to be provided are  the names of
-the  ```detector``` and the ```scenario```, respectively.		|
+| print_metrics(detector: string, scenario: string, perf: dict, cm: dict)		|  Prints the performance metrics  ```perf```(dict type including the time to build the model and the time to make predictions) and the confusion matrix ```cm```  on the standard output. The first two parameters to be provided are  the names of the  ```detector``` and the ```scenario```, respectively.		|
 | metrics_to_csv(detector: string, scenario: string, perf: dict, cm: dict, results_csv_path: string)	| Save the performance metrics  ```perf```(dict type including the time to build the model and the time to make predictions) and the confusion matrix ```cm``` (dict type) print on the csv file ```results_csv_path```. The first two parameters to be provided are  the names of the  ```detector``` and the ```scenario```, respectively.
  
 - ```TEGdetector```  class 
@@ -49,13 +48,13 @@ the  ```detector``` and the ```scenario```, respectively.		|
  
 | method            					  |    description														|
 |------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
-| \_\_init__(usages, n_bins) | Constructor that initializes the TEGdetector based on the training dataset ```usage``` (Dataframe type) and ```n_bins``` |
-| sumGraph(gr1, gr2)	| Adds to graph ```gr1``` the graph ```gr2```. __Pre-Condition: ```gr1``` nodes set includes the ```gr2```node set__ 	|
-| getGlobalGraph(graphs): Graph | Creates and returns a *global graph* as the sum of a list of ```graphs``` (Graph type) |	|
-| generateTEG(usagesClassified, n_periods): list of Graph | Generates the time evolving graph series (list of Graph type) from the discretized observations ```usagesClassified``` (```numpy``` Array of int) and the number of periods ```n_period```	|
-| computeGraphDist(gr1, gr2, metric): float | Computes the distance (float type) between two graphs ```gr1``` and ```gr2``` (type Graph) using the dissimilarity ```metric```	|
-| buildModel(metric, usages, n_periods): ```numpy``` Array of float, Graph | Builds the prediction model based on the dissimilarity ```metric```, observation set ```usages``` (Dataframe type) and number of periods ```n_periods```. It returns the distribution of the dissimilarities (```numpy``` Array of float) and the global graph (Graph type)	|
-| makePrediction(baseline, global_graph, metric, usages, n_periods): ```numpy``` Array of float | Makes the predictions of the observation set ```usages``` (Dataframe type) based on the ```baseline``` distribution of the dissimilarities (```numpy``` Array of float), the global graph (Graph type), the dissimilarity ```metric``` and the number of periods ```n_periods``` 	|
+| \_\_init__(usages: Dataframe, n_bins: int) | Constructor that initializes the TEGdetector based on the training dataset ```usage``` and ```n_bins``` |
+| sumGraph(gr1: Graph, gr2: Graph)	| Adds to graph ```gr1``` the graph ```gr2```. __Pre-Condition: ```gr1``` nodes set includes the ```gr2```node set__ 	|
+| getGlobalGraph(graphs: list of Graph): Graph | Creates and returns a *global graph* as the sum of a list of ```graphs```  	|
+| generateTEG(usagesClassified: numpy array of int, n_periods: int): list of Graph | Generates and returns the time evolving graph series (list of Graph type) from the discretized observations ```usagesClassified```  and the number of periods ```n_period```	|
+| computeGraphDist(gr1: Graph, gr2: Graph, metric: string): float | Computes and returns the distance (float type) between two graphs ```gr1``` and ```gr2``` using the dissimilarity ```metric```	|
+| buildModel(metric: string, usages: Dataframe, n_periods: int): numpy array of float, Graph | Builds the distribution of the dissimilarities based on the ```metric```, observation set ```usages``` and number of periods ```n_periods```. It returns the distribution of the dissimilarities  and the global graph	|
+| makePrediction(baseline: numpy array of float, global_graph: Graph, metric: string, usages: Dataframe, n_periods): ```numpy``` array of float | Makes the predictions of the observation set ```usages```  based on the ```baseline``` distribution of the dissimilarities, the global graph, the dissimilarity ```metric``` and the number of periods ```n_periods``` 	|
 | computeOutliers(model, test, sigLevel): int | Computes the number of outliers based on the baseline distribution of the dissimilarities ```model``` (```numpy``` Array of float), the prediction ```test``` (```numpy``` Array of float) and the significance level ```sigLevel``` (float type)	|
 
 - ```LevelExtractor``` class
