@@ -233,13 +233,13 @@ class TEGdetector:
 
         return graph_dist
 
-    def computeOutliers(self, model, test, sigLevel):
+    def computeOutliers(self, baseline, prediction, sigLevel):
         # Computes the  percentile of the dissimilarity model
-        perc = np.percentile(model, sigLevel)
+        perc = np.percentile(baseline, sigLevel)
 
         # Sets a counter vector to zero
-        n_out = np.zeros(test.size)
+        n_out = np.zeros(prediction.size)
         # Dissimilarity tests
-        n_out = np.where(test > perc, n_out + 1, n_out)
+        n_out = np.where(prediction > perc, n_out + 1, n_out)
 
         return np.sum(n_out)

@@ -51,11 +51,11 @@ TEG module includes three classes:
 | \_\_init__(usages: Dataframe, n_bins: int) | Constructor that initializes the TEGdetector based on the training dataset ```usage``` and ```n_bins``` |
 | sumGraph(gr1: Graph, gr2: Graph)	| Adds to graph ```gr1``` the graph ```gr2```. __Pre-Condition: ```gr1``` nodes set includes the ```gr2```node set__ 	|
 | getGlobalGraph(graphs: list of Graph): Graph | Creates and returns a *global graph* as the sum of a list of ```graphs```  	|
-| generateTEG(usagesClassified: numpy array of int, n_periods: int): list of Graph | Generates and returns the time evolving graph series (list of Graph type) from the discretized observations ```usagesClassified```  and the number of periods ```n_period```	|
-| computeGraphDist(gr1: Graph, gr2: Graph, metric: string): float | Computes and returns the distance (float type) between two graphs ```gr1``` and ```gr2``` using the dissimilarity ```metric```	|
+| generateTEG(usagesClassified: numpy array of int, n_periods: int): list of Graph | Generates and returns the time evolving graph series from the discretized observations ```usagesClassified```  and the number of periods ```n_period```	|
+| computeGraphDist(gr1: Graph, gr2: Graph, metric: string): float | Computes and returns the distance  between two graphs ```gr1``` and ```gr2``` using the dissimilarity ```metric```	|
 | buildModel(metric: string, usages: Dataframe, n_periods: int): numpy array of float, Graph | Builds the distribution of the dissimilarities based on the ```metric```, observation set ```usages``` and number of periods ```n_periods```. It returns the distribution of the dissimilarities  and the global graph	|
-| makePrediction(baseline: numpy array of float, global_graph: Graph, metric: string, usages: Dataframe, n_periods): ```numpy``` array of float | Makes the predictions of the observation set ```usages```  based on the ```baseline``` distribution of the dissimilarities, the global graph, the dissimilarity ```metric``` and the number of periods ```n_periods``` 	|
-| computeOutliers(model, test, sigLevel): int | Computes the number of outliers based on the baseline distribution of the dissimilarities ```model``` (```numpy``` Array of float), the prediction ```test``` (```numpy``` Array of float) and the significance level ```sigLevel``` (float type)	|
+| makePrediction(baseline: numpy array of float, global_graph: Graph, metric: string, usages: Dataframe, n_periods): numpy array of float | Makes the predictions of the observation set ```usages```  based on the ```baseline``` distribution of the dissimilarities, the ```global graph```, the dissimilarity ```metric``` and the number of periods ```n_periods``` 	|
+| computeOutliers(baseline: numpy array of float, prediction: numpy array of float, sigLevel: int): int | Computes the number of outliers based on the ```baseline``` distribution of the dissimilarities, the ```prediction```  and the significance level ```sigLevel``` |
 
 - ```LevelExtractor``` class
 
