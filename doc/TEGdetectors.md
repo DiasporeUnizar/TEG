@@ -67,7 +67,7 @@ TEG module includes three classes:
  
 | method            								  |    description														|
 |------------------------------------------------------------------------------------------------------------- |---------------------------------------------------------------------------   |
-| \_\_init__(minValue: float, step: int, n_bins: int) |	Constructor that initializes the LevelExtractor 	|
+| \_\_init__(minValue: float, step: int, n_bins: int) |	Constructor that initializes the LevelExtractor attributes	|
 | getLevel(usages: Dataframe): numpy array of int	| Discretizes the real valued observations of ```usages``` according to the discretization levels and returns the discretized usages	|
                                                                                 
 ## Graph discovery module
@@ -85,7 +85,7 @@ from the dataset:
 
 | method            					  |    description														|
 |------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
-| \_\_init__( ) 							|	Constructor that initializes the Graph 	|
+| \_\_init__( ) 							|	Constructor that initializes the Graph attributes to empty lists 	|
 
 - ```GraphGenerator```
 
@@ -95,9 +95,9 @@ from the dataset:
 
 | method            					 	 |    description														|
 |-------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
-| \_\_init__( ) 							|	Constructor that initializes the GraphGenerator	|
-| getIndex(element): int					|	|
-| generateGraph(eventlog: Dataframe)		|	|
+| \_\_init__( ) 							| Constructor that initializes the GraphGenerator attribute (empty Graph)	|
+| getIndex(element: int): int				| Retuns the index (int type) of the matrix row/column based on ```element```	|
+| generateGraph(eventlog: Dataframe)		| Generates the  ```graph``` from the ```eventlog```. __Pre-condition: the ```eventlog``` includes observations related to one caseID	|
 
 ## Graph comparison module
 This modules include classes enable to compare two graphs and compute the "difference" between them according to a 
