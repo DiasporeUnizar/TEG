@@ -66,7 +66,7 @@ TEG module includes three classes:
 | minValue	: float			| Minimum value of the training observation set	|
  
 | method            					  |    description														|
-|------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
+|------------------------------------------------------------------------------------ |---------------------------------------------------------------------------   |
 | \_\_init__(minValue: float, step: int, n_bins: int) |	Constructor that initializes the LevelExtractor 	|
 | getLevel(usages: Dataframe): numpy array of int	| Discretizes the real valued observations of ```usages``` according to the discretization levels and returns the discretized usages	|
                                                                                 
