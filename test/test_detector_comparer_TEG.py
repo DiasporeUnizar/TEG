@@ -38,7 +38,7 @@ def test_generate_results():
 
     for metric in list_of_metrics:
 
-        detector = TEG(metric,N_BINS)
+        detector = TEG(metric)
 
         #Load training dataset
         training_dataset = detector.get_training_dataset(training_ds)
