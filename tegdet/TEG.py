@@ -47,9 +47,9 @@ class TEG():
         self._baseline = None
         self._global_graph= None
 
-    def get_dataset(self,train_ds_path):
+    def get_dataset(self,ds_path):
 
-        df = pd.read_csv(train_ds_path)
+        df = pd.read_csv(ds_path)
         df.columns = ['TS','Attribute']
         return df
 
