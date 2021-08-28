@@ -32,9 +32,8 @@ TEG module includes three classes:
 | method            					  |    description														|
 |----------------------------------------------------------------------------------------------- |----------------------------------------------------------------------------------   |
 | \_\_init__(metric: string, n_bins: int =_N_BINS, alpha: int =_ALPHA, n_obs_per_period: int =_N_OBS_PER_PERIOD)	| Constructor that initializes the TEG input parameters		|
-| get_training_dataset(train_ds_path: string): DataFrame 	| Loads the training dataset from ```train_ds_path``` csv file and returns it as a   ```pandas``` Dataframe			|
+| get_dataset(ds_path: string): DataFrame 	| Loads the dataset from ```ds_path``` csv file, renames the columns and returns it as a   ```pandas``` Dataframe			|
 | build_model(training_dataset: Dataframe): TEGdetector, float	|  Builds the prediction model based on the ```training_dataset``` and returns it together with the time to build the model          |
-| get_testing_dataset(test_ds_path: string): DataFrame	| Loads the testing dataset from ```test_ds_path``` csv file and returns it as a   ```pandas``` Dataframe			|
 | predict(testing_dataset: Dataframe, model: TEGDetector): int, int, float		| Makes predictions on the ```testing_dataset``` using the model. It returns three values: number of outliers and total number of observations (int type), and the time to make predictions (float type)		|
 | compute_confusion_matrix(testing_len: int, predictions: int, is_attack_behavior: bool): dict |	 Computes the confusion matrix based on the total number of observations ```testing_len```, number of outliers ```predictions```and the type of scenario (boolean parameter indicating whether the testing dataset represents an attack scenario or not). It returns the confusion matrix as a dictionary type. __Pre-condition: ```testing_len``` and ```predictions``` are computed from a testing dataset that can be either a normal scenario (i.e., no attacks) or an attack scenario (all the observations are attacks)__		|
 | print_metrics(detector: string, scenario: string, perf: dict, cm: dict)		|  Prints the performance metrics  ```perf```(dict type including the time to build the model and the time to make predictions) and the confusion matrix ```cm```  on the standard output. The first two parameters to be provided are  the names of the  ```detector``` and the ```scenario```, respectively.		|
@@ -48,13 +47,13 @@ TEG module includes three classes:
  
 | method            					  |    description														|
 |------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
-| \_\_init__(usages: Dataframe, n_bins: int) | Constructor that initializes the TEGdetector based on the training dataset ```usage``` and ```n_bins``` |
+| \_\_init__(observations: Dataframe, n_bins: int) | Constructor that initializes the TEGdetector based on the training dataset ```observations``` and ```n_bins``` |
 | sumGraph(gr1: Graph, gr2: Graph)	| Adds to graph ```gr1``` the graph ```gr2```. __Pre-Condition: ```gr1``` nodes set includes the ```gr2```node set__ 	|
 | getGlobalGraph(graphs: list of Graph): Graph | Creates and returns a *global graph* as the sum of a list of ```graphs```  	|
-| generateTEG(usagesClassified: numpy array of int, n_periods: int): list of Graph | Generates and returns the time evolving graph series from the discretized observations ```usagesClassified```  and the number of periods ```n_period```	|
+| generateTEG(observationsClassified: numpy array of int, n_periods: int): list of Graph | Generates and returns the time evolving graph series from the discretized observations ```observationsClassified```  and the number of periods ```n_period```	|
 | computeGraphDist(gr1: Graph, gr2: Graph, metric: string): float | Computes and returns the distance  between two graphs ```gr1``` and ```gr2``` using the dissimilarity ```metric```	|
-| buildModel(metric: string, usages: Dataframe, n_periods: int): numpy array of float, Graph | Builds the distribution of the dissimilarities based on the ```metric```, observation set ```usages``` and number of periods ```n_periods```. It returns the distribution of the dissimilarities  and the global graph	|
-| makePrediction(baseline: numpy array of float, global_graph: Graph, metric: string, usages: Dataframe, n_periods): numpy array of float | Makes the predictions of the observation set ```usages```  based on the ```baseline``` distribution of the dissimilarities, the ```global graph```, the dissimilarity ```metric``` and the number of periods ```n_periods``` 	|
+| buildModel(metric: string, observations: Dataframe, n_periods: int): numpy array of float, Graph | Builds the distribution of the dissimilarities based on the ```metric```, ```observations``` and number of periods ```n_periods```. It returns the distribution of the dissimilarities  and the global graph	|
+| makePrediction(baseline: numpy array of float, global_graph: Graph, metric: string, observations: Dataframe, n_periods): numpy array of float | Makes the predictions of the ```observations```  based on the ```baseline``` distribution of the dissimilarities, the ```global graph```, the dissimilarity ```metric``` and the number of periods ```n_periods``` 	|
 | computeOutliers(baseline: numpy array of float, prediction: numpy array of float, sigLevel: int): int | Computes the number of outliers based on the ```baseline``` distribution of the dissimilarities, the ```prediction```  and the significance level ```sigLevel``` |
 
 - ```LevelExtractor``` class
@@ -68,7 +67,7 @@ TEG module includes three classes:
 | method            								  |    description														|
 |------------------------------------------------------------------------------------------------------------- |---------------------------------------------------------------------------   |
 | \_\_init__(minValue: float, step: int, n_bins: int) |	Constructor that initializes the LevelExtractor attributes	|
-| getLevel(usages: Dataframe): numpy array of int	| Discretizes the real valued observations of ```usages``` according to the discretization levels and returns the discretized usages	|
+| getLevel(observations: Dataframe): numpy array of int	| Discretizes the real valued ```observations``` according to the discretization levels and returns the discretized observations	|
                                                                                 
 ## Graph discovery module
 This module includes two classes that enable to generate a causal graph (node frequency list, adjacency-frequency matrix)
@@ -97,7 +96,7 @@ from the dataset:
 |-------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
 | \_\_init__( ) 							| Constructor that initializes the GraphGenerator attribute (empty Graph)	|
 | getIndex(element: int): int				| Retuns the index (int type) of the matrix row/column based on ```element```	|
-| generateGraph(eventlog: Dataframe)		| Generates the  ```graph``` from the ```eventlog```. __Pre-condition: the ```eventlog``` includes observations related to one caseID__	|
+| generateGraph(eventlog: Dataframe)		| Generates the  ```graph``` from the ```eventlog```. __Pre-condition: the ```eventlog``` includes observations related to a specific ID__	|
 
 ## Graph comparison module
 This modules include classes enable to compare two graphs and compute the "difference" between them according to a 
