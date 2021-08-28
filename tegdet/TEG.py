@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi, Raúl Javierre
-@Date: 26/08/2021
+@Date: 28/08/2021
 
 Time-Evolving-Graph detector Version 0.1.0
 This modules includes the following classes:
