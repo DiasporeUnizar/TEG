@@ -47,25 +47,23 @@ class TEG():
         self._baseline = None
         self._global_graph= None
 
-    def get_training_dataset(self,train_ds_path):
+    def get_dataset(self,train_ds_path):
 
-        return pd.read_csv(train_ds_path)
+        df = pd.read_csv(train_ds_path)
+        df.columns = ['TS','Attribute']
+        return df
 
     def build_model(self, training_dataset):
         t0 = time()
-        usages = training_dataset['Usage']
+        usages = training_dataset['Attribute']
         teg = TEGdetector(usages, self.n_bins)
         self._baseline, self._global_graph = teg.buildModel(self.metric, usages, int(len(training_dataset.index) / self.n_obs_per_period))
 
         return teg, time() - t0
 
-    def get_testing_dataset(self,test_ds_path):
-
-        return pd.read_csv(test_ds_path)
-
     def predict(self, testing_dataset, model):
         t0 = time()
-        usages = testing_dataset['Usage']
+        usages = testing_dataset['Attribute']
         test = model.makePrediction(self._baseline, self._global_graph, self.metric, usages, int(len(testing_dataset.index) / self.n_obs_per_period))
         n_outliers = model.computeOutliers(self._baseline, test, 100 - self.alpha)
 
@@ -74,11 +72,11 @@ class TEG():
     def compute_confusion_matrix(self, testing_len, predictions, is_attack_behavior):
         cm = {'n_tp': 0, 'n_tn': 0, 'n_fp': 0, 'n_fn': 0}
         if is_attack_behavior:  # if attacks were detected, they were true positives
-            cm['n_tp'] = predictions
-            cm['n_fn'] = testing_len - predictions
+            cm['n_tp'] = int(predictions)
+            cm['n_fn'] = int(testing_len - predictions)
         else:  # if attacks were detected, they were false positives
-            cm['n_fp'] = predictions
-            cm['n_tn'] = testing_len - predictions
+            cm['n_fp'] = int(predictions)
+            cm['n_tn'] = int(testing_len - predictions)
 
         return cm
 
@@ -116,29 +114,29 @@ class LevelExtractor:
         self.step = step
         self.minValue = minValue
 
-    def getLevel(self, usages):
-        # Discretization of  "usages" according to the "self.Level"
-        # "usages" is a np.array (of floats)
-        nObs = len(usages)  # number of observations
+    def getLevel(self, observations):
+        # Discretization of  "observations" according to the "self.Level"
+        # "observations" is a np.array (of floats)
+        nObs = len(observations)  # number of observations
         level = -1 * np.ones(nObs)  # array initialized with -1
         level = level.astype(int)  # level is a np.array of int
 
-        # Case: "usages" (testing set) is lower than the min_train_value
+        # Case: "observations" (testing set) is lower than the min_train_value
         #       level position the last
-        level = np.where((usages < self.minValue), self.level[-1], level)
+        level = np.where((observations < self.minValue), self.level[-1], level)
         
         n_bins= len(self.level)-2
         i = 0  # while iterator
         while i < n_bins:
             lowerB = self.minValue + i * self.step
             upperB = self.minValue + (i + 1) * self.step
-            level = np.where((lowerB <= usages) & (usages < upperB),
+            level = np.where((lowerB <= observations) & (observations < upperB),
                              self.level[i], level)
             i += 1
 
-        # Case: "usages" (testing set) is greater than the max_train_value 
+        # Case: "observations" (testing set) is greater than the max_train_value 
         # level position the penultimate      
-        level = np.where(upperB <= usages, self.level[-2], level)
+        level = np.where(upperB <= observations, self.level[-2], level)
 
         return level
 
@@ -146,10 +144,10 @@ class LevelExtractor:
 class TEGdetector:
     """Builds the model and makes predictions """
 
-    def __init__(self, usages, n_bins):
+    def __init__(self, observations, n_bins):
         # Creates an new level extractor
-        m = usages.min()  # min of the TRAINING dataset
-        M = usages.max()  # max of the TRAINING dataset
+        m = observations.min()  # min of the TRAINING dataset
+        M = observations.max()  # max of the TRAINING dataset
         step = (M - m) / n_bins  # usage increment step
 
         self.le = LevelExtractor(m, step, n_bins)
@@ -175,15 +173,15 @@ class TEGdetector:
 
         return global_graph
 
-    def generateTEG(self, usagesClassified, n_periods):
+    def generateTEG(self, observationsClassified, n_periods):
         # Creates the time evolving graphs series
-        nObs = int(len(usagesClassified) / n_periods)  # number of observations per period
+        nObs = int(len(observationsClassified) / n_periods)  # number of observations per period
         graphs = []
         for period in range(n_periods):
             gr = GraphGenerator()
-            eventlog = usagesClassified[period * nObs:(period + 1) * nObs]
+            eventlog = observationsClassified[period * nObs:(period + 1) * nObs]
             # Transforms to a dataframe (needed to generate the graph)
-            el = pd.DataFrame({'Period': period * np.ones(nObs), 'Usage': eventlog})
+            el = pd.DataFrame({'Period': period * np.ones(nObs), 'Attribute': eventlog})
             gr.generateGraph(el)
             graphs.append(gr)
 
@@ -202,12 +200,12 @@ class TEGdetector:
 
         return metricValue
 
-    def buildModel(self, metric, usages, n_periods):
-        # Gets usage levels (discretization)
-        usagesClassified = self.le.getLevel(usages)
+    def buildModel(self, metric, observations, n_periods):
+        # Gets observation levels (discretization)
+        observationsClassified = self.le.getLevel(observations)
 
         # Generates the time-evolving graphs
-        graphs = self.generateTEG(usagesClassified, n_periods)
+        graphs = self.generateTEG(observationsClassified, n_periods)
 
         # Gets the graph of the training period
         global_graph = self.getGlobalGraph(graphs)
@@ -219,12 +217,12 @@ class TEGdetector:
 
         return graph_dist, global_graph
 
-    def makePrediction(self, baseline, global_graph, metric, usages, n_periods):
+    def makePrediction(self, baseline, global_graph, metric, observations, n_periods):
         # Gets consumption levels (consumption discretization)
-        usagesClassified = self.le.getLevel(usages)
+        observationsClassified = self.le.getLevel(observations)
 
         # Generates the time-evolving graphs
-        graphs = self.generateTEG(usagesClassified, n_periods)
+        graphs = self.generateTEG(observationsClassified, n_periods)
 
         # Computes the distance between each graph and the global graph
         graph_dist = np.empty(n_periods)

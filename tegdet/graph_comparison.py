@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: updated 25/04/2021
+@Date: updated 26/08/2021
 
 Graph comparison module:
 Classes that enable to compare two graphs and compute the "difference" between them according to a 
@@ -13,8 +13,6 @@ import numpy as np
 from math import sqrt
 from scipy.stats import entropy #it is used to compute the KLD measure
 from scipy.spatial import distance #it is used to compute several distances
-
-DEBUG = True
 
 
 class GraphComparator:

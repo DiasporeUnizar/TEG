@@ -44,20 +44,20 @@ class GraphGenerator:
 
         return idx
 
-    #Pre: the eventlog is already filtered for a given ID
+    #Pre: the eventlog is related to a specific ID
     def generateGraph(self, eventlog):
-        grouped = eventlog.groupby('Usage').count()
-        # Sets vertices: they are ordered according to the usage levels 
+        grouped = eventlog.groupby('Attribute').count()
+        # Sets vertices: they are ordered according to the levels 
         self.graph.nodes = grouped.index.to_numpy()          
         self.graph.nodesFreq = grouped.to_numpy()
         dim = len(self.graph.nodes)
 
         # Initializes the adjacent matrix
         self.graph.matrix = np.zeros((dim, dim), dtype=int)
-        usage = eventlog.Usage.to_numpy()
+        attr = eventlog.Attribute.to_numpy()
         # Sets the adjacent matrix with the frequencies
-        for i in range(usage.size - 1):
-            row = self.getIndex(usage[i])
-            col = self.getIndex(usage[i + 1])
+        for i in range(attr.size - 1):
+            row = self.getIndex(attr[i])
+            col = self.getIndex(attr[i + 1])
             self.graph.matrix[row][col] += 1
 

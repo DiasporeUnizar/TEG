@@ -34,14 +34,14 @@ def test_generate_results():
 
     cwd = os.getcwd() 
 
-    training_ds = cwd + "/test/dataset/1540_0_60.csv"
+    training_ds = cwd + "/test/dataset/training_0_60.csv"
 
     for metric in list_of_metrics:
 
         detector = TEG(metric)
 
         #Load training dataset
-        training_dataset = detector.get_training_dataset(training_ds)
+        training_dataset = detector.get_dataset(training_ds)
 
         assert not training_dataset.empty, "The training dataset is empty."
 
@@ -51,13 +51,13 @@ def test_generate_results():
         for attack in tuple_of_attacks:
             
             if attack:
-                testing_ds = cwd + "/test/dataset/1540_" + attack + "_61_75.csv"
+                testing_ds = cwd + "/test/dataset/test_" + attack + "_61_75.csv"
                 
             else:
-                testing_ds = cwd + "/test/dataset/1540_61_75.csv"
+                testing_ds = cwd + "/test/dataset/test_61_75.csv"
 
             #Load testing dataset
-            testing_dataset = detector.get_testing_dataset(testing_ds)
+            testing_dataset = detector.get_dataset(testing_ds)
 
             assert not testing_dataset.empty, "The testing dataset is empty."
 
