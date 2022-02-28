@@ -1,8 +1,8 @@
 """
 @Author: Simona Bernardi, Raúl Javierre
-@Date: 28/08/2021
+@Date: 28/02/2022
 
-Time-Evolving-Graph detector Version 0.1.0
+Time-Evolving-Graph detector Version 1.0
 This modules includes the following classes:
 
 - TEG
@@ -35,6 +35,7 @@ from tegdet.graph_comparison import GraphComparator, GraphHammingDissimilarity, 
 
 
 class TEG():
+    #Default values
     _N_OBS_PER_PERIOD = 336
     _N_BINS = 30
     _ALPHA = 5
@@ -48,39 +49,61 @@ class TEG():
         self._global_graph= None
 
     def get_dataset(self,ds_path):
-
+        """
+        Loads the dataset from "ds_path" (csv file), renames the two columns as TS (timestamp) and 
+        data points (DP), respectively, and return the pandas dataframe "dt"
+        """
         df = pd.read_csv(ds_path)
-        df.columns = ['TS','Attribute']
+        df.columns = ['TS','DP']
         return df
 
     def build_model(self, training_dataset):
+        """
+        Builds the prediction model based on the "training_dataset" and returns it together with
+        the time to build the model
+        """
         t0 = time()
-        usages = training_dataset['Attribute']
-        teg = TEGdetector(usages, self.n_bins)
-        self._baseline, self._global_graph = teg.buildModel(self.metric, usages, int(len(training_dataset.index) / self.n_obs_per_period))
+        dataPoints = training_dataset['DP']
+        teg = TEGdetector(dataPoints, self.n_bins)
+        self._baseline, self._global_graph = teg.buildModel(self.metric, dataPoints, int(len(training_dataset.index) / self.n_obs_per_period))
 
         return teg, time() - t0
 
     def predict(self, testing_dataset, model):
+        """
+        Makes predictions on the "testing_dataset" using the model. It returns three values:
+        number of outliers, total number of observations, and time to make predictions
+        """
         t0 = time()
-        usages = testing_dataset['Attribute']
-        test = model.makePrediction(self._baseline, self._global_graph, self.metric, usages, int(len(testing_dataset.index) / self.n_obs_per_period))
+        dataPoints = testing_dataset['DP']
+        test = model.makePrediction(self._baseline, self._global_graph, self.metric, dataPoints, int(len(testing_dataset.index) / self.n_obs_per_period))
         n_outliers = model.computeOutliers(self._baseline, test, 100 - self.alpha)
 
         return n_outliers, int(len(testing_dataset.index) / self.n_obs_per_period), time() - t0
 
-    def compute_confusion_matrix(self, testing_len, predictions, is_attack_behavior):
+    def compute_confusion_matrix(self, n_observations, n_outliers, is_anomalous):
+        """
+        Pre: "n_observations" and "n_outliers" are computed from a testing dataset that can be 
+        either a normal scenario (without anomalies) or an anomalous scenario (all the observations are anomalous)
+        Post: Computes the confusion matrix based on the total number of observations "n_observations",
+        "n_outliers", and the type of scenario "is_anomalous" (boolean).
+        It returns the confusion matrix as dictionary type.
+        """
         cm = {'n_tp': 0, 'n_tn': 0, 'n_fp': 0, 'n_fn': 0}
-        if is_attack_behavior:  # if attacks were detected, they were true positives
-            cm['n_tp'] = int(predictions)
-            cm['n_fn'] = int(testing_len - predictions)
-        else:  # if attacks were detected, they were false positives
-            cm['n_fp'] = int(predictions)
-            cm['n_tn'] = int(testing_len - predictions)
+        if is_anomalous:  # if anomaly is detected, it is a true positive
+            cm['n_tp'] = int(n_outliers)
+            cm['n_fn'] = int(n_observations - n_outliers)
+        else:  # if anomay is detected, it is a false positive
+            cm['n_fp'] = int(n_outliers)
+            cm['n_tn'] = int(n_observations - n_outliers)
 
         return cm
 
     def print_metrics(self, detector, scenario, perf, cm):
+        """
+        Prints the performance metrics "perf" (time to build the model and to make predictions)
+        and the confusion matrix "cm" on the stdout for a given "detector" and "scenario"
+        """
         print("Detector:\t\t\t", detector)
         print("Scenario:\t\t\t\t", scenario)
         print("Exec. time of model creation:\t", perf['tmc'], "seconds")
@@ -88,7 +111,10 @@ class TEG():
         print("Confusion matrix:\t\n\n", cm)
 
     def metrics_to_csv(self, detector, scenario, perf, cm,results_csv_path):
-
+        """
+        Saves the performance metrics "perf" (time to build the model and to make predictions)
+        and the confusion matrix "cm" on the csv file "result_csv_path" for a given "detector" and "scenario"
+        """
         df = pd.DataFrame({
                            'detector': detector,
                            'scenario': scenario,
@@ -104,19 +130,23 @@ class TEG():
 
 
 class LevelExtractor:
-    """Extractor of usage levels """
+    """Extractor of levels """
 
     def __init__(self, minValue, step, n_bins):
-        # Creates Levels [0,1,..,n_bins+2], the last 2 positions for the possible 
-        #outliers of the testing dataset (minimum than the min_train_value and maximum 
-        #of the max_train_value)
+        """
+        Creates levels [0,1,..,n_bins+2], the last two positions for the possible 
+        outliers of the testing dataset (minimum than the min_train_value and maximum 
+        of the max_train_value)
+        """
         self.level = np.arange(n_bins+2)
         self.step = step
         self.minValue = minValue
 
     def getLevel(self, observations):
-        # Discretization of  "observations" according to the "self.Level"
-        # "observations" is a np.array (of floats)
+        """
+        Discretization of  "observations" according to the "self.level"
+        "observations" is a np.array (of floats)
+        """
         nObs = len(observations)  # number of observations
         level = -1 * np.ones(nObs)  # array initialized with -1
         level = level.astype(int)  # level is a np.array of int
@@ -145,15 +175,22 @@ class TEGdetector:
     """Builds the model and makes predictions """
 
     def __init__(self, observations, n_bins):
-        # Creates an new level extractor
+        """
+        Constructor that initializes the TEGdetector based on the training dataset "observations" and "n_bins"
+        Creates a new level extractor.
+        """
         m = observations.min()  # min of the TRAINING dataset
         M = observations.max()  # max of the TRAINING dataset
         step = (M - m) / n_bins  # usage increment step
 
         self.le = LevelExtractor(m, step, n_bins)
 
-    # Pre: Graph "gr1" nodes set includes graph "gr2" nodes set
+    
     def sumGraph(self, gr1, gr2):
+        """
+        Pre: Graph "gr1" nodes set includes graph "gr2" nodes set
+        Adds to graph "gr1" the graph "gr2"
+        """
         for i in range(gr2.nodes.size):
             row = gr2.nodes[i]
             gr1.nodesFreq[row] += gr2.nodesFreq[i]
@@ -162,7 +199,9 @@ class TEGdetector:
                 gr1.matrix[row][col] += gr2.matrix[i][j]
 
     def getGlobalGraph(self, graphs):
-        # Creates a global graph of max dimensions - initialized to zeros
+        """
+        Creates and returns a global graph as the sum of a list of "graphs".
+        """
         global_graph = Graph()
         n_bins = len(self.le.level)
         global_graph.nodes = np.arange(n_bins, dtype=int)
@@ -174,21 +213,26 @@ class TEGdetector:
         return global_graph
 
     def generateTEG(self, observationsClassified, n_periods):
-        # Creates the time evolving graphs series
+        """
+        Creates and returns the time evolving graphs series from the discretized observations
+        "observationClassified" and the number of periods "n_periods"
+        """
         nObs = int(len(observationsClassified) / n_periods)  # number of observations per period
         graphs = []
         for period in range(n_periods):
             gr = GraphGenerator()
-            eventlog = observationsClassified[period * nObs:(period + 1) * nObs]
+            obsClass = observationsClassified[period * nObs:(period + 1) * nObs]
             # Transforms to a dataframe (needed to generate the graph)
-            el = pd.DataFrame({'Period': period * np.ones(nObs), 'Attribute': eventlog})
+            el = pd.DataFrame({'Period': period * np.ones(nObs), 'DP': obsClass})
             gr.generateGraph(el)
             graphs.append(gr)
 
         return graphs
 
     def computeGraphDist(self, gr1, gr2, metric):
-        # Computes the distance between graphs "gr1" and "gr2" using the "metric"
+        """
+        Computes and returns the distance between graphs "gr1" and "gr2" using the dissimilarity "metric"
+        """
         grcomp = GraphComparator(gr1, gr2)
         # Graph normalization
         grcomp.normalizeGraphs()
@@ -201,6 +245,11 @@ class TEGdetector:
         return metricValue
 
     def buildModel(self, metric, observations, n_periods):
+        """
+        Builds the distribution of the dissimilarities based on "metric", "observations", and
+        "n_periods". It returns the ditribution of the dissimilarities and the global graph.
+        """
+
         # Gets observation levels (discretization)
         observationsClassified = self.le.getLevel(observations)
 
@@ -218,6 +267,11 @@ class TEGdetector:
         return graph_dist, global_graph
 
     def makePrediction(self, baseline, global_graph, metric, observations, n_periods):
+        """
+        Makes and returns the predictions of the "observations" based on the "baseline" distribution 
+        of the dissimilarities, "global_graph", the dissimilarity "metric" and "n_periods"
+        """
+
         # Gets consumption levels (consumption discretization)
         observationsClassified = self.le.getLevel(observations)
 
@@ -232,7 +286,10 @@ class TEGdetector:
         return graph_dist
 
     def computeOutliers(self, baseline, prediction, sigLevel):
-        # Computes the  percentile of the dissimilarity model
+        """
+        Computes the number of outliers based on the "baseline" distribution of the dissimilarities,
+        the "prediction" and the significance level "sigLevel"
+        """
         perc = np.percentile(baseline, sigLevel)
 
         # Sets a counter vector to zero

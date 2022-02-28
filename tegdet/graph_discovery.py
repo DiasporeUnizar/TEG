@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: 28/08/2021
+@Date: 28/02/2022
 
 
 Graph discovery module:
@@ -18,6 +18,9 @@ class Graph:
     """Graph structure"""
 
     def __init__(self):
+        """
+        Constructor that initializes the graph attributes to empty lists
+        """
         # List of nodes 
         self.nodes = []
         # List of node frequencies
@@ -30,10 +33,15 @@ class GraphGenerator:
     """Generator of a causal graph from the dataset"""
 
     def __init__(self):
-        # Graph data structure
+        """
+        Constructor that creates an empty graph
+        """
         self.graph = Graph()
 
     def getIndex(self, element):
+        """
+        Returns the index of the matrix row (column) based on "element"
+        """
         idx = -1  # not assigned
         i = 0
         nodes = self.graph.nodes
@@ -44,9 +52,12 @@ class GraphGenerator:
 
         return idx
 
-    #Pre: the eventlog is related to a specific ID
-    def generateGraph(self, eventlog):
-        grouped = eventlog.groupby('Attribute').count()
+    
+    def generateGraph(self, obsClassified):
+        """
+        Generates the "graph" from the classified observations "obsClassified"
+        """
+        grouped = obsClassified.groupby('DP').count()
         # Sets vertices: they are ordered according to the levels 
         self.graph.nodes = grouped.index.to_numpy()          
         self.graph.nodesFreq = grouped.to_numpy()
@@ -54,7 +65,7 @@ class GraphGenerator:
 
         # Initializes the adjacent matrix
         self.graph.matrix = np.zeros((dim, dim), dtype=int)
-        attr = eventlog.Attribute.to_numpy()
+        attr = obsClassified.DP.to_numpy()
         # Sets the adjacent matrix with the frequencies
         for i in range(attr.size - 1):
             row = self.getIndex(attr[i])

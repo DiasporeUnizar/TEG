@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: updated 26/08/2021
+@Date: 28/02/2022
 
 Graph comparison module:
 Classes that enable to compare two graphs and compute the "difference" between them according to a 
@@ -19,12 +19,19 @@ class GraphComparator:
     """ Operator that compares two graphs """
 
     def __init__(self,gr1,gr2):
+        """
+        Constructor that initializes the two operands (graphs)
+        """
         # First operand
         self.graph1 = gr1
         # Second operand
         self.graph2 = gr2
  
     def expandGraph(self, graph, position, vertex):
+        """
+        Expands "graph" by inserting a new node "vertex" in "position". The new added fictious node
+        has frequency -1. The new added row and column of the adjacency matrix have -1 entries
+        """
         # Different from zero to differentiate from the absence of arc,
         # but presence of the node
         wildcard = '-1'
@@ -37,6 +44,9 @@ class GraphComparator:
         graph.matrix = np.insert(graph.matrix, position, wildcard, axis=0)
 
     def normalizeGraphs(self):
+        """
+        Compare the nodes of the two graphs and possibly expand them
+        """
         first = self.graph1
         second = self.graph2
 
