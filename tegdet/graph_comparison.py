@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: 28/02/2022
+@Date: 14/03/2022
 
 Graph comparison module:
 Classes that enable to compare two graphs and compute the "difference" between them according to a 
@@ -43,7 +43,7 @@ class GraphComparator:
         # Insert the new row in the matrix
         graph.matrix = np.insert(graph.matrix, position, wildcard, axis=0)
 
-    def normalizeGraphs(self):
+    def resizeGraphs(self):
         """
         Compare the nodes of the two graphs and possibly expand them
         """
@@ -63,6 +63,22 @@ class GraphComparator:
             if (second.nodes.size > i) and (second.nodes[i] != nodesU[i]) or (
                     second.nodes.size <= i):
                 self.expandGraph(second, i, nodesU[i])
+
+    def normalizeMatrices(self):
+        # Convert the two matrices into arrays
+        first = self.graph1.matrix.flatten()
+        second = self.graph2.matrix.flatten()
+
+        # Set -1 entries to zero
+        first = np.where((first < 0), first * 0, first)
+        second = np.where((second < 0), second * 0, second)
+
+        # Normalizes the matrices (PDF)
+        first = first / (first.sum())
+        second = second / (second.sum())
+
+        return first, second
+
 
     def compareGraphs(self):  # signature only because it is overriden
         return 0
@@ -127,17 +143,23 @@ class GraphCosineDissimilarity(GraphComparator):
         second = np.concatenate(
             (self.graph2.nodesFreq, self.graph2.matrix.flatten()), axis=None)
         
+
         # Normalization factor
         nfactor = 1.0
         sp = first * second / nfactor
         # Frobenius norm (L2-norm Euclidean)
         norm1 = np.linalg.norm(first)
         norm2 = np.linalg.norm(second)
-        # Compute the product
-        cosinus = np.sum(sp) / (norm1 * norm2)
+        den = np.sum(sp)
+        
+        if den > 0:
+            # Compute the product
+            cosinus =  den / (norm1 * norm2)
+        else:
+            cosinus = 0
 
         #Since some entries of the matrices can be -1 the cosinus maybe be negative!
-        return 1.0 - abs(cosinus) #returns the dissimilarity (distance)
+        return 1.0 - cosinus #returns the dissimilarity (distance)
 
 class GraphJaccardDissimilarity(GraphComparator):
 
@@ -149,18 +171,9 @@ class GraphJaccardDissimilarity(GraphComparator):
         --  corresponding to the same ordered set of nodes:
             graph normalization has to be done before!
         """
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
-
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
+ 
         # Compute the Jaccard similarity (equal to Peak Correlation Energy)
         sumprod = (first * second).sum()
         quadnorm1 = (first*first).sum()
@@ -179,17 +192,8 @@ class GraphDiceDissimilarity(GraphComparator):
         --  corresponding to the same ordered set of nodes:
             graph normalization has to be done before!
         """
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Dice similarity 
         sumprod = (first * second).sum()
@@ -213,17 +217,8 @@ class GraphKLDissimilarity(GraphComparator):
         --  corresponding to the same ordered set of nodes:
             graph normalization has to be done before!
         """
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the KLD of first  w.r.t second 
         kld = entropy(first,second,base=2)
@@ -240,17 +235,8 @@ class GraphJeffreysDissimilarity(GraphComparator):
         --  corresponding to the same ordered set of nodes:
             graph normalization has to be done before!
         """
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1  to  zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
 
         # Compute the Jeffreys of first  w.r.t second 
@@ -277,17 +263,8 @@ class GraphJSDissimilarity(GraphComparator):
         --  corresponding to the same ordered set of nodes:
             graph normalization has to be done before!
         """
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the JSD 
         jsd = distance.jensenshannon(first,second,base=2)
@@ -308,17 +285,8 @@ class GraphEuclideanDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Euclidean distance 
         eucl = distance.euclidean(first,second)
@@ -336,17 +304,8 @@ class GraphCityblockDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Cityblock distance 
         city = distance.cityblock(first,second)
@@ -364,17 +323,8 @@ class GraphChebyshevDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Chebyshev distance 
         cheb = distance.chebyshev(first,second)
@@ -392,17 +342,8 @@ class GraphMinkowskiDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Minkowski distance 
         mink = distance.minkowski(first,second,3)
@@ -423,17 +364,8 @@ class GraphBraycurtisDissimilarity(GraphComparator):
         graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Bray-Curtis distance 
         bray = distance.braycurtis(first,second)
@@ -451,17 +383,8 @@ class GraphGowerDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Gower distance (=Cityblock divided by the number of elements)
         gower = distance.cityblock(first,second) / len(first)
@@ -479,17 +402,8 @@ class GraphSoergelDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Soergel distance (=Cityblock divided by the 
         # sum of the pairwise_max_elements)
@@ -508,17 +422,8 @@ class GraphKulczynskiDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Kulczynski distance (=Cityblock divided by the 
         # sum of the pairwise_min_elements)
@@ -545,17 +450,8 @@ class GraphCanberraDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Canberra distance 
         canb = distance.canberra(first,second)
@@ -573,17 +469,8 @@ class GraphLorentzianDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Lorentzian distance 
         lore = np.log(1 + (first - second))
@@ -604,17 +491,8 @@ class GraphBhattacharyyaDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Bhattacharyya distance 
         bhatta = (np.sqrt(first * second)).sum()
@@ -639,17 +517,8 @@ class GraphHellingerDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Hellinger distance 
         helli = 1 - (np.sqrt(first * second)).sum()
@@ -667,17 +536,8 @@ class GraphMatusitaDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Matusita distance 
         matu = (np.sqrt(first * second)).sum()
@@ -695,17 +555,8 @@ class GraphSquaredchordDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Squared-chord distance (= Matusita without the square root)
         sqchord = (np.sqrt(first * second)).sum()
@@ -727,17 +578,8 @@ class GraphPearsonDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-        
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Check possible division by zero
         almostzero = np.finfo(float).eps
@@ -762,17 +604,8 @@ class GraphNeymanDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-        
-        # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Check possible division by zero
         almostzero = np.finfo(float).eps
@@ -797,18 +630,8 @@ class GraphSquaredDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-        
-        
-        # Set -1 entries to  zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Squared Chi^2 distance
         num =  (first - second) 
@@ -830,18 +653,8 @@ class GraphProbsymmetricDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-        
-        
-        # Set -1 entries to  zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-       # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Probabistic symmetric Chi^2 distance
         num =  (first - second) 
@@ -863,18 +676,8 @@ class GraphDivergenceDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-        
-        
-        # Set -1 entries to  zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-       # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Divergence
         num =  (first - second) 
@@ -896,18 +699,8 @@ class GraphClarkDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-        
-        
-        # Set -1 entries to  zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Clark distance
         num =  abs(first - second) 
@@ -930,18 +723,8 @@ class GraphAdditivesymmetricDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
 
-        # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
-        
-        
-        # Set -1 entries to  zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
-
-        # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        # Matrices normalization
+        first, second = self.normalizeMatrices()
 
         # Compute the Additive symmetric Chi^2 distance
         term1 =  (first - second) 

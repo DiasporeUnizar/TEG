@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi, Raúl Javierre
-@Date: 28/02/2022
+@Date: 14/03/2022
 
 Time-Evolving-Graph detector Version 1.0
 This modules includes the following classes:
@@ -234,8 +234,8 @@ class TEGdetector:
         Computes and returns the distance between graphs "gr1" and "gr2" using the dissimilarity "metric"
         """
         grcomp = GraphComparator(gr1, gr2)
-        # Graph normalization
-        grcomp.normalizeGraphs()
+        # Graph resizing
+        grcomp.resizeGraphs()
 
         # Computes the difference based on the metric
         className = "Graph" + metric + "Dissimilarity"
