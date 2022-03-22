@@ -5,7 +5,7 @@ This repository includes the TEG library that has been created from the implemen
 The core structure is the following:
 - *dataset*: include datasets used in the library test and the usage examples
 - *dist*: contains a ```.whl``` file, i.e., package saved in the ```Wheel``` format (the standard built-package format used for Python distributions). 
-The TEG library can be directly installed   using ```pip install tegdet-0.1.0-py3-none-any.whl``` 
+The TEG library can be directly installed   using ```pip install tegdet-1.0-py3-none-any.whl``` 
 - *tegdet*: includes the TEG detectors modules (see [TEG detectors](https://github.com/DiasporeUnizar/TEG/blob/master/doc/TEGdetectors.md))
 - *test*: includes the test module and the ```script_results``` folder
 - *.gitignore*
