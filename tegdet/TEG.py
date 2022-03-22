@@ -17,7 +17,7 @@ from time import time
 import numpy as np
 import pandas as pd
 import os
-import sys      # needed to convert a string to a class object
+import sys      
 from tegdet.graph_discovery import GraphGenerator, Graph
 from tegdet.graph_comparison import *
 
@@ -270,7 +270,7 @@ class TEGdetector:
 
     def computeOutliers(self, baseline, prediction, sigLevel):
         """
-        Computes the number of outliers based on the "baseline" distribution of the dissimilarities,
+        Computes the outliers based on the "baseline" distribution of the dissimilarities,
         the "prediction" and the significance level "sigLevel"
         """
         perc = np.percentile(baseline, sigLevel)
@@ -280,5 +280,4 @@ class TEGdetector:
         # Dissimilarity tests
         n_out = np.where(prediction > perc, n_out + 1, n_out)
 
-        #return np.sum(n_out)
         return n_out
