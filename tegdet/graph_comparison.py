@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: 14/03/2022
+@Date: 22/03/2022
 
 Graph comparison module:
 Classes that enable to compare two graphs and compute the "difference" between them according to a 
@@ -32,8 +32,7 @@ class GraphComparator:
         Expands "graph" by inserting a new node "vertex" in "position". The new added fictious node
         has frequency -1. The new added row and column of the adjacency matrix have -1 entries
         """
-        # Different from zero to differentiate from the absence of arc,
-        # but presence of the node
+        # Different from zero to differentiate from the absence of arc, but presence of the node
         wildcard = '-1'
         # Insert the new vertex in the list of nodes
         graph.nodes = np.insert(graph.nodes, position, vertex)
