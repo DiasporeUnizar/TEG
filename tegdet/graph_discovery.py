@@ -13,7 +13,6 @@ import numpy as np
 
 DEBUG = True
 
-
 class Graph:
     """Graph structure"""
 

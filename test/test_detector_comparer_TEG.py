@@ -1,27 +1,33 @@
 """
 @Author: Simona Bernardi
-@Date: updated 24/08/2021
+@Date: updated 22/03/2022
 
-Simplified version of the detector_comparer in Diaspore repository to test the TEG library
-The main program:
-- builds a model based on the training set related to a given meterID
-- makes prediction based on a set of *scenarios* and
-- generates *basic metrics* to facilitate the comparison of the *TEG detectors* 
-The training set and testing set (*scenario*) are stored in separate files 
-in the "/dataset/" folder.
-The results with all the basic metrics are generated in "/script_results/detector_comparer_results.csv"
-- compare the results with the ones obtained from the TEG version of the Diaspore repository
-(assumed correct).
+Input dataset:
+- energy consumption (in KhW), every half-an-hour, registered by a smartmeter.
+- the training set is over 60 weeks
+- the testing sets are over 15 weeks: a testing set are either normal or anomalous scenarios
+- The training set and testing set are stored in separate files in the "/dataset/" folder.
+
+The test program:
+- builds a prediction model based on the training set for each dissimilarity metric (TEG-detectors variants)
+- makes predictions in testing sets and
+- compute the confusion matrix and performance metrics  
+
+Output:
+- Confusion matrices and performance metrics are stored in "/script_results/detector_comparer_results.csv"
+- Validation: results are compared with the ones obtained from the TEG version of the Diaspore repository
+(assumed correct), which are stored in "/script_results/reference_results.csv"
 """
 
 import os
 import pandas as pd
+import numpy as np
 from tegdet.TEG import TEG
 
-# The meterIDs used are specific for each dataset
-# You can customize the attacks and the detectors you want to use here
-tuple_of_attacks = (False, "RSA_0.5_1.5", "RSA_0.25_1.1", "RSA_0.5_3", "Avg", "Min-Avg", "Swap", 
-                    "FDI0", "FDI5", "FDI10", "FDI20", "FDI30")
+#List of scenarios
+list_of_scenarios = ("Normal", "Anomalous")
+
+#List of metrics (detector variants)
 list_of_metrics = [ "Cosine", "Jaccard", "Hamming", "KL", "Jeffreys", "JS", "Euclidean", 
                     "Cityblock", "Chebyshev", "Minkowski", "Braycurtis", "Kulczynski", 
                     "Canberra", "Bhattacharyya", "Squared", "Divergence", "Additivesymmetric"]
@@ -34,7 +40,7 @@ def test_generate_results():
 
     cwd = os.getcwd() 
 
-    training_ds = cwd + "/test/dataset/training_0_60.csv"
+    training_ds = cwd + "/dataset/training_0_60.csv"
 
     for metric in list_of_metrics:
 
@@ -48,14 +54,11 @@ def test_generate_results():
         #Build model
         model, time_model_creation = detector.build_model(training_dataset)
 
-        for attack in tuple_of_attacks:
-            
-            if attack:
-                testing_ds = cwd + "/test/dataset/test_" + attack + "_61_75.csv"
-                
-            else:
-                testing_ds = cwd + "/test/dataset/test_61_75.csv"
+        for scenario in list_of_scenarios:
 
+            #Path of the scenario
+            testing_ds = cwd + "/dataset/test_" + scenario + "_61_75.csv"
+                
             #Load testing dataset
             testing_dataset = detector.get_dataset(testing_ds)
 
@@ -64,16 +67,22 @@ def test_generate_results():
             #Make prediction
             predictions, obs, time_model_prediction = detector.predict(testing_dataset, model)
 
-            #Compute quality  metrics
-            cm = detector.compute_confusion_matrix(obs, predictions, attack)
+            #Set ground true vector
+            if scenario == "Anomalous":
+                groundtrue = np.ones(obs)        
+            else:
+                groundtrue = np.zeros(obs)
+
+            #Compute confusion matrix
+            cm = detector.compute_confusion_matrix(groundtrue,predictions)
 
             #Performance metrics
             perf = {'tmc': time_model_creation, 'tmp': time_model_prediction}
 
             #Print and store basic metrics
-            detector.print_metrics(metric, attack, perf, cm)
+            detector.print_metrics(metric, scenario, perf, cm)
             results_path = cwd + RESULTS_PATH
-            detector.metrics_to_csv(metric, attack, perf, cm, results_path)
+            detector.metrics_to_csv(metric, scenario, perf, cm, results_path)
 
         assert os.path.exists(results_path), "Results file has not been created."
         assert os.path.getsize(results_path) > 0, "The result file is empty"

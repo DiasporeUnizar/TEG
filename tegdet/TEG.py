@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi, Raúl Javierre
-@Date: 14/03/2022
+@Date: 22/03/2022
 
 Time-Evolving-Graph detector Version 1.0
 This modules includes the following classes:
@@ -19,20 +19,7 @@ import pandas as pd
 import os
 import sys      # needed to convert a string to a class object
 from tegdet.graph_discovery import GraphGenerator, Graph
-from tegdet.graph_comparison import GraphComparator, GraphHammingDissimilarity, \
-    GraphCosineDissimilarity, GraphJaccardDissimilarity, GraphDiceDissimilarity, \
-    GraphKLDissimilarity, GraphJeffreysDissimilarity, GraphJSDissimilarity, \
-    GraphEuclideanDissimilarity, GraphCityblockDissimilarity, GraphChebyshevDissimilarity, \
-    GraphMinkowskiDissimilarity, \
-    GraphBraycurtisDissimilarity, GraphGowerDissimilarity, GraphSoergelDissimilarity, \
-    GraphKulczynskiDissimilarity, GraphCanberraDissimilarity, \
-    GraphLorentzianDissimilarity, \
-    GraphBhattacharyyaDissimilarity, GraphHellingerDissimilarity, GraphMatusitaDissimilarity, \
-    GraphSquaredchordDissimilarity, \
-    GraphPearsonDissimilarity, GraphNeymanDissimilarity, GraphSquaredDissimilarity, \
-    GraphProbsymmetricDissimilarity, \
-    GraphDivergenceDissimilarity, GraphClarkDissimilarity, GraphAdditivesymmetricDissimilarity
-
+from tegdet.graph_comparison import *
 
 class TEG():
     #Default values
@@ -80,22 +67,18 @@ class TEG():
         n_outliers = model.computeOutliers(self._baseline, test, 100 - self.alpha)
 
         return n_outliers, int(len(testing_dataset.index) / self.n_obs_per_period), time() - t0
-
-    def compute_confusion_matrix(self, n_observations, n_outliers, is_anomalous):
+        
+    def compute_confusion_matrix(self, groundTrue, predictions):
         """
-        Pre: "n_observations" and "n_outliers" are computed from a testing dataset that can be 
-        either a normal scenario (without anomalies) or an anomalous scenario (all the observations are anomalous)
-        Post: Computes the confusion matrix based on the total number of observations "n_observations",
-        "n_outliers", and the type of scenario "is_anomalous" (boolean).
-        It returns the confusion matrix as dictionary type.
+        Pre: "groundTrue" is a vector with the true values, "predictions" is a vector 
+        with predicted values (0,1)
+        Post: Computes the confusion matrix. It returns the confusion matrix as dictionary type.
         """
         cm = {'n_tp': 0, 'n_tn': 0, 'n_fp': 0, 'n_fn': 0}
-        if is_anomalous:  # if anomaly is detected, it is a true positive
-            cm['n_tp'] = int(n_outliers)
-            cm['n_fn'] = int(n_observations - n_outliers)
-        else:  # if anomay is detected, it is a false positive
-            cm['n_fp'] = int(n_outliers)
-            cm['n_tn'] = int(n_observations - n_outliers)
+        cm['n_tp'] = ((groundTrue == 1) & (predictions == 1)).sum()
+        cm['n_tn'] = ((groundTrue == 0) & (predictions == 0)).sum()
+        cm['n_fp'] = ((groundTrue == 0) & (predictions == 1)).sum()
+        cm['n_fn'] = ((groundTrue == 1) & (predictions == 0)).sum()
 
         return cm
 
@@ -297,4 +280,5 @@ class TEGdetector:
         # Dissimilarity tests
         n_out = np.where(prediction > perc, n_out + 1, n_out)
 
-        return np.sum(n_out)
+        #return np.sum(n_out)
+        return n_out
