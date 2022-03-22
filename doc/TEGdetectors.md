@@ -113,14 +113,14 @@ given measure.
 |------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
 | \_\_init__(gr1: Graph, gr2: Graph)				| Constructor that initializes the GraphComparator attributes as ```gr1``` and ```gr2```, respectively	|
 | expandGraph(graph: Graph, position: int, vertex: int) | Expands ```graph``` by inserting a new node ```vertex``` in ```position```. The new added fictious node	has frequency -1. The new added row and column of the adjacency matrix have -1 entries |
-| normalizeGraphs( )							| Compares the nodes of the two graphs and possibly expand them	|
+| resizeGraphs( )							| Compares the nodes of the two graphs and possibly expand them	|
+| normalizeMatrices      | Converts the incidence matrices of graph1 and graph2 into one-dimensional array, and normalizes the entries (i.e., relative frequencies).
 | compareGraphs( )							| Signature only (it is overriden)	|
 
 The rest of the classes are subclasses of ```GraphComparator``` that override the method ```compareGraphs()```. Each subclass ```Graph```__Metric__```Dissimilarity``` implements the dissimilarity metric included in the following Table. 
 
-- The __Hamming__ metric is computed considering two vectors *P* and *Q* obtained by flattening the incidence-frequency matrices of the two graphs
-- The __Cosine__ metric is computed considering two vectors *P* and *Q* obtained by flattening the node-frequency and the incidence-frequency matrices of the two graphs
-- The rest of the metrics are computed considering two vectors *P* and *Q* obtained by converting the incidence-frequency 
-matrices of the two graphs into relative frequencies and flattening them.
+- The __Hamming__ metric is computed considering two vectors *P* and *Q* obtained by flattening the incidence matrices of the two graphs
+- The __Cosine__ metric is computed considering two vectors *P* and *Q* obtained by flattening the node-frequency and the incidence matrices of the two graphs
+- The rest of the metrics are computed considering two vectors *P* and *Q* obtained by normalizing the incidence matrices of the two graphs.
 
   <img src="https://github.com/DiasporeUnizar/TEG/blob/master/doc/metricsTable.png" width="700">
