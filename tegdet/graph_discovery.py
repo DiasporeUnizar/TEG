@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: 28/02/2022
+@Date: 29/03/2022
 
 
 Graph discovery module:
@@ -52,11 +52,11 @@ class GraphGenerator:
         return idx
 
     
-    def generateGraph(self, obsClassified):
+    def generateGraph(self, obsDiscretized):
         """
-        Generates the "graph" from the classified observations "obsClassified"
+        Generates the "graph" from the discretized observations "obsDiscretized"
         """
-        grouped = obsClassified.groupby('DP').count()
+        grouped = obsDiscretized.groupby('DP').count()
         # Sets vertices: they are ordered according to the levels 
         self.graph.nodes = grouped.index.to_numpy()          
         self.graph.nodesFreq = grouped.to_numpy()
@@ -64,7 +64,7 @@ class GraphGenerator:
 
         # Initializes the adjacent matrix
         self.graph.matrix = np.zeros((dim, dim), dtype=int)
-        attr = obsClassified.DP.to_numpy()
+        attr = obsDiscretized.DP.to_numpy()
         # Sets the adjacent matrix with the frequencies
         for i in range(attr.size - 1):
             row = self.getIndex(attr[i])

@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi, Raúl Javierre
-@Date: 22/03/2022
+@Date: 29/03/2022
 
 Time-Evolving-Graph detector Version 1.0
 This modules includes the following classes:
@@ -50,11 +50,11 @@ class TEG():
         the time to build the model
         """
         t0 = time()
-        dataPoints = training_dataset['DP']
-        teg = TEGdetector(dataPoints, self.n_bins)
-        self._baseline, self._global_graph = teg.buildModel(self.metric, dataPoints, int(len(training_dataset.index) / self.n_obs_per_period))
+        obs = training_dataset['DP']
+        tegd = TEGdetector(obs, self.n_bins)
+        self._baseline, self._global_graph = tegd.buildModel(self.metric, obs, int(len(training_dataset.index) / self.n_obs_per_period))
 
-        return teg, time() - t0
+        return tegd, time() - t0
 
     def predict(self, testing_dataset, model):
         """
@@ -64,9 +64,9 @@ class TEG():
         t0 = time()
         dataPoints = testing_dataset['DP']
         test = model.makePrediction(self._baseline, self._global_graph, self.metric, dataPoints, int(len(testing_dataset.index) / self.n_obs_per_period))
-        n_outliers = model.computeOutliers(self._baseline, test, 100 - self.alpha)
+        outliers = model.computeOutliers(self._baseline, test, 100 - self.alpha)
 
-        return n_outliers, int(len(testing_dataset.index) / self.n_obs_per_period), time() - t0
+        return outliers, int(len(testing_dataset.index) / self.n_obs_per_period), time() - t0
         
     def compute_confusion_matrix(self, groundTrue, predictions):
         """
@@ -234,10 +234,10 @@ class TEGdetector:
         """
 
         # Gets observation levels (discretization)
-        observationsClassified = self.le.getLevel(observations)
+        obsDiscretized = self.le.getLevel(observations)
 
         # Generates the time-evolving graphs
-        graphs = self.generateTEG(observationsClassified, n_periods)
+        graphs = self.generateTEG(obsDiscretized, n_periods)
 
         # Gets the graph of the training period
         global_graph = self.getGlobalGraph(graphs)
@@ -256,10 +256,10 @@ class TEGdetector:
         """
 
         # Gets consumption levels (consumption discretization)
-        observationsClassified = self.le.getLevel(observations)
+        obsDiscretized = self.le.getLevel(observations)
 
         # Generates the time-evolving graphs
-        graphs = self.generateTEG(observationsClassified, n_periods)
+        graphs = self.generateTEG(obsDiscretized, n_periods)
 
         # Computes the distance between each graph and the global graph
         graph_dist = np.empty(n_periods)

@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: updated 22/03/2022
+@Date: updated 29/03/2022
 
 Input dataset:
 - energy consumption (in KhW), every half-an-hour, registered by a smartmeter.
@@ -24,6 +24,13 @@ import pandas as pd
 import numpy as np
 from tegdet.TEG import TEG
 
+#Paths
+TRAINING_DS_PATH = "/dataset/training.csv"
+TEST_DS_PATH = "/dataset/test_"
+RESULTS_PATH = "/test/script_results/detector_comparer_TEG_results.csv"
+REFERENCE_PATH = "/test/script_results/reference_results.csv"
+
+
 #List of scenarios
 list_of_scenarios = ("Normal", "Anomalous")
 
@@ -32,40 +39,40 @@ list_of_metrics = [ "Cosine", "Jaccard", "Hamming", "KL", "Jeffreys", "JS", "Euc
                     "Cityblock", "Chebyshev", "Minkowski", "Braycurtis", "Kulczynski", 
                     "Canberra", "Bhattacharyya", "Squared", "Divergence", "Additivesymmetric"]
 
-#Parameters of TEG detectors
+#Parameters of TEG detectors: default values
 N_BINS = 30 
-RESULTS_PATH = "/test/script_results/detector_comparer_TEG_results.csv"
+
 
 def test_generate_results():
 
     cwd = os.getcwd() 
 
-    training_ds = cwd + "/dataset/training_0_60.csv"
+    train_ds_path = cwd + TRAINING_DS_PATH
 
     for metric in list_of_metrics:
 
-        detector = TEG(metric)
+        teg = TEG(metric)
 
         #Load training dataset
-        training_dataset = detector.get_dataset(training_ds)
+        train_ds = teg.get_dataset(train_ds_path)
 
-        assert not training_dataset.empty, "The training dataset is empty."
+        assert not train_ds.empty, "The training dataset is empty."
 
         #Build model
-        model, time_model_creation = detector.build_model(training_dataset)
+        model, time2build = teg.build_model(train_ds)
 
         for scenario in list_of_scenarios:
 
             #Path of the scenario
-            testing_ds = cwd + "/dataset/test_" + scenario + "_61_75.csv"
+            test_ds_path = cwd + TEST_DS_PATH + scenario + ".csv"
                 
             #Load testing dataset
-            testing_dataset = detector.get_dataset(testing_ds)
+            test_ds = teg.get_dataset(test_ds_path)
 
-            assert not testing_dataset.empty, "The testing dataset is empty."
+            assert not test_ds.empty, "The testing dataset is empty."
 
             #Make prediction
-            predictions, obs, time_model_prediction = detector.predict(testing_dataset, model)
+            outliers, obs, time2predict = teg.predict(test_ds, model)
 
             #Set ground true vector
             if scenario == "Anomalous":
@@ -74,15 +81,15 @@ def test_generate_results():
                 groundtrue = np.zeros(obs)
 
             #Compute confusion matrix
-            cm = detector.compute_confusion_matrix(groundtrue,predictions)
+            cm = teg.compute_confusion_matrix(groundtrue, outliers)
 
             #Performance metrics
-            perf = {'tmc': time_model_creation, 'tmp': time_model_prediction}
+            perf = {'tmc': time2build, 'tmp': time2predict}
 
             #Print and store basic metrics
-            detector.print_metrics(metric, scenario, perf, cm)
+            teg.print_metrics(metric, scenario, perf, cm)
             results_path = cwd + RESULTS_PATH
-            detector.metrics_to_csv(metric, scenario, perf, cm, results_path)
+            teg.metrics_to_csv(metric, scenario, perf, cm, results_path)
 
         assert os.path.exists(results_path), "Results file has not been created."
         assert os.path.getsize(results_path) > 0, "The result file is empty"
@@ -94,7 +101,7 @@ def test_results():
 
     #Load results and reference results
     results_path = cwd + RESULTS_PATH
-    reference_path = cwd + "/test/script_results/reference_results.csv"
+    reference_path = cwd + REFERENCE_PATH
     results = pd.read_csv(results_path)
     reference = pd.read_csv(reference_path)
     
