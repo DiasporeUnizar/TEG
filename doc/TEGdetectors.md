@@ -1,10 +1,17 @@
 # TEG detectors implementation
 
-The ```tegdet``` package includes the  modules that implements the TEG detectors. The class diagram below  shows the structure of the implementation, there are three Python modules:
-- ```TEG.py```: it is the main module including the yellow classes;
-- ```graph_discovery.py```: it is responsible of graph generation and includes the green classes; and
-- ```graph_comparison.py```: it is responsible to compute the difference between two graphs according to a given metric (variant of strategy pattern). It includes the blue classes.
- 
+The ```tegdet``` package includes the  modules that implements the TEG detectors:
+- ```TEG.py```: it is the main module that includes the API;
+- ```graph_discovery.py```: it is responsible of graph generation; and
+- ```graph_comparison.py```: it is responsible to compute the difference between two graphs according to a given metric (variant of strategy pattern). 
+
+The ```tegdet``` package depends on several well-known ```Python``` packages as shown in the diagram below:
+
+ <img src="https://github.com/DiasporeUnizar/TEG/blob/master/doc/overwiew.png" width="1000">
+
+Each module includes a set of classes, which are detailed in the class diagram below,
+where the colour is used to map the classes to the module they belong to:
+
  <img src="https://github.com/DiasporeUnizar/TEG/blob/master/doc/tegdet.png" width="1000">
 
 ## TEG module
@@ -16,7 +23,7 @@ TEG module includes three classes:
 |--------------------- |--------------------------------------------------------------------------------------------------------------------------------   |
 | metric: string            | Dissimilarity metric used to compare two graphs. Input parameter.                              |
 | n_bins: int            | Level of discretization of real valued observations (number of levels). Input parameter. Default value=  _N_BINS    |
-| alpha: int             |  Significance level. Input parameter. Default value=  _ALPHA   |
+| alpha: int             |  Significance level 100-alpha. Input parameter. Default value=  _ALPHA   |
 | n_obs_per_period: int  | Number of observation per period. Input parameter. Default value= _N_OBS_PER_PERIOD                                            |
 
 
@@ -24,20 +31,20 @@ TEG module includes three classes:
 |---------------------- |------------------------------------------------------------------------------------------------   |
 | _N_OBS_PER_PERIOD: int  | Number of observations per period. Value=336    |
 | _N_BINS: int            | Level of discretization of real valued observations (number of levels). Value=30.     |
-| _ALPHA: int             | Significance level. Value=5.      |
+| _ALPHA: int             | Significance level 100-_ALPHA. Value=5.      |
 | _baseline:  numpy array of float        | Baseline distribution of the training period. 				|
 | _global_graph: Graph	   | Global graph associated to the training period. 				|
 
 
 | method            					  |    description														|
 |----------------------------------------------------------------------------------------------- |----------------------------------------------------------------------------------   |
-| \_\_init__(metric: string, n_bins: int =_N_BINS, alpha: int =_ALPHA, n_obs_per_period: int =_N_OBS_PER_PERIOD)	| Constructor that initializes the TEG input parameters		|
-| get_dataset(ds_path: string): DataFrame 	| Loads the dataset from ```ds_path``` csv file, renames the columns and returns it as a   ```pandas``` Dataframe			|
-| build_model(training_dataset: Dataframe): TEGdetector, float	|  Builds the prediction model based on the ```training_dataset``` and returns it together with the time to build the model          |
-| predict(testing_dataset: Dataframe, model: TEGDetector): numpy array of int, int, float		| Makes predictions on the ```testing_dataset``` using the model. It returns: the outliers (array of 0,1 values) and total number of observations (int type), and the time to make predictions (float type)		|
-| compute_confusion_matrix(groundTrue: numpy array of int, predictions: numpy array of int): dict |	 Computes the confusion matrix based on the ground true values and predicted values. It returns the confusion matrix as a dictionary type. |
-| print_metrics(detector: string, scenario: string, perf: dict, cm: dict)		|  Prints the performance metrics  ```perf```(dict type including the time to build the model and the time to make predictions) and the confusion matrix ```cm```  on the standard output. The first two parameters to be provided are  the names of the  ```detector``` and the ```scenario```, respectively.		|
-| metrics_to_csv(detector: string, scenario: string, perf: dict, cm: dict, results_csv_path: string)	| Save the performance metrics  ```perf```(dict type including the time to build the model and the time to make predictions) and the confusion matrix ```cm``` (dict type) print on the csv file ```results_csv_path```. The first two parameters to be provided are  the names of the  ```detector``` and the ```scenario```, respectively.
+| \_\_init__(metric: string, n_bins: int =_N_BINS, alpha: int =_ALPHA, n_obs_per_period: int =_N_OBS_PER_PERIOD)	| Constructor that initializes the TEG input parameters	(see the public attribute table)	|
+| get_dataset(ds_path: string): DataFrame 	| Loads the dataset from ```ds_path``` file (comma-separated value format), renames the columns and returns it as a   ```pandas Dataframe```			|
+| build_model(training_dataset: Dataframe): TEGdetector, float	|  Builds the prediction model based on the ```training_dataset``` and returns it together with the time to build the model (```float``` type)        |
+| predict(testing_dataset: Dataframe, model: TEGDetector): numpy array of int, int, float		| Makes predictions on the ```testing_dataset``` using the ```model```. It returns: the outliers (```numpy``` array of {0,1} values) and total number of observations (```int``` type), and the time to make predictions (```float``` type)		|
+| compute_confusion_matrix(groundTrue: numpy array of int, predictions: numpy array of int): dict |	 Computes the confusion matrix based on the ground true values and predicted values (```numpy``` array of {0,1} values). It returns the confusion matrix as a dictionary (```dict```) type |
+| print_metrics(detector: string, scenario: string, perf: dict, cm: dict)		|  Prints on the stdout:  the names of the  ```detector``` and the ```scenario```, the performance metrics  ```perf```(```dict``` type including the time to build the model and the time to make predictions) and the confusion matrix ```cm``` 		|
+| metrics_to_csv(detector: string, scenario: string, perf: dict, cm: dict, results_csv_path: string)	| Saves in the file with pathname ```results_csv_path``` (comma-separated values format): the names of the  ```detector``` and the ```scenario```,  the performance metrics  ```perf``` (```dict``` type) and the confusion matrix ```cm``` (```dict``` type)
  
 - ```TEGdetector```  class 
 
