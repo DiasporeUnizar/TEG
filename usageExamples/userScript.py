@@ -1,4 +1,7 @@
 """
+@Author: Simona Bernardi
+@Date: updated 30/03/2022
+
 Input dataset:
 - Energy consumption (in KhW), every half-an-hour, registered by a smart meter.
 - The training set is over 60 weeks and the two testing sets are over 15 weeks
@@ -21,7 +24,7 @@ TEST_DS_PATH = "/dataset/test_"
 RESULTS_PATH = "/usageExamples/script_results/userScript_results.csv"
 
 #List of scenarios
-list_of_scenarios = ("Normal", "Anomalous")
+list_of_scenarios = ("normal", "anomalous")
 #List of metrics (detector variants)
 list_of_metrics = ["Hamming", "Cosine", "Jaccard", "Dice", "KL", "Jeffreys", "JS", 
                     "Euclidean", "Cityblock", "Chebyshev", "Minkowski", "Braycurtis",
@@ -50,7 +53,7 @@ def build_and_predict():
             #Make prediction
             outliers, obs, time2predict = teg.predict(test_ds, model)
             #Set ground true values
-            if scenario == "Anomalous":
+            if scenario == "anomalous":
                 groundtrue = np.ones(obs)        
             else:
                 groundtrue = np.zeros(obs)

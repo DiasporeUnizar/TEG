@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: updated 29/03/2022
+@Date: updated 30/03/2022
 
 Input dataset:
 - energy consumption (in KhW), every half-an-hour, registered by a smartmeter.
@@ -14,9 +14,9 @@ The test program:
 - compute the confusion matrix and performance metrics  
 
 Output:
-- Confusion matrices and performance metrics are stored in "/script_results/detector_comparer_results.csv"
+- Confusion matrices and performance metrics are stored in RESULTS_PATH
 - Validation: results are compared with the ones obtained from the TEG version of the Diaspore repository
-(assumed correct), which are stored in "/script_results/reference_results.csv"
+(assumed correct), which are stored in REFERENCE_PATH
 """
 
 import os
@@ -24,15 +24,14 @@ import pandas as pd
 import numpy as np
 from tegdet.TEG import TEG
 
-#Paths
+#Input datasets/output results Paths
 TRAINING_DS_PATH = "/dataset/training.csv"
 TEST_DS_PATH = "/dataset/test_"
 RESULTS_PATH = "/test/script_results/detector_comparer_TEG_results.csv"
 REFERENCE_PATH = "/test/script_results/reference_results.csv"
 
-
 #List of scenarios
-list_of_scenarios = ("Normal", "Anomalous")
+list_of_scenarios = ("normal", "anomalous")
 
 #List of metrics (detector variants)
 list_of_metrics = [ "Cosine", "Jaccard", "Hamming", "KL", "Jeffreys", "JS", "Euclidean", 
@@ -40,8 +39,6 @@ list_of_metrics = [ "Cosine", "Jaccard", "Hamming", "KL", "Jeffreys", "JS", "Euc
                     "Canberra", "Bhattacharyya", "Squared", "Divergence", "Additivesymmetric"]
 
 #Parameters of TEG detectors: default values
-N_BINS = 30 
-
 
 def test_generate_results():
 
@@ -74,8 +71,8 @@ def test_generate_results():
             #Make prediction
             outliers, obs, time2predict = teg.predict(test_ds, model)
 
-            #Set ground true vector
-            if scenario == "Anomalous":
+            #Set ground true values
+            if scenario == "anomalous":
                 groundtrue = np.ones(obs)        
             else:
                 groundtrue = np.zeros(obs)
@@ -83,7 +80,7 @@ def test_generate_results():
             #Compute confusion matrix
             cm = teg.compute_confusion_matrix(groundtrue, outliers)
 
-            #Performance metrics
+            #Collect performance metrics in a dictionary
             perf = {'tmc': time2build, 'tmp': time2predict}
 
             #Print and store basic metrics
