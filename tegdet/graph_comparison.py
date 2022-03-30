@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: 22/03/2022
+@Date: 30/03/2022
 
 Graph comparison module:
 Classes that enable to compare two graphs and compute the "difference" between them according to a 
@@ -242,12 +242,10 @@ class GraphJeffreysDissimilarity(GraphComparator):
         
         # Check possible case of division by 0 
         almostzero = np.finfo(float).eps
-        zero = np.ones(len(second))*almostzero
-        second = np.where((second == 0.0), zero, second)
-        jef = np.divide(first, second)
+        second = np.where( (second < almostzero), almostzero, second)
 
         # Check possible case of log 0 
-        jef = np.where((jef == 0.0), zero, jef)
+        jef = np.where((first < almostzero), almostzero, first / second)
         jef = np.log(jef) * (first - second)
 
         return jef.sum() #returns the dissimilarity (distance)
@@ -580,14 +578,16 @@ class GraphPearsonDissimilarity(GraphComparator):
         # Matrices normalization
         first, second = self.normalizeMatrices()
 
+        num =  (first - second) 
+        num = num * num
+        
         # Check possible division by zero
         almostzero = np.finfo(float).eps
-        zero = np.ones(len(second))*almostzero
-        second = np.where((second == 0.0), second * almostzero, second)
-  
+        zero = 0.0
+        second = np.where((second < almostzero), almostzero, second)       
+
         # Compute the Pearson Chi^2 distance
-        num =  (first - second) 
-        pearson = np.divide(num*num,second)
+        pearson = np.where((num < almostzero), zero, num / second)
         
         
         return  pearson.sum() #returns the dissimilarity (distance)
@@ -606,16 +606,17 @@ class GraphNeymanDissimilarity(GraphComparator):
         # Matrices normalization
         first, second = self.normalizeMatrices()
 
+        num =  (first - second) 
+        num = num * num
+
         # Check possible division by zero
         almostzero = np.finfo(float).eps
-        zero = np.ones(len(first))*almostzero
-        first = np.where((first == 0.0), first * almostzero, first)
+        zero = 0.0
+        first = np.where((first < almostzero),  almostzero, first)
   
         # Compute the Neyman Chi^2 distance
-        num =  (first - second) 
-        neyman = np.divide(num*num,first)
-        
-        
+        neyman = np.where((num < almostzero), zero, num / first)
+               
         return  neyman.sum() #returns the dissimilarity (distance)
 
 class GraphSquaredDissimilarity(GraphComparator):

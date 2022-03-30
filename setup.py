@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 setup(
     name='tegdet',
     packages=find_packages(include=['tegdet']),
-    version='0.1.0',
+    version='1.0',
     description='Time Evolving Graph detectors library',
     author='Diaspore team',
     license='MIT',
