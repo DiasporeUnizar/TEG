@@ -21,7 +21,7 @@ from tegdet.TEG import TEG
 #Input datasets/output results paths
 TRAINING_DS_PATH = "/dataset/training.csv"
 TEST_DS_PATH = "/dataset/test_"
-RESULTS_PATH = "/usageExamples/script_results/userScript_results.csv"
+RESULTS_PATH = "/script_results/userScript_results.csv"
 
 #List of scenarios
 list_of_scenarios = ("normal", "anomalous")
