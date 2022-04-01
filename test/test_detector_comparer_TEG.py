@@ -1,12 +1,12 @@
 """
 @Author: Simona Bernardi
-@Date: updated 30/03/2022
+@Date: updated 01/04/2022
 
 Input dataset:
 - energy consumption (in KhW), every half-an-hour, registered by a smartmeter.
 - the training set is over 60 weeks
-- the testing sets are over 15 weeks: a testing set are either normal or anomalous scenarios
-- The training set and testing set are stored in separate files in the "/dataset/" folder.
+- the testing sets are over 15 weeks: a testing set is either normal or anomalous testings
+- The training set and testing sets are stored in separate files in the "/dataset/" folder.
 
 The test program:
 - builds a prediction model based on the training set for each dissimilarity metric (TEG-detectors variants)
@@ -30,8 +30,8 @@ TEST_DS_PATH = "/dataset/test_"
 RESULTS_PATH = "/script_results/detector_comparer_TEG_results.csv"
 REFERENCE_PATH = "/script_results/reference_results.csv"
 
-#List of scenarios
-list_of_scenarios = ("normal", "anomalous")
+#List of testing
+list_of_testing = ("normal", "anomalous")
 
 #List of metrics (detector variants)
 list_of_metrics = [ "Cosine", "Jaccard", "Hamming", "KL", "Jeffreys", "JS", "Euclidean", 
@@ -58,10 +58,10 @@ def test_generate_results():
         #Build model
         model, time2build = teg.build_model(train_ds)
 
-        for scenario in list_of_scenarios:
+        for testing in list_of_testing:
 
-            #Path of the scenario
-            test_ds_path = cwd + TEST_DS_PATH + scenario + ".csv"
+            #Path of the testing
+            test_ds_path = cwd + TEST_DS_PATH + testing + ".csv"
                 
             #Load testing dataset
             test_ds = teg.get_dataset(test_ds_path)
@@ -72,7 +72,7 @@ def test_generate_results():
             outliers, obs, time2predict = teg.predict(test_ds, model)
 
             #Set ground true values
-            if scenario == "anomalous":
+            if testing == "anomalous":
                 groundtrue = np.ones(obs)        
             else:
                 groundtrue = np.zeros(obs)
@@ -84,9 +84,9 @@ def test_generate_results():
             perf = {'tmc': time2build, 'tmp': time2predict}
 
             #Print and store basic metrics
-            teg.print_metrics(metric, scenario, perf, cm)
+            teg.print_metrics(metric, testing, perf, cm)
             results_path = cwd + RESULTS_PATH
-            teg.metrics_to_csv(metric, scenario, perf, cm, results_path)
+            teg.metrics_to_csv(metric, testing, perf, cm, results_path)
 
         assert os.path.exists(results_path), "Results file has not been created."
         assert os.path.getsize(results_path) > 0, "The result file is empty"

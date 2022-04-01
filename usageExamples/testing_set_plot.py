@@ -1,3 +1,10 @@
+"""
+@Author: Simona Bernardi
+@Date: updated 30/03/2022
+
+- Produces the plot of the two training sets during the first week
+"""
+
 import os
 import pandas as pd
 import numpy as np

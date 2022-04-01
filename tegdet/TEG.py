@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi, Raúl Javierre
-@Date: 29/03/2022
+@Date: 01/04/2022
 
 Time-Evolving-Graph detector Version 1.0
 This modules includes the following classes:
@@ -82,25 +82,26 @@ class TEG():
 
         return cm
 
-    def print_metrics(self, detector, scenario, perf, cm):
+    def print_metrics(self, detector, testing_set, perf, cm):
         """
-        Prints the performance metrics "perf" (time to build the model and to make predictions)
-        and the confusion matrix "cm" on the stdout for a given "detector" and "scenario"
+        Prints on the stdout: the "detector", the "testing set", the performance metrics "perf" 
+        (time to build the model and to make predictions) and the confusion matrix "cm" 
         """
         print("Detector:\t\t\t", detector)
-        print("Scenario:\t\t\t\t", scenario)
+        print("Testing set:\t\t\t", testing_set)
         print("Exec. time of model creation:\t", perf['tmc'], "seconds")
         print("Exec. time of model prediction:\t", perf['tmp'], "seconds")
         print("Confusion matrix:\t\n\n", cm)
 
-    def metrics_to_csv(self, detector, scenario, perf, cm,results_csv_path):
+    def metrics_to_csv(self, detector, testing_set, perf, cm,results_csv_path):
         """
-        Saves the performance metrics "perf" (time to build the model and to make predictions)
-        and the confusion matrix "cm" on the csv file "result_csv_path" for a given "detector" and "scenario"
+        Saves in the csv file "result_csv_path", the "detector", the  "testing set",
+        the performance metrics "perf" (time to build the model and to make predictions)
+        and the confusion matrix "cm" 
         """
         df = pd.DataFrame({
                            'detector': detector,
-                           'scenario': scenario,
+                           'testing_set': testing_set,
                            'time_model_creation': perf['tmc'],
                            'time_model_prediction': perf['tmp'],
                            'n_tp': cm['n_tp'],
