@@ -10,8 +10,8 @@ The script:
 -- n_obs_per_period = [84, 168, 336, 672, 1008]
 -- n_bins = [10, 20, 30, 40, 50]
 -- alpha = [1,2.5,5,10,15]
-- Build the Hamming TEG-detector and makes predictions with the two testing sets
-- Compute the confusion matrix and performance metrics 
+- Builds the metric specific TEG-detector and makes predictions with the two testing sets
+- Computes the confusion matrix and performance metrics 
 Output:
 - Stores the confusion matrix and metrics in RESULTS_PATH
 """
@@ -28,42 +28,61 @@ RESULTS_PATH = "/script_results/tegdet_params_sensitivity_results.csv"
 
 #List of testing
 list_of_testing = ("normal", "anomalous")
-#List of metrics (detector variants)
-list_of_metrics = ("Hamming")
 
-def build_and_predict():
+#List of metrics (detector variants)
+list_of_metrics = ("Hamming") #, "Cosine", "Jaccard", "Dice", "KL", "Jeffreys", "JS", 
+                   # "Euclidean", "Cityblock", "Chebyshev", "Minkowski", "Braycurtis",
+                   # "Gower", "Soergel", "Kulczynski", "Canberra", "Lorentzian",
+                   # "Bhattacharyya", "Hellinger", "Matusita", "Squaredchord",
+                   # "Pearson", "Neyman", "Squared", "Probsymmetric", "Divergence",
+                   # "Clark", "Additivesymmetric" )
+
+#Parameters
+list_of_n_obs_per_period = [84, 168, 336, 672, 1008]
+list_of_n_bins = [10, 20, 30, 40, 50]
+list_of_alpha = [1, 2.5, 5, 10, 15]
+
+
+def build_and_predict(metric, n_bins, n_obs_per_period, alpha):
     cwd = os.getcwd() 
     train_ds_path = cwd + TRAINING_DS_PATH
-    for metric in list_of_metrics:
 
-        teg = TEG(metric)
-        #Load training dataset
-        train_ds = teg.get_dataset(train_ds_path)
-        #Build model
-        model, time2build = teg.build_model(train_ds)
-
-        for testing in list_of_testing:
-
-            #Path of the testing
-            test_ds_path = cwd + TEST_DS_PATH + testing + ".csv"               
-            #Load testing dataset
-            test_ds = teg.get_dataset(test_ds_path)
-            #Make prediction
-            outliers, obs, time2predict = teg.predict(test_ds, model)
-            #Set ground true values
-            if testing == "anomalous":
-                groundtrue = np.ones(obs)        
-            else:
-                groundtrue = np.zeros(obs)
-            #Compute confusion matrix
-            cm = teg.compute_confusion_matrix(groundtrue, outliers)
-            #Collect performance metrics in a dictionary
-            perf = {'tmc': time2build, 'tmp': time2predict}
-            #Print and store basic metrics
-            teg.print_metrics(metric, testing, perf, cm)
-            results_path = cwd + RESULTS_PATH
-            teg.metrics_to_csv(metric, testing, perf, cm, results_path)
+    teg = TEG(metric, n_bins, n_obs_per_period, alpha)
+    #Load training dataset
+    train_ds = teg.get_dataset(train_ds_path)
+    #Build model
+    model, time2build = teg.build_model(train_ds)
+    for testing in list_of_testing:
+        #Path of the testing
+        test_ds_path = cwd + TEST_DS_PATH + testing + ".csv"               
+        #Load testing dataset
+        test_ds = teg.get_dataset(test_ds_path)
+        #Make prediction
+        outliers, obs, time2predict = teg.predict(test_ds, model)
+        #Set ground true values
+        if testing == "anomalous":
+            groundtrue = np.ones(obs)        
+        else:
+            groundtrue = np.zeros(obs)
+        #Compute confusion matrix
+        cm = teg.compute_confusion_matrix(groundtrue, outliers)
+        #Collect detector configuration
+        detector = {'metric': metric, 'n_bins': n_bins,'n_obs_per_period':n_obs_per_period,'alpha': alpha}
+        #Collect performance metrics in a dictionary
+        perf = {'tmc': time2build, 'tmp': time2predict}
+        #Print and store basic metrics
+        teg.print_metrics(detector, testing, perf, cm)
+        results_path = cwd + RESULTS_PATH
+        teg.metrics_to_csv(detector, testing, perf, cm, results_path)
         
 if __name__ == '__main__':
 
-    build_and_predict()
+    for metric in list_of_metrics:
+
+        for n_obs_per_period in list_of_n_obs_per_period:
+
+            for n_bins in list_of_n_bins:
+
+                for alpha in list_of_alpha:
+
+                    build_and_predict("Hamming", n_bins, n_obs_per_period, alpha)

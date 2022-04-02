@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi, Raúl Javierre
-@Date: 01/04/2022
+@Date: 02/04/2022
 
 Time-Evolving-Graph detector Version 1.0
 This modules includes the following classes:
@@ -27,7 +27,7 @@ class TEG():
     _N_BINS = 30
     _ALPHA = 5
 
-    def __init__(self, metric, n_bins=_N_BINS, alpha=_ALPHA, n_obs_per_period=_N_OBS_PER_PERIOD):
+    def __init__(self, metric, n_bins=_N_BINS, n_obs_per_period=_N_OBS_PER_PERIOD, alpha=_ALPHA):
         self.metric = metric
         self.n_bins = n_bins
         self.alpha = alpha
@@ -84,10 +84,13 @@ class TEG():
 
     def print_metrics(self, detector, testing_set, perf, cm):
         """
-        Prints on the stdout: the "detector", the "testing set", the performance metrics "perf" 
+        Prints on the stdout: the "detector" configuration, the "testing set", the performance metrics "perf" 
         (time to build the model and to make predictions) and the confusion matrix "cm" 
         """
-        print("Detector:\t\t\t", detector)
+        print("Detector:\t\t\t", detector['metric'])
+        print("N_bins:\t\t\t\t", detector['n_bins'])
+        print("N_obs_per_period:\t\t", detector['n_obs_per_period'])
+        print("Alpha:\t\t\t\t", detector['alpha'])
         print("Testing set:\t\t\t", testing_set)
         print("Exec. time of model creation:\t", perf['tmc'], "seconds")
         print("Exec. time of model prediction:\t", perf['tmp'], "seconds")
@@ -95,12 +98,15 @@ class TEG():
 
     def metrics_to_csv(self, detector, testing_set, perf, cm,results_csv_path):
         """
-        Saves in the csv file "result_csv_path", the "detector", the  "testing set",
+        Saves in the csv file "result_csv_path", the "detector" configuration, the  "testing set",
         the performance metrics "perf" (time to build the model and to make predictions)
         and the confusion matrix "cm" 
         """
         df = pd.DataFrame({
-                           'detector': detector,
+                           'detector': detector['metric'],
+                           'n_bins': detector['n_bins'],
+                           'n_obs_per_period': detector['n_obs_per_period'],
+                           'alpha': detector['alpha'],
                            'testing_set': testing_set,
                            'time_model_creation': perf['tmc'],
                            'time_model_prediction': perf['tmp'],

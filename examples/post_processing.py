@@ -36,15 +36,15 @@ def compare_scenarios(cwd):
 def generate_quality_report(cwd):
     results_path = cwd + RESULTS_PATH
     df = pd.read_csv(results_path)
-    #Removing testing_set column
+    #Removing parameters and testing_set columns
     df = df[['detector','time_model_creation','time_model_prediction','n_tp','n_tn','n_fp','n_fn']]
     #Grouping on detector by sum
     df_grouped = df.groupby('detector').sum()
     #Getting the detectors list
     detectors = df_grouped.index.tolist()
-    #Computing mean values of times
-    time2build = df_grouped['time_model_creation']/2
-    time2predict = df_grouped['time_model_prediction']/2
+    #Extracting execution times
+    time2build = df_grouped['time_model_creation']
+    time2predict = df_grouped['time_model_prediction']
     print(time2build.describe())
     print(time2predict.describe())
 

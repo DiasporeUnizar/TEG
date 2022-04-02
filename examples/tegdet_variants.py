@@ -25,6 +25,7 @@ RESULTS_PATH = "/script_results/tegdet_variants_results.csv"
 
 #List of testing
 list_of_testing = ("normal", "anomalous")
+
 #List of metrics (detector variants)
 list_of_metrics = ("Hamming", "Cosine", "Jaccard", "Dice", "KL", "Jeffreys", "JS", 
                     "Euclidean", "Cityblock", "Chebyshev", "Minkowski", "Braycurtis",
@@ -33,39 +34,50 @@ list_of_metrics = ("Hamming", "Cosine", "Jaccard", "Dice", "KL", "Jeffreys", "JS
                     "Pearson", "Neyman", "Squared", "Probsymmetric", "Divergence",
                     "Clark", "Additivesymmetric" )
 
-def build_and_predict():
+#Parameters: default values
+n_bins = 30
+n_obs_per_period = 336
+alpha = 5
+
+def build_and_predict(metric):
     cwd = os.getcwd() 
     train_ds_path = cwd + TRAINING_DS_PATH
-    for metric in list_of_metrics:
 
-        teg = TEG(metric)
-        #Load training dataset
-        train_ds = teg.get_dataset(train_ds_path)
-        #Build model
-        model, time2build = teg.build_model(train_ds)
+    teg = TEG(metric)
+    #Load training dataset
+    train_ds = teg.get_dataset(train_ds_path)
+    #Build model
+    model, time2build = teg.build_model(train_ds)
 
-        for testing in list_of_testing:
+    for testing in list_of_testing:
 
-            #Path of the testing
-            test_ds_path = cwd + TEST_DS_PATH + testing + ".csv"               
-            #Load testing dataset
-            test_ds = teg.get_dataset(test_ds_path)
-            #Make prediction
-            outliers, obs, time2predict = teg.predict(test_ds, model)
-            #Set ground true values
-            if testing == "anomalous":
-                groundtrue = np.ones(obs)        
-            else:
-                groundtrue = np.zeros(obs)
-            #Compute confusion matrix
-            cm = teg.compute_confusion_matrix(groundtrue, outliers)
-            #Collect performance metrics in a dictionary
-            perf = {'tmc': time2build, 'tmp': time2predict}
-            #Print and store basic metrics
-            teg.print_metrics(metric, testing, perf, cm)
-            results_path = cwd + RESULTS_PATH
-            teg.metrics_to_csv(metric, testing, perf, cm, results_path)
+        #Path of the testing
+        test_ds_path = cwd + TEST_DS_PATH + testing + ".csv"               
+        #Load testing dataset
+        test_ds = teg.get_dataset(test_ds_path)
+        #Make prediction
+        outliers, obs, time2predict = teg.predict(test_ds, model)
+        #Set ground true values
+        if testing == "anomalous":
+            groundtrue = np.ones(obs)        
+        else:
+            groundtrue = np.zeros(obs)
+
+        #Compute confusion matrix
+        cm = teg.compute_confusion_matrix(groundtrue, outliers)
+
+        #Collect detector configuration
+        detector = {'metric': metric, 'n_bins': n_bins, 'n_obs_per_period':n_obs_per_period, 'alpha': alpha}
+        #Collect performance metrics in a dictionary
+        perf = {'tmc': time2build, 'tmp': time2predict}
+
+        #Print and store basic metrics
+        teg.print_metrics(detector, testing, perf, cm)
+        results_path = cwd + RESULTS_PATH
+        teg.metrics_to_csv(detector, testing, perf, cm, results_path)
         
 if __name__ == '__main__':
 
-    build_and_predict()
+    for metric in list_of_metrics:
+
+        build_and_predict(metric)

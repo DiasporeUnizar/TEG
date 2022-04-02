@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: updated 01/04/2022
+@Date: updated 02/04/2022
 
 Input dataset:
 - energy consumption (in KhW), every half-an-hour, registered by a smartmeter.
@@ -27,7 +27,7 @@ from tegdet.TEG import TEG
 #Input datasets/output results Paths
 TRAINING_DS_PATH = "/dataset/training.csv"
 TEST_DS_PATH = "/dataset/test_"
-RESULTS_PATH = "/script_results/detector_comparer_TEG_results.csv"
+RESULTS_PATH = "/script_results/test_detector_comparer_TEG_results.csv"
 REFERENCE_PATH = "/script_results/reference_results.csv"
 
 #List of testing
@@ -39,6 +39,10 @@ list_of_metrics = [ "Cosine", "Jaccard", "Hamming", "KL", "Jeffreys", "JS", "Euc
                     "Canberra", "Bhattacharyya", "Squared", "Divergence", "Additivesymmetric"]
 
 #Parameters of TEG detectors: default values
+n_bins = 30
+n_obs_per_period=336
+alpha=5
+
 
 def test_generate_results():
 
@@ -80,13 +84,16 @@ def test_generate_results():
             #Compute confusion matrix
             cm = teg.compute_confusion_matrix(groundtrue, outliers)
 
+            #Collect detector configuration
+            detector = {'metric': metric, 'n_bins': n_bins, 'n_obs_per_period':n_obs_per_period, 'alpha': alpha}
+
             #Collect performance metrics in a dictionary
             perf = {'tmc': time2build, 'tmp': time2predict}
 
             #Print and store basic metrics
-            teg.print_metrics(metric, testing, perf, cm)
+            teg.print_metrics(detector, testing, perf, cm)
             results_path = cwd + RESULTS_PATH
-            teg.metrics_to_csv(metric, testing, perf, cm, results_path)
+            teg.metrics_to_csv(detector, testing, perf, cm, results_path)
 
         assert os.path.exists(results_path), "Results file has not been created."
         assert os.path.getsize(results_path) > 0, "The result file is empty"
