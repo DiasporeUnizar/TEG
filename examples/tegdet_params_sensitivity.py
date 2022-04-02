@@ -30,12 +30,12 @@ RESULTS_PATH = "/script_results/tegdet_params_sensitivity_results.csv"
 list_of_testing = ("normal", "anomalous")
 
 #List of metrics (detector variants)
-list_of_metrics = ("Hamming") #, "Cosine", "Jaccard", "Dice", "KL", "Jeffreys", "JS", 
+list_of_metrics = [#"Hamming" , "Cosine", "Jaccard", "Dice", "KL", "Jeffreys", "JS", 
                    # "Euclidean", "Cityblock", "Chebyshev", "Minkowski", "Braycurtis",
                    # "Gower", "Soergel", "Kulczynski", "Canberra", "Lorentzian",
                    # "Bhattacharyya", "Hellinger", "Matusita", "Squaredchord",
                    # "Pearson", "Neyman", "Squared", "Probsymmetric", "Divergence",
-                   # "Clark", "Additivesymmetric" )
+                    "Clark"] #, "Additivesymmetric" )
 
 #Parameters
 list_of_n_obs_per_period = [84, 168, 336, 672, 1008]
@@ -85,4 +85,4 @@ if __name__ == '__main__':
 
                 for alpha in list_of_alpha:
 
-                    build_and_predict("Hamming", n_bins, n_obs_per_period, alpha)
+                    build_and_predict(metric, n_bins, n_obs_per_period, alpha)
