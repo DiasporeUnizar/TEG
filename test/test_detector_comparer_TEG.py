@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: updated 02/04/2022
+@Date: updated 04/04/2022
 
 Input dataset:
 - energy consumption (in KhW), every half-an-hour, registered by a smartmeter.
@@ -110,7 +110,7 @@ def test_results():
     reference = pd.read_csv(reference_path)
     
     #Select confusion matrix entries
-    cm = ['n_tp','n_tn','n_fp','n_fn']
+    cm = ['tp','tn','fp','fn']
     results = results[cm]
     reference = reference[cm]
 

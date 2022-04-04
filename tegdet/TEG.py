@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi, Raúl Javierre
-@Date: 02/04/2022
+@Date: 04/04/2022
 
 Time-Evolving-Graph detector Version 1.0
 This modules includes the following classes:
@@ -23,15 +23,15 @@ from tegdet.graph_comparison import *
 
 class TEG():
     #Default values
-    _N_OBS_PER_PERIOD = 336
     _N_BINS = 30
+    _N_OBS_PER_PERIOD = 336
     _ALPHA = 5
 
     def __init__(self, metric, n_bins=_N_BINS, n_obs_per_period=_N_OBS_PER_PERIOD, alpha=_ALPHA):
         self.metric = metric
         self.n_bins = n_bins
-        self.alpha = alpha
         self.n_obs_per_period= n_obs_per_period
+        self.alpha = alpha
         self._baseline = None
         self._global_graph= None
 
@@ -74,11 +74,11 @@ class TEG():
         with predicted values (0,1)
         Post: Computes the confusion matrix. It returns the confusion matrix as dictionary type.
         """
-        cm = {'n_tp': 0, 'n_tn': 0, 'n_fp': 0, 'n_fn': 0}
-        cm['n_tp'] = ((groundTrue == 1) & (predictions == 1)).sum()
-        cm['n_tn'] = ((groundTrue == 0) & (predictions == 0)).sum()
-        cm['n_fp'] = ((groundTrue == 0) & (predictions == 1)).sum()
-        cm['n_fn'] = ((groundTrue == 1) & (predictions == 0)).sum()
+        cm = {'tp': 0, 'tn': 0, 'fp': 0, 'fn': 0}
+        cm['tp'] = ((groundTrue == 1) & (predictions == 1)).sum()
+        cm['tn'] = ((groundTrue == 0) & (predictions == 0)).sum()
+        cm['fp'] = ((groundTrue == 0) & (predictions == 1)).sum()
+        cm['fn'] = ((groundTrue == 1) & (predictions == 0)).sum()
 
         return cm
 
@@ -92,8 +92,8 @@ class TEG():
         print("N_obs_per_period:\t\t", detector['n_obs_per_period'])
         print("Alpha:\t\t\t\t", detector['alpha'])
         print("Testing set:\t\t\t", testing_set)
-        print("Exec. time of model creation:\t", perf['tmc'], "seconds")
-        print("Exec. time of model prediction:\t", perf['tmp'], "seconds")
+        print("Time to build the model:\t", perf['tmc'], "seconds")
+        print("Time to make prediction:\t", perf['tmp'], "seconds")
         print("Confusion matrix:\t\n\n", cm)
 
     def metrics_to_csv(self, detector, testing_set, perf, cm,results_csv_path):
@@ -108,12 +108,12 @@ class TEG():
                            'n_obs_per_period': detector['n_obs_per_period'],
                            'alpha': detector['alpha'],
                            'testing_set': testing_set,
-                           'time_model_creation': perf['tmc'],
-                           'time_model_prediction': perf['tmp'],
-                           'n_tp': cm['n_tp'],
-                           'n_tn': cm['n_tn'],
-                           'n_fp': cm['n_fp'],
-                           'n_fn': cm['n_fn']},
+                           'time2build': perf['tmc'],
+                           'time2predict': perf['tmp'],
+                           'tp': cm['tp'],
+                           'tn': cm['tn'],
+                           'fp': cm['fp'],
+                           'fn': cm['fn']},
                            index=[0])
 
         df.to_csv(results_csv_path, mode='a', header=not os.path.exists(results_csv_path), index=False)

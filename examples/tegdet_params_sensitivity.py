@@ -30,17 +30,18 @@ RESULTS_PATH = "/script_results/tegdet_params_sensitivity_results.csv"
 list_of_testing = ("normal", "anomalous")
 
 #List of metrics (detector variants)
-list_of_metrics = [#"Hamming" , "Cosine", "Jaccard", "Dice", "KL", "Jeffreys", "JS", 
+list_of_metrics = [#"Hamming" #, "Cosine", "Jaccard", "Dice", "KL", "Jeffreys", "JS", 
                    # "Euclidean", "Cityblock", "Chebyshev", "Minkowski", "Braycurtis",
                    # "Gower", "Soergel", "Kulczynski", "Canberra", "Lorentzian",
                    # "Bhattacharyya", "Hellinger", "Matusita", "Squaredchord",
                    # "Pearson", "Neyman", "Squared", "Probsymmetric", "Divergence",
-                    "Clark"] #, "Additivesymmetric" )
+                    "Clark" #, "Additivesymmetric" 
+                   ]
 
 #Parameters
-list_of_n_obs_per_period = [84, 168, 336, 672, 1008]
-list_of_n_bins = [10, 20, 30, 40, 50]
-list_of_alpha = [1, 2.5, 5, 10, 15]
+list_of_n_obs_per_period = [24, 48, 96, 168, 192, 336, 480, 672, 816, 1008]
+list_of_n_bins = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+list_of_alpha = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 
 def build_and_predict(metric, n_bins, n_obs_per_period, alpha):

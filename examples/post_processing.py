@@ -85,7 +85,7 @@ def plot_3D(xlabel,ylabel,zlabel,x,y,z):
     #Set axis labels
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
-    ax.set_zlabel(zlabel)
+    #ax.set_zlabel(zlabel)
 
     #Set coordinates
     X, Y = np.meshgrid(x,y)
@@ -174,6 +174,6 @@ if __name__ == '__main__':
 
     generate_report_teg_variants(cwd)
 
-    generate_report_params_sensitivity(cwd,"Clark")
+    generate_report_params_sensitivity(cwd,"Hamming")
     
     

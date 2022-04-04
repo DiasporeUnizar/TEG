@@ -1,4 +1,4 @@
-detector,attack,time_model_creation,time_model_prediction,n_tp,n_tn,n_fp,n_fn,accuracy
+detector,attack,time_model_creation,time_model_prediction,tp,tn,fp,fn,accuracy
 TEG_Cosine_30,Normal,0.183196068,0.048320055,0,15,0,0,1
 TEG_Cosine_30,Anomalous,0.183196068,0.053091049,2,0,0,13,0.133333333
 TEG_Jaccard_30,Normal,0.176917076,0.051462889,0,10,5,0,0.666666667
