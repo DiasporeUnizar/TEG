@@ -1,17 +1,18 @@
 """
 @Author: Simona Bernardi
-@Date: updated 04/04/2022
+@Date: updated 05/04/2022
 
+The script:
 - Produces the plot of the two testing sets during the first week
-- Post-processing of TEGDET_VARIANTS_RESULTS_PATH
--- Shows the accuracy of the TEG-detectors variants as a barplot
+- From the file TEGDET_VARIANTS_RESULTS_PATH
 -- Prints on stdout the statistics of the times to build and to make predictions 
-- Post-processing of TEGDET_PARAMS_SENSITIVITY_RESULTS_PATH
--- For a given TEG-detector variant, 
---- shows the mean times to build and to execute vs/ n_bins and n_obs_per_period
---- shows the accuracy vs/ alpha and n_obs_per_period (n_bins fixed to default value)
---- shows the accuracy vs/ n_bins and n_obs_per_period (alpha fixed to default value)
---- shows the accuracy vs/ alpha and n_bins (n_obs_per_period fixed to default value)
+-- Shows the accuracy of the TEG-detectors variants as a barplot
+- From the file TEGDET_PARAMS_SENSITIVITY_RESULTS_PATH
+For a given TEG-detector variant:
+--- Shows the mean times to build and to execute vs/ n_bins and n_obs_per_period
+--- Shows the accuracy vs/ alpha and n_obs_per_period (n_bins fixed to default value)
+--- Shows the accuracy vs/ n_bins and n_obs_per_period (alpha fixed to default value)
+--- Shows the accuracy vs/ alpha and n_bins (n_obs_per_period fixed to default value)
 """
 
 import os
@@ -28,6 +29,7 @@ TEST_ANOMALOUS_DS_PATH = "/dataset/test_anomalous.csv"
 TEGDET_VARIANTS_RESULTS_PATH = "/script_results/tegdet_variants_results.csv"
 TEGDET_PARAMS_SENSITIVITY_RESULTS_PATH = "/script_results/tegdet_params_sensitivity_results.csv"
 
+list_of_metrics = ["Hamming","Clark"]
 
 def compare_testing_sets(cwd, n_obs):
     
@@ -55,14 +57,22 @@ def generate_report_teg_variants(cwd):
     df = df[['detector','time2build','time2predict','tp','tn','fp','fn']]
     #Group by detector and takes the sum (of the two testing sets results)
     df_grouped = df.groupby('detector').sum()
+    
+
+    #Extract execution times (in ms.: sum_of_the_times / 2 * 1000)
+    time2build = df_grouped['time2build'] * 500
+    time2predict = df_grouped['time2predict'] * 500
+    #Timing statistics on stdout
+    print("Time to build the model (ms):", time2build.describe())
+    print("Time to make predictions: (ms)", time2predict.describe())
+    print("------------------------------------------------------")
+
     #Get the detectors list
     detectors = df_grouped.index.tolist()
-
     #Compute the accuracy from the confusion matrix
     num = df_grouped['tp']+df_grouped['tn']
     den = num + df_grouped['fp']+ df_grouped['fn']
-    accuracy = num / den
-    
+    accuracy = num / den   
     print("Accuracy:")
     print(accuracy)
 
@@ -76,13 +86,6 @@ def generate_report_teg_variants(cwd):
     ax.set_xlabel('Accuracy')
     plt.show()
     
-    #Extract execution times (in ms.  time / 2 * 1000)
-    time2build = df_grouped['time2build'] * 500
-    time2predict = df_grouped['time2predict'] * 500
-    #Timing statistics on stdout
-    print("Time to build the model (ms):", time2build.describe())
-    print("Time to make predictions: (ms)", time2predict.describe())
-    print("------------------------------------------------------")
 
 def plot_3D(xlabel,ylabel,zlabel,x,y,z):
     #Set figure 
@@ -159,7 +162,7 @@ def generate_report_params_sensitivity(cwd,detector):
 
     #Accuracy sensitivity analysis
  
-    #Remove timings
+    #Remove time columns
     df_view = df[['n_bins','n_obs_per_period','alpha','tp','tn','fp','fn']]   
 
     #Fix n_bins = 30 (reference configuration)
@@ -167,7 +170,6 @@ def generate_report_params_sensitivity(cwd,detector):
 
     #Fix alpha = 5 (reference configuration)
     plot_3D_accuracy(df_view, "alpha", 5, "n_obs_per_period", "n_bins")
-
 
     #Fix n_obs_per_period = 336 (reference configuration)
     plot_3D_accuracy(df_view, "n_obs_per_period", 336, "n_bins", "alpha")
@@ -183,6 +185,7 @@ if __name__ == '__main__':
 
     generate_report_teg_variants(cwd)
 
-    generate_report_params_sensitivity(cwd,"Hamming")
+    for metric in list_of_metrics:
+        generate_report_params_sensitivity(cwd, metric)
     
     
