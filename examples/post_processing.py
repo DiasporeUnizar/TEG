@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: updated 02/04/2022
+@Date: updated 04/04/2022
 
 - Produces the plot of the two testing sets during the first week
 - Post-processing of TEGDET_VARIANTS_RESULTS_PATH
@@ -47,20 +47,24 @@ def compare_testing_sets(cwd, n_obs):
 
 def generate_report_teg_variants(cwd):
 
+    print("-------- TEG variants analysis report ----------------")
     #Load the results
     results_path = cwd + TEGDET_VARIANTS_RESULTS_PATH
     df = pd.read_csv(results_path)   
     #Remove parameters and testing_set columns
-    df = df[['detector','time_model_creation','time_model_prediction','n_tp','n_tn','n_fp','n_fn']]
+    df = df[['detector','time2build','time2predict','tp','tn','fp','fn']]
     #Group by detector and takes the sum (of the two testing sets results)
     df_grouped = df.groupby('detector').sum()
     #Get the detectors list
     detectors = df_grouped.index.tolist()
 
     #Compute the accuracy from the confusion matrix
-    num = df_grouped['n_tp']+df_grouped['n_tn']
-    den = num + df_grouped['n_fp']+ df_grouped['n_fn']
+    num = df_grouped['tp']+df_grouped['tn']
+    den = num + df_grouped['fp']+ df_grouped['fn']
     accuracy = num / den
+    
+    print("Accuracy:")
+    print(accuracy)
 
     #Generate barplot
     fig, ax = plt.subplots()
@@ -73,11 +77,12 @@ def generate_report_teg_variants(cwd):
     plt.show()
     
     #Extract execution times (in ms.  time / 2 * 1000)
-    time2build = df_grouped['time_model_creation'] * 500
-    time2predict = df_grouped['time_model_prediction'] * 500
+    time2build = df_grouped['time2build'] * 500
+    time2predict = df_grouped['time2predict'] * 500
     #Timing statistics on stdout
     print("Time to build the model (ms):", time2build.describe())
     print("Time to make predictions: (ms)", time2predict.describe())
+    print("------------------------------------------------------")
 
 def plot_3D(xlabel,ylabel,zlabel,x,y,z):
     #Set figure 
@@ -102,11 +107,13 @@ def plot_3D_accuracy(df_view, fixed_param, ref_value, y_view, x_view):
     df_grouped = df_view.groupby([y_view,fixed_param, x_view]).sum() 
     
     #Compute the accuracy from the confusion matrix
-    num = df_grouped['n_tp']+df_grouped['n_tn']
-    den = num + df_grouped['n_fp']+ df_grouped['n_fn']
+    num = df_grouped['tp']+df_grouped['tn']
+    den = num + df_grouped['fp']+ df_grouped['fn']
     accuracy = num / den
-
+    
+    print("-------- Parameters sensitivity analysis report ----------------")
     print("Accuracy statistics", accuracy.describe())
+    print("----------------------------------------------------------------")
       
     #Plot accuracy figures
     x = np.unique(df_view[[x_view]].to_numpy())
@@ -125,33 +132,35 @@ def generate_report_params_sensitivity(cwd,detector):
     df = df[df["detector"] == detector]
 
     #Remove detector and testing_set columns
-    df = df[['n_bins','n_obs_per_period','alpha','time_model_creation',
-            'time_model_prediction','n_tp','n_tn','n_fp','n_fn']]
+    df = df[['n_bins','n_obs_per_period','alpha','time2build',
+            'time2predict','tp','tn','fp','fn']]
  
     #Performance sensitivity analysis
     #Get parameters ranges
     n_bins = np.unique(df[['n_bins']].to_numpy())
     n_obs = np.unique(df[['n_obs_per_period']].to_numpy())
-    #Remove alpha and confusion matrix columns
-    df_view = df[['n_bins','n_obs_per_period','time_model_creation','time_model_prediction']]
+    alpha = np.unique(df[['alpha']].to_numpy())
 
-    #Group by parameter configuration and take mean times (converted in ms: sum / 2 * 1000)
-    df_grouped = df_view.groupby(['n_obs_per_period','n_bins']).sum() * 500 
-    tmc = df_grouped['time_model_creation'].to_numpy()
-    tmp = df_grouped['time_model_prediction'].to_numpy()
+    #Remove alpha and confusion matrix columns
+    df_view = df[['n_bins','n_obs_per_period','time2build','time2predict']]
+
+    #Group by parameter configuration and take mean times (converted in ms: * 1000)
+    df_grouped = df_view.groupby(['n_obs_per_period','n_bins']).mean() * 1000 
+
+    print("Execution times:", df_grouped.describe())
+
+    tmc = df_grouped['time2build'].to_numpy()
+    tmp = df_grouped['time2predict'].to_numpy()
 
     #Plot performance figures    
-    plot_3D("n_bins","n_obs_per_period","time_model_creation (ms)",n_bins,n_obs,tmc)
-    plot_3D("n_bins","n_obs_per_period","time_model_prediction (ms)",n_bins,n_obs,tmp)
+    plot_3D("n_bins","n_obs_per_period","time2build (ms)",n_bins,n_obs,tmc)
+    plot_3D("n_bins","n_obs_per_period","time2predict (ms)",n_bins,n_obs,tmp)
 
 
     #Accuracy sensitivity analysis
-    #Get parameters range
-    #alpha = np.unique(df[['alpha']].to_numpy())
-
+ 
     #Remove timings
-    df_view = df[['n_bins','n_obs_per_period','alpha','n_tp','n_tn','n_fp','n_fn']]   
-
+    df_view = df[['n_bins','n_obs_per_period','alpha','tp','tn','fp','fn']]   
 
     #Fix n_bins = 30 (reference configuration)
     plot_3D_accuracy(df_view, "n_bins", 30, "n_obs_per_period", "alpha")
