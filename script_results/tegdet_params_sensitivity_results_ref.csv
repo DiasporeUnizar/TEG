@@ -1,4 +1,4 @@
-detector,n_bins,n_obs_per_period,alpha,testing_set,time_model_creation,time_model_prediction,n_tp,n_tn,n_fp,n_fn
+detector,n_bins,n_obs_per_period,alpha,testing_set,time2build,time2predict,tp,tn,fp,fn
 Hamming,5,24,1,normal,0.9177892208099365,0.22928094863891602,0,210,0,0
 Hamming,5,24,1,anomalous,0.9177892208099365,0.2366487979888916,0,0,0,210
 Hamming,5,24,2,normal,0.8999249935150146,0.2196810245513916,0,210,0,0

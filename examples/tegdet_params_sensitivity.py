@@ -1,15 +1,15 @@
 """
 @Author: Simona Bernardi
-@Date: updated 02/04/2022
+@Date: updated 05/04/2022
 
 Input dataset:
 - Energy consumption (in kWh), every half-an-hour, registered by a smart meter.
 - The training set is over 60 weeks and the two testing sets are over 15 weeks
 The script:
 - Performs sensitivity analysis on the TEG-detector parameters:
--- n_obs_per_period = [84, 168, 336, 672, 1008]
--- n_bins = [10, 20, 30, 40, 50]
--- alpha = [1,2.5,5,10,15]
+-- n_obs_per_period: number of observation per period  
+-- n_bins: number of discretization levels 
+-- alpha: significance level 100-alpha 
 - Builds the metric specific TEG-detector and makes predictions with the two testing sets
 - Computes the confusion matrix and performance metrics 
 Output:
@@ -30,13 +30,13 @@ RESULTS_PATH = "/script_results/tegdet_params_sensitivity_results.csv"
 list_of_testing = ("normal", "anomalous")
 
 #List of metrics (detector variants)
-list_of_metrics = [#"Hamming" #, "Cosine", "Jaccard", "Dice", "KL", "Jeffreys", "JS", 
-                   # "Euclidean", "Cityblock", "Chebyshev", "Minkowski", "Braycurtis",
-                   # "Gower", "Soergel", "Kulczynski", "Canberra", "Lorentzian",
-                   # "Bhattacharyya", "Hellinger", "Matusita", "Squaredchord",
-                   # "Pearson", "Neyman", "Squared", "Probsymmetric", "Divergence",
+list_of_metrics =   ["Hamming", #, "Cosine", "Jaccard", "Dice", "KL", "Jeffreys", "JS", 
+                    # "Euclidean", "Cityblock", "Chebyshev", "Minkowski", "Braycurtis",
+                    # "Gower", "Soergel", "Kulczynski", "Canberra", "Lorentzian",
+                    # "Bhattacharyya", "Hellinger", "Matusita", "Squaredchord",
+                    # "Pearson", "Neyman", "Squared", "Probsymmetric", "Divergence",
                     "Clark" #, "Additivesymmetric" 
-                   ]
+                    ]
 
 #Parameters
 list_of_n_obs_per_period = [24, 48, 96, 168, 192, 336, 480, 672, 816, 1008]
