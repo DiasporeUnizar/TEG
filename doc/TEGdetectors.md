@@ -23,14 +23,14 @@ TEG module includes three classes:
 |--------------------- |--------------------------------------------------------------------------------------------------------------------------------   |
 | metric: string            | Dissimilarity metric used to compare two graphs. Input parameter.                              |
 | n_bins: int            | Level of discretization of real valued observations (number of levels). Input parameter. Default value=  _N_BINS    |
-| alpha: int             |  Significance level 100-alpha. Input parameter. Default value=  _ALPHA   |
 | n_obs_per_period: int  | Number of observation per period. Input parameter. Default value= _N_OBS_PER_PERIOD                                            |
+| alpha: int             |  Significance level 100-alpha. Input parameter. Default value=  _ALPHA   |
 
 
 | attribute  (private)       | description                                                                                       |
 |---------------------- |------------------------------------------------------------------------------------------------   |
-| _N_OBS_PER_PERIOD: int  | Number of observations per period. Value=336    |
 | _N_BINS: int            | Level of discretization of real valued observations (number of levels). Value=30.     |
+| _N_OBS_PER_PERIOD: int  | Number of observations per period. Value=336    |
 | _ALPHA: int             | Significance level 100-_ALPHA. Value=5.      |
 | _baseline:  numpy array of float        | Baseline distribution of the training period. 				|
 | _global_graph: Graph	   | Global graph associated to the training period. 				|
@@ -38,13 +38,13 @@ TEG module includes three classes:
 
 | method            					  |    description														|
 |----------------------------------------------------------------------------------------------- |----------------------------------------------------------------------------------   |
-| \_\_init__(metric: string, n_bins: int =_N_BINS, alpha: int =_ALPHA, n_obs_per_period: int =_N_OBS_PER_PERIOD)	| Constructor that initializes the TEG input parameters	(see the public attribute table)	|
+| \_\_init__(metric: string, n_bins: int =_N_BINS,  n_obs_per_period: int =_N_OBS_PER_PERIOD, alpha: int =_ALPHA)	| Constructor that initializes the TEG input parameters	(see the public attribute table)	|
 | get_dataset(ds_path: string): DataFrame 	| Loads the dataset from ```ds_path``` file (comma-separated value format), renames the columns and returns it as a   ```pandas Dataframe```			|
 | build_model(training_dataset: Dataframe): TEGdetector, float	|  Builds the prediction model based on the ```training_dataset``` and returns it together with the time to build the model (```float``` type)        |
 | predict(testing_dataset: Dataframe, model: TEGDetector): numpy array of int, int, float		| Makes predictions on the ```testing_dataset``` using the ```model```. It returns: the outliers (```numpy``` array of {0,1} values) and total number of observations (```int``` type), and the time to make predictions (```float``` type)		|
 | compute_confusion_matrix(groundTrue: numpy array of int, predictions: numpy array of int): dict |	 Computes the confusion matrix based on the ground true values and predicted values (```numpy``` array of {0,1} values). It returns the confusion matrix as a dictionary (```dict```) type |
-| print_metrics(detector: string, scenario: string, perf: dict, cm: dict)		|  Prints on the stdout:  the names of the  ```detector``` and the ```scenario```, the performance metrics  ```perf```(```dict``` type including the time to build the model and the time to make predictions) and the confusion matrix ```cm``` 		|
-| metrics_to_csv(detector: string, scenario: string, perf: dict, cm: dict, results_csv_path: string)	| Saves in the file with pathname ```results_csv_path``` (comma-separated values format): the names of the  ```detector``` and the ```scenario```,  the performance metrics  ```perf``` (```dict``` type) and the confusion matrix ```cm``` (```dict``` type)
+| print_metrics(detector: dict, testing_set: string, perf: dict, cm: dict)		|  Prints on the stdout:  the  ```detector```  (```dict```type including the metric and the input parameters setting), and the ```testing_set```, the performance metrics  ```perf```(```dict``` type including the time to build the model and the time to make predictions) and the confusion matrix ```cm``` 		|
+| metrics_to_csv(detector: dict, testing_set: string, perf: dict, cm: dict, results_csv_path: string)	| Saves in the file with pathname ```results_csv_path``` (comma-separated values format):  the  ```detector``` (```dict```type), the ```testing_set```,  the performance metrics  ```perf``` (```dict``` type) and the confusion matrix ```cm``` (```dict``` type)
  
 - ```TEGdetector```  class 
 
