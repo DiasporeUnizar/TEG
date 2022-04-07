@@ -41,11 +41,11 @@ and produce a result file ```<name_of_the_script>_results.csv``` (with comma-sep
 The third one, relies on the files in the ```dataset``` folder and in the ```script_results``` folder to produce reports (comparison of the testing datasets, performance and  accuracy of the TEG-detectors).
 Since the script generates 3D plots, it is necessary to install the ```matplotlib``` package before running it:
 
-```pip install matplotlib```
+```$ pip install matplotlib```
 
 The scripts can be run using the following command from the root directory of this repository:
 
-```python3 examples/<name_of_the_script>.py```
+```$ python3 examples/<name_of_the_script>.py```
 
 ## Test script
 The ```test``` folder  includes the test script ```test_detector_comparer_TEG.py``` that is used during debugging to check the correctness of the library. 
