@@ -4,8 +4,8 @@ This repository includes the TEG library that has been created from the implemen
 ## Structure of the repository
 The core structure is the following:
 - *dataset*: includes the dataset used in the library test and the usage examples
-- *dist*: contains a ```.whl``` file, i.e., package saved in the ```Wheel``` format (the standard built-package format used for Python distributions). 
-The TEG library can be directly installed   using ```pip install tegdet-1.0-py3-none-any.whl``` 
+- *dist*: contains  ```.whl``` files, i.e., package saved in the ```Wheel``` format (the standard built-package format used for Python distributions). 
+The last version of the TEG library can be directly installed   using ```pip install tegdet-2.0.0-py3-none-any.whl``` 
 - *doc*: includes library documentation
 - *examples*: includes scripts that use the API of the library and post-process the results
 - *script_results*: includes all the result files from the test script and usage examples in ```csv``` format
@@ -25,7 +25,7 @@ It depends on the Python packages listed in the ```requirements.txt``` file whic
 
 The library is local to this repository (not published yet in the official PyPI repository) and can be installed using the command:
 
-```$ pip install dist/tegdet-1.0-py3-none-any.whl```
+```$ pip install dist/tegdet-2.0.0-py3-none-any.whl```
 
 
 ## User scripts
