@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: updated 04/04/2022
+@Date: updated 02/05/2022
 
 Input dataset:
 - energy consumption (in KhW), every half-an-hour, registered by a smartmeter.
@@ -22,7 +22,9 @@ Output:
 import os
 import pandas as pd
 import numpy as np
-from tegdet.TEG import TEG
+
+from tegdet.teg import TEGDetector
+
 
 #Input datasets/output results Paths
 TRAINING_DS_PATH = "/dataset/training.csv"
@@ -34,7 +36,7 @@ REFERENCE_PATH = "/script_results/reference_results.csv"
 list_of_testing = ("normal", "anomalous")
 
 #List of metrics (detector variants)
-list_of_metrics = [ "Cosine", "Jaccard", "Hamming", "KL", "Jeffreys", "JS", "Euclidean", 
+list_of_metrics = [ "Cosine",  "Jaccard", "Hamming", "KL", "Jeffreys", "JS", "Euclidean", 
                     "Cityblock", "Chebyshev", "Minkowski", "Braycurtis", "Kulczynski", 
                     "Canberra", "Bhattacharyya", "Squared", "Divergence", "Additivesymmetric"]
 
@@ -52,13 +54,14 @@ def test_generate_results():
 
     for metric in list_of_metrics:
 
-        teg = TEG(metric)
+        teg = TEGDetector(metric)
 
         #Load training dataset
         train_ds = teg.get_dataset(train_ds_path)
 
         assert not train_ds.empty, "The training dataset is empty."
 
+        
         #Build model
         model, time2build = teg.build_model(train_ds)
 
@@ -97,6 +100,7 @@ def test_generate_results():
 
         assert os.path.exists(results_path), "Results file has not been created."
         assert os.path.getsize(results_path) > 0, "The result file is empty"
+
 
 def test_results():
 

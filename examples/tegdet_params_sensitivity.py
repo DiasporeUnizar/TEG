@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: updated 05/04/2022
+@Date: updated 02/05/2022
 
 Input dataset:
 - Energy consumption (in kWh), every half-an-hour, registered by a smart meter.
@@ -19,7 +19,8 @@ Output:
 import os
 import pandas as pd
 import numpy as np
-from tegdet.TEG import TEG
+from tegdet.teg import TEGDetector
+
 
 #Input datasets/output results paths
 TRAINING_DS_PATH = "/dataset/training.csv"
@@ -30,12 +31,10 @@ RESULTS_PATH = "/script_results/tegdet_params_sensitivity_results.csv"
 list_of_testing = ("normal", "anomalous")
 
 #List of metrics (detector variants)
-list_of_metrics =   ["Hamming", #, "Cosine", "Jaccard", "Dice", "KL", "Jeffreys", "JS", 
-                    # "Euclidean", "Cityblock", "Chebyshev", "Minkowski", "Braycurtis",
-                    # "Gower", "Soergel", "Kulczynski", "Canberra", "Lorentzian",
-                    # "Bhattacharyya", "Hellinger", "Matusita", "Squaredchord",
-                    # "Pearson", "Neyman", "Squared", "Probsymmetric", "Divergence",
-                    "Clark" #, "Additivesymmetric" 
+list_of_metrics =   [#"Hamming", "Clark", "Canberra", "Lorentzian", "Kulczynski", "Divergence", "Cosine"
+                     "Jaccard", "Dice", "KL", "Jeffreys", "JS", "Euclidean", "Cityblock", 
+                     #"Chebyshev", "Minkowski", "Braycurtis", "Gower", "Soergel", "Bhattacharyya", "Hellinger", 
+                     #"Matusita", "Squaredchord", "Pearson", "Neyman", "Squared", "Probsymmetric", "Additivesymmetric" 
                     ]
 
 #Parameters
@@ -48,7 +47,7 @@ def build_and_predict(metric, n_bins, n_obs_per_period, alpha):
     cwd = os.getcwd() 
     train_ds_path = cwd + TRAINING_DS_PATH
 
-    teg = TEG(metric, n_bins, n_obs_per_period, alpha)
+    teg = TEGDetector(metric, n_bins, n_obs_per_period, alpha)
     #Load training dataset
     train_ds = teg.get_dataset(train_ds_path)
     #Build model

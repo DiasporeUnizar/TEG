@@ -1,72 +1,119 @@
 """
 @Author: Simona Bernardi
-@Date: 30/03/2022
+@Date: 02/05/2022
 
-Graph comparison module:
-Classes that enable to compare two graphs and compute the "difference" between them according to a 
+graph_comparison module Version 2.0.0
+
+- Graph class enables to generate a causal graph (node frequency list, adjacency-frequency matrix)
+from the dataset
+- GraphComparator and sub-classes enable to compare two graphs and compute the "difference" between them according to a 
 given measure
 
-
 """
+
 import numpy as np
 
 from math import sqrt
 from scipy.stats import entropy #it is used to compute the KLD measure
 from scipy.spatial import distance #it is used to compute several distances
 
+class Graph:
+    """
+    Graph generator and manipulator (graph expansion)
+    """
+
+    def __init__(self, nodes=None, nodes_freq=None, matrix=None):
+        """
+        Constructor that initializes the graph attributes
+        """       
+        self.__nodes = nodes          
+        self.__nodes_freq = nodes_freq
+        self.__matrix = matrix
+
+    def get_nodes(self):
+        return self.__nodes
+
+    def get_nodes_freq(self):
+        return self.__nodes_freq
+
+    def get_matrix(self):
+        return self.__matrix
+
+    def update_node_freq(self, pos, value):
+        self.__nodes_freq[pos] += value
+
+    def update_matrix_entry(self, row, col, value):
+        self.__matrix[row][col] += value
+
+    def __get_index(self, element):
+        """
+        Returns the index of the matrix row (column) based on "element"
+        """
+        idx = -1  # not assigned
+        i = 0
+        while i < len(self.__nodes) and idx == -1:
+            if element == self.__nodes[i]:
+                idx = i
+            i += 1
+
+        return idx
+   
+    def generate_graph(self, obs_discretized):
+        """
+        Generates the graph from the discretized observations "obs_discretized"
+        """
+        grouped = obs_discretized.groupby('DP').count()
+        # Sets vertices: they are ordered according to the levels 
+        self.__nodes = grouped.index.to_numpy()          
+        self.__nodes_freq = grouped.to_numpy()
+        dim = len(self.__nodes)
+
+        # Initializes the adjacent matrix
+        self.__matrix = np.zeros((dim, dim), dtype=int)
+        attr = obs_discretized.DP.to_numpy()
+        # Sets the adjacent matrix with the frequencies
+        for i in range(attr.size - 1):
+            row = self.__get_index(attr[i])
+            col = self.__get_index(attr[i + 1])
+            self.__matrix[row][col] += 1
+
+    def expand_graph(self, position, vertex):
+        """
+        Expands the graph by inserting a new node "vertex" in "position". The new added fictious node
+        has frequency -1. The new added row and column of the adjacency matrix have -1 entries
+        """
+        # Different from zero to differentiate from the absence of arc, but presence of the node
+        wildcard = '-1'
+        # Insert the new vertex in the list of nodes
+        self.__nodes = np.insert(self.__nodes, position, vertex)
+        self.__nodes_freq = np.insert(self.__nodes_freq, position, wildcard)
+        # Insert the new column in the matrix
+        self.__matrix = np.insert(self.__matrix, position, wildcard, axis=1)
+        # Insert the new row in the matrix
+        self.__matrix = np.insert(self.__matrix, position, wildcard, axis=0)
+
 
 class GraphComparator:
-    """ Operator that compares two graphs """
+    """ 
+    Graphs comparator operator
+    """
 
     def __init__(self,gr1,gr2):
         """
         Constructor that initializes the two operands (graphs)
         """
         # First operand
-        self.graph1 = gr1
+        self._graph1 = gr1
         # Second operand
-        self.graph2 = gr2
+        self._graph2 = gr2
  
-    def expandGraph(self, graph, position, vertex):
+    def _normalize_matrices(self):
         """
-        Expands "graph" by inserting a new node "vertex" in "position". The new added fictious node
-        has frequency -1. The new added row and column of the adjacency matrix have -1 entries
+        Flatten the matrices of the two graphs and normalize them
         """
-        # Different from zero to differentiate from the absence of arc, but presence of the node
-        wildcard = '-1'
-        # Insert the new vertex in the list of nodes
-        graph.nodes = np.insert(graph.nodes, position, vertex)
-        graph.nodesFreq = np.insert(graph.nodesFreq, position, wildcard)
-        # Insert the new column in the matrix
-        graph.matrix = np.insert(graph.matrix, position, wildcard, axis=1)
-        # Insert the new row in the matrix
-        graph.matrix = np.insert(graph.matrix, position, wildcard, axis=0)
-
-    def resizeGraphs(self):
-        """
-        Compare the nodes of the two graphs and possibly expand them
-        """
-        first = self.graph1
-        second = self.graph2
-
-        # Union of the nodes
-        nodesU = np.union1d(first.nodes, second.nodes)
-
-        # Compare the node list and possibly extend the model(s)
-        for i in range(nodesU.size):
-            if (first.nodes.size > i) and (first.nodes[i] != nodesU[i]) or (
-                    first.nodes.size <= i):
-                self.expandGraph(first, i, nodesU[i])
-
-        for i in range(nodesU.size):
-            if (second.nodes.size > i) and (second.nodes[i] != nodesU[i]) or (
-                    second.nodes.size <= i):
-                self.expandGraph(second, i, nodesU[i])
-
-    def normalizeMatrices(self):
-        # Convert the two matrices into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
+        # Get the two matrixes and convert them into arrays
+        first = self._graph1.get_matrix().flatten()
+        second = self._graph2.get_matrix().flatten()
 
         # Set -1 entries to zero
         first = np.where((first < 0), first * 0, first)
@@ -78,8 +125,29 @@ class GraphComparator:
 
         return first, second
 
+    def resize_graphs(self):
+        """
+        Compare the nodes of the two graphs and possibly expand them
+        """
+        first = self._graph1
+        second = self._graph2
 
-    def compareGraphs(self):  # signature only because it is overriden
+        # Union of the nodes
+        union = np.union1d(first.get_nodes(), second.get_nodes())
+
+        # Compare the node list and possibly extend the graph(s)
+        for i in range(union.size):
+            nodes = first.get_nodes()
+            if (nodes.size > i) and (nodes[i] != union[i]) or (nodes.size <= i):
+                first.expand_graph(i, union[i])
+
+        for i in range(union.size):
+            nodes = second.get_nodes()
+            if (nodes.size > i) and (nodes[i] != union[i]) or (nodes.size <= i):
+                second.expand_graph(i, union[i])
+
+
+    def compare_graphs(self):  # signature only because it is overriden
         return 0
 
 
@@ -91,7 +159,7 @@ class GraphComparator:
 #######################################################################
 class GraphHammingDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: Structural-based distance (Hamming)
         The two matrix arrays are assumed
@@ -101,8 +169,8 @@ class GraphHammingDissimilarity(GraphComparator):
         """
 
         # Get just the matrices and convert into arrays
-        first = self.graph1.matrix.flatten()
-        second = self.graph2.matrix.flatten()
+        first = self._graph1.get_matrix().flatten()
+        second = self._graph2.get_matrix().flatten()
         # Just the adjacency matrix
         dim = min(len(first), len(second))
         # Setting a counter vector to zero
@@ -127,7 +195,7 @@ Reference of the following implemented dissimilarity metrics:
 
 class GraphCosineDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: Frequency-based dissimilarity (1-cosine)
         The two arrays are assumed
@@ -138,11 +206,10 @@ class GraphCosineDissimilarity(GraphComparator):
 
         # Convert into arrays the node frequencies and matrices
         first = np.concatenate(
-            (self.graph1.nodesFreq, self.graph1.matrix.flatten()), axis=None)
+            (self._graph1.get_nodes_freq(), self._graph1.get_matrix().flatten()), axis=None)
         second = np.concatenate(
-            (self.graph2.nodesFreq, self.graph2.matrix.flatten()), axis=None)
-        
-
+            (self._graph2.get_nodes_freq(), self._graph2.get_matrix().flatten()), axis=None)
+    
         # Normalization factor
         nfactor = 1.0
         sp = first * second / nfactor
@@ -162,7 +229,7 @@ class GraphCosineDissimilarity(GraphComparator):
 
 class GraphJaccardDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Jaccard)
         The two arrays are assumed
@@ -171,7 +238,7 @@ class GraphJaccardDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
  
         # Compute the Jaccard similarity (equal to Peak Correlation Energy)
         sumprod = (first * second).sum()
@@ -183,7 +250,7 @@ class GraphJaccardDissimilarity(GraphComparator):
 
 class GraphDiceDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Dice)
         The two arrays are assumed
@@ -192,7 +259,7 @@ class GraphDiceDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Dice similarity 
         sumprod = (first * second).sum()
@@ -208,7 +275,7 @@ class GraphDiceDissimilarity(GraphComparator):
 ####################################################################
 class GraphKLDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Kullback–Leibler)
         The two arrays are assumed
@@ -217,7 +284,7 @@ class GraphKLDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the KLD of first  w.r.t second 
         kld = entropy(first,second,base=2)
@@ -226,7 +293,7 @@ class GraphKLDissimilarity(GraphComparator):
 
 class GraphJeffreysDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Jeffreys)
         The two arrays are assumed
@@ -235,7 +302,7 @@ class GraphJeffreysDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
 
         # Compute the Jeffreys of first  w.r.t second 
@@ -252,7 +319,7 @@ class GraphJeffreysDissimilarity(GraphComparator):
 
 class GraphJSDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic:  PDF-based dissimilarity (Jensen-Shannon)
         The two arrays are assumed
@@ -261,7 +328,7 @@ class GraphJSDissimilarity(GraphComparator):
             graph normalization has to be done before!
         """
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the JSD 
         jsd = distance.jensenshannon(first,second,base=2)
@@ -273,7 +340,7 @@ class GraphJSDissimilarity(GraphComparator):
 ###################################################################
 class GraphEuclideanDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Euclidean)
         The two arrays are assumed
@@ -283,7 +350,7 @@ class GraphEuclideanDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Euclidean distance 
         eucl = distance.euclidean(first,second)
@@ -292,7 +359,7 @@ class GraphEuclideanDissimilarity(GraphComparator):
 
 class GraphCityblockDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Cityblok)
         The two arrays are assumed
@@ -302,7 +369,7 @@ class GraphCityblockDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Cityblock distance 
         city = distance.cityblock(first,second)
@@ -311,7 +378,7 @@ class GraphCityblockDissimilarity(GraphComparator):
 
 class GraphChebyshevDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Chebyshev) 
         The two arrays are assumed
@@ -321,7 +388,7 @@ class GraphChebyshevDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Chebyshev distance 
         cheb = distance.chebyshev(first,second)
@@ -330,7 +397,7 @@ class GraphChebyshevDissimilarity(GraphComparator):
 
 class GraphMinkowskiDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Minkowski distance with p=3)
         The two arrays are assumed
@@ -340,7 +407,7 @@ class GraphMinkowskiDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Minkowski distance 
         mink = distance.minkowski(first,second,3)
@@ -352,7 +419,7 @@ class GraphMinkowskiDissimilarity(GraphComparator):
 ###################################################################
 class GraphBraycurtisDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Bray-Curtis, also called Sorensen)
         The two arrays are assumed
@@ -362,7 +429,7 @@ class GraphBraycurtisDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Bray-Curtis distance 
         bray = distance.braycurtis(first,second)
@@ -371,7 +438,7 @@ class GraphBraycurtisDissimilarity(GraphComparator):
 
 class GraphGowerDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Gower)
         The two arrays are assumed
@@ -381,7 +448,7 @@ class GraphGowerDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Gower distance (=Cityblock divided by the number of elements)
         gower = distance.cityblock(first,second) / len(first)
@@ -390,7 +457,7 @@ class GraphGowerDissimilarity(GraphComparator):
 
 class GraphSoergelDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Soergel)
         The two arrays are assumed
@@ -400,7 +467,7 @@ class GraphSoergelDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Soergel distance (=Cityblock divided by the 
         # sum of the pairwise_max_elements)
@@ -410,7 +477,7 @@ class GraphSoergelDissimilarity(GraphComparator):
 
 class GraphKulczynskiDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Kulczynski)
         The two arrays are assumed
@@ -420,7 +487,7 @@ class GraphKulczynskiDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Kulczynski distance (=Cityblock divided by the 
         # sum of the pairwise_min_elements)
@@ -438,7 +505,7 @@ class GraphKulczynskiDissimilarity(GraphComparator):
 
 class GraphCanberraDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Canberra)
         The two arrays are assumed
@@ -448,7 +515,7 @@ class GraphCanberraDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Canberra distance 
         canb = distance.canberra(first,second)
@@ -457,7 +524,7 @@ class GraphCanberraDissimilarity(GraphComparator):
 
 class GraphLorentzianDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Lorentzian)
         The two arrays are assumed
@@ -467,7 +534,7 @@ class GraphLorentzianDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Lorentzian distance 
         lore = np.log(1 + (first - second))
@@ -479,7 +546,7 @@ class GraphLorentzianDissimilarity(GraphComparator):
 ###################################################################
 class GraphBhattacharyyaDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Bhattacharyya)
         The two arrays are assumed
@@ -489,7 +556,7 @@ class GraphBhattacharyyaDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Bhattacharyya distance 
         bhatta = (np.sqrt(first * second)).sum()
@@ -505,7 +572,7 @@ class GraphBhattacharyyaDissimilarity(GraphComparator):
 
 class GraphHellingerDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Hellinger)
         The two arrays are assumed
@@ -515,7 +582,7 @@ class GraphHellingerDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Hellinger distance 
         helli = 1 - (np.sqrt(first * second)).sum()
@@ -524,7 +591,7 @@ class GraphHellingerDissimilarity(GraphComparator):
 
 class GraphMatusitaDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Matusita)
         The two arrays are assumed
@@ -534,7 +601,7 @@ class GraphMatusitaDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Matusita distance 
         matu = (np.sqrt(first * second)).sum()
@@ -543,7 +610,7 @@ class GraphMatusitaDissimilarity(GraphComparator):
 
 class GraphSquaredchordDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Squared-chord)
         The two arrays are assumed
@@ -553,7 +620,7 @@ class GraphSquaredchordDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Squared-chord distance (= Matusita without the square root)
         sqchord = (np.sqrt(first * second)).sum()
@@ -566,7 +633,7 @@ class GraphSquaredchordDissimilarity(GraphComparator):
 
 class GraphPearsonDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Pearson Chi^2)
         The two arrays are assumed
@@ -576,7 +643,7 @@ class GraphPearsonDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         num =  (first - second) 
         num = num * num
@@ -594,7 +661,7 @@ class GraphPearsonDissimilarity(GraphComparator):
 
 class GraphNeymanDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Neyman Chi^2)
         The two arrays are assumed
@@ -604,7 +671,7 @@ class GraphNeymanDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         num =  (first - second) 
         num = num * num
@@ -621,7 +688,7 @@ class GraphNeymanDissimilarity(GraphComparator):
 
 class GraphSquaredDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Squared Chi^2)
         The two arrays are assumed
@@ -631,7 +698,7 @@ class GraphSquaredDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Squared Chi^2 distance
         num =  (first - second) 
@@ -644,7 +711,7 @@ class GraphSquaredDissimilarity(GraphComparator):
 
 class GraphProbsymmetricDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Probabilistic symmetric Chi^2)
         The two arrays are assumed
@@ -654,7 +721,7 @@ class GraphProbsymmetricDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Probabistic symmetric Chi^2 distance
         num =  (first - second) 
@@ -667,7 +734,7 @@ class GraphProbsymmetricDissimilarity(GraphComparator):
 
 class GraphDivergenceDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic:  PDF-based dissimilarity (Divergence)
         The two arrays are assumed
@@ -677,7 +744,7 @@ class GraphDivergenceDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Divergence
         num =  (first - second) 
@@ -690,7 +757,7 @@ class GraphDivergenceDissimilarity(GraphComparator):
 
 class GraphClarkDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Clark)
         The two arrays are assumed
@@ -700,7 +767,7 @@ class GraphClarkDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Clark distance
         num =  abs(first - second) 
@@ -714,7 +781,7 @@ class GraphClarkDissimilarity(GraphComparator):
 
 class GraphAdditivesymmetricDissimilarity(GraphComparator):
 
-    def compareGraphs(self):
+    def compare_graphs(self):
         """
         Heuristic: PDF-based dissimilarity (Additive symmetric Chi^2)
         The two arrays are assumed
@@ -724,7 +791,7 @@ class GraphAdditivesymmetricDissimilarity(GraphComparator):
         """
 
         # Matrices normalization
-        first, second = self.normalizeMatrices()
+        first, second = self._normalize_matrices()
 
         # Compute the Additive symmetric Chi^2 distance
         term1 =  (first - second) 

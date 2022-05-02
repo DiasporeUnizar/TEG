@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: updated 02/04/2022
+@Date: updated 02/05/2022
 
 Input dataset:
 - Energy consumption (in kWh), every half-an-hour, registered by a smart meter.
@@ -16,7 +16,7 @@ Output:
 import os
 import pandas as pd
 import numpy as np
-from tegdet.TEG import TEG
+from tegdet.teg import TEGDetector
 
 #Input datasets/output results paths
 TRAINING_DS_PATH = "/dataset/training.csv"
@@ -43,7 +43,7 @@ def build_and_predict(metric):
     cwd = os.getcwd() 
     train_ds_path = cwd + TRAINING_DS_PATH
 
-    teg = TEG(metric)
+    teg = TEGDetector(metric)
     #Load training dataset
     train_ds = teg.get_dataset(train_ds_path)
     #Build model
