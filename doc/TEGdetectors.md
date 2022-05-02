@@ -6,7 +6,7 @@ The ```tegdet``` package includes the  modules that implements the TEG detectors
 
 The ```tegdet``` package depends on several well-known ```Python``` packages as shown in the diagram below:
 
- <img src="https://github.com/DiasporeUnizar/TEG/blob/master/doc/packageOverview_v2.png" width="700">
+ <img src="https://github.com/DiasporeUnizar/TEG/blob/master/doc/packageOverview_v2.png" width="500">
 
 Each module includes a set of classes, which are detailed in the class diagram below,
 where the colour is used to map the classes to the module they belong to:
