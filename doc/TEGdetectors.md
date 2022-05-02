@@ -31,7 +31,7 @@ The teg module includes the following classes:
 |--------------------- |--------------------------------------------------------------------------------------------------------------------------------   |
 | \_\_metric: string            | Dissimilarity metric used to compare two graphs. Input parameter.                              |
 | \_\_n_bins: int            | Level of discretization of real valued observations (number of levels). Input parameter. Default value=  \_\_N_BINS    |
-| \_\_n_obs_per_period: int  | Number of observation per period. Input parameter. Default value= \_\_N_OBS_PER_PERIOD                                            |
+| \_\_n_obs_per_period: int 	 | Number of observation per period. Input parameter. Default value= \_\_N_OBS_PER_PERIOD                                            |
 | \_\_alpha: int             |  Significance level 100-alpha. Input parameter. Default value=  \_\_ALPHA   |
 
 
@@ -63,9 +63,8 @@ The teg module includes the following classes:
 | \_\_compute_global_graph(graphs: list of Graph): Graph | Creates and returns a *global graph* as the sum of a list of ```graphs```    |
 | get_level_extractor(): Dataframe | Returns ```__le``` |
 | get_baseline(self): numpy array of float | Returns ```__baseline``` |
-| get_global_graph(): Graph  | Returns ```\_\_global_graph``` |
+| get_global_graph(): Graph  | Returns ```__global_graph``` |
 | build_model(metric: string, n_periods: int) | Computes and sets ```__global_graph``` and ```__baseline``` based on the ```metric```, number of periods ```n_periods``` and ```__obs```. 	|
-
 
 
 - ```AnomalyDetector```: it makes predictions and computes outliers
@@ -77,8 +76,8 @@ The teg module includes the following classes:
 | method                        |    description                            |
 |------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
 | \_\_init__(model: ModelBuilder) | Constructor that initializes  ```model``` with the reference ModelBuilder|
-| make_prediction(metric: string, observations: Dataframe, n_periods): numpy array of float | Makes the predictions of the ```observations```  based on the dissimilarity ```metric```, the number of periods ```n_periods``` and the reference ```\_\_model```  |
-| compute_outliers(prediction: numpy array of float, sigLevel: int): numpy array of int | Computes the outliers based on the ```prediction```,  the significance level ```sigLevel``` and the reference ```model``` (concretely, the ```\_\_baseline``` distribution) |
+| make_prediction(metric: string, observations: Dataframe, n_periods): numpy array of float | Makes the predictions of the ```observations```  based on the dissimilarity ```metric```, the number of periods ```n_periods``` and the reference ```__model```  |
+| compute_outliers(prediction: numpy array of float, sigLevel: int): numpy array of int | Computes the outliers based on the ```prediction```,  the significance level ```sigLevel``` and the reference ```model``` (concretely, the ```__baseline``` distribution) |
 
 
 
@@ -104,8 +103,8 @@ The teg module includes the following classes:
 
 | method                              |    description                            |
 |------------------------------------------------------------------------------------------------------------- |---------------------------------------------------------------------------   |
-| \_\_init__(observation_discretized: numpy array of int, n_periods: int) | Generates and sets the ```\_\_teg``` from the discretized observations ```observation_discretized``` and the number of periods ```n_periods``` |
-| get_teg(): list of Graph | Returns the generated ```\_\_teg``` |
+| \_\_init__(observation_discretized: numpy array of int, n_periods: int) | Generates and sets the ```__teg``` from the discretized observations ```observation_discretized``` and the number of periods ```n_periods``` |
+| get_teg(): list of Graph | Returns the generated ```__teg``` |
 
 
 - ```GraphDistanceCollector```: Collector of distances between graphs in a TEG and the global graph
@@ -116,7 +115,7 @@ The teg module includes the following classes:
 
 | method                              |    description                            |
 |------------------------------------------------------------------------------------------------------------- |---------------------------------------------------------------------------   |
-| \_\_init__(n_periods: int) | Constructor, sets the ```\_\_distance``` attributes as an  ```n_periods``` length empty array |
+| \_\_init__(n_periods: int) | Constructor, sets the ```__distance``` attributes as an  ```n_periods``` length empty array |
 | compute_graphs_dist(teg: list of Graph, global_graph: Graph, metric: string): numpy array of float | Computes and returns the distances  between each graph in  ```teg``` and ```global_graph``` using the dissimilarity ```metric```  |
 
 
@@ -136,11 +135,11 @@ This module includes the following classes:
 |------------------------------------------------------------- |---------------------------------------------------------------------------------------------   |
 | \_\_init__(nodes=None, nodes_freq=None, matrix=None ) 		|	Constructor that initializes the Graph attributes (possible empty graph) 	|
 | \_\_get_index(element: int): int       | Returns the index (int type) of the matrix row/column based on ```element``` |
-| get_nodes() | Returns ```\_\_nodes``` |
-| get_nodes_freq() | Returns ```\_\_nodes_freq``` |
-| get_matrix() | Returns ```\_\_matrix``` |
-| update_node_freq(pos: int, value: int) | Increments by ```value``` the ```pos``` element of ```\_\_nodes_freq``` |
-| update_matrix_entry(row: int , col: int, value: int) | Increments by ```value``` the  ```\_\_matrix``` entry in position ```row``` and ```col``` | 
+| get_nodes() | Returns ```__nodes``` |
+| get_nodes_freq() | Returns ```__nodes_freq``` |
+| get_matrix() | Returns ```__matrix``` |
+| update_node_freq(pos: int, value: int) | Increments by ```value``` the ```pos``` element of ```__nodes_freq``` |
+| update_matrix_entry(row: int , col: int, value: int) | Increments by ```value``` the  ```__matrix``` entry in position ```row``` and ```col``` | 
 | generate_graph(obs_discretized_: Dataframe)	| Generates the  ```graph``` from the discretized observations ```obs_discretized```  |
 | expand_graph(position: int, vertex: int) | Expands the graph by inserting a new node ```vertex``` in ```position```. The new added fictious node has frequency -1. The new added row and column of the adjacency matrix have -1 entries |
 
