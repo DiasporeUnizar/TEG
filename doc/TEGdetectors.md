@@ -61,10 +61,10 @@ The teg module includes the following classes:
 | \_\_init__(observations: Dataframe, n_bins: int) | Constructor that initializes the ModelBuilder based on the training dataset ```observations``` and ```n_bins``` |
 | \_\_sum_graphs(gr1: Graph, gr2: Graph)	| Adds to graph ```gr1``` the graph ```gr2```. __Pre-Condition: ```gr1``` nodes set includes the ```gr2```node set__ 	|
 | \_\_compute_global_graph(graphs: list of Graph): Graph | Creates and returns a *global graph* as the sum of a list of ```graphs```    |
-| get_level_extractor(): Dataframe | Returns ```\_\_le``` |
-| get_baseline(self): numpy array of float | Returns ```\_\_baseline``` |
+| get_level_extractor(): Dataframe | Returns ```__le``` |
+| get_baseline(self): numpy array of float | Returns ```__baseline``` |
 | get_global_graph(): Graph  | Returns ```\_\_global_graph``` |
-| build_model(metric: string, n_periods: int) | Computes and sets ```\_\_global_graph``` and ```\_\_baseline``` based on the ```metric```, number of periods ```n_periods``` and ```\_\_obs```. 	|
+| build_model(metric: string, n_periods: int) | Computes and sets ```__global_graph``` and ```__baseline``` based on the ```metric```, number of periods ```n_periods``` and ```__obs```. 	|
 
 
 
