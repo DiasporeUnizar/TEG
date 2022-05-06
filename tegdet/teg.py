@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi, Raúl Javierre
-@Date: 02/05/2022
+@Date: 06/05/2022
 
 teg module Version 2.0.0
 This modules includes the following classes:
@@ -130,46 +130,46 @@ class LevelExtractor:
     Extractor of levels, univariate time-series discretizer 
     """
 
-    def __init__(self, minValue, step, n_bins):
+    def __init__(self, min_value, step, n_bins):
         """
         Create levels [0,1,..,n_bins+2], the last two positions for the possible 
         outliers of the testing dataset (minimum than the min_train_value and maximum 
         of the max_train_value)
         """
-        self.__level = np.arange(n_bins+2)
+        self.__levels = np.arange(n_bins+2)
         self.__step = step
-        self.__minValue = minValue
+        self.__min_value = min_value
 
     def get_levels(self):
-        return self.__level
+        return self.__levels
 
     def discretize(self, observations):
         """
-        Discretization of  "observations" according to the "self.level"
+        Discretization of  "observations" according to the "self.levels"
         "observations" is a np.array (of floats)
         """
-        nObs = len(observations)  # number of observations
-        level = -1 * np.ones(nObs)  # array initialized with -1
-        level = level.astype(int)  # level is a np.array of int
+        n_obs = len(observations)  # number of observations
+        discretized_obs = -1 * np.ones(n_obs)  # array initialized with -1
+        discretized_obs = discretized_obs.astype(int)  # np.array of int
 
         # Case: "observations" (testing set) is lower than the min_train_value
         #       level position the last
-        level = np.where((observations < self.__minValue), self.__level[-1], level)
+        discretized_obs = np.where((observations < self.__min_value), self.__levels[-1], discretized_obs)
         
-        n_bins= len(self.__level)-2
+        n_bins= len(self.__levels)-2
         i = 0  # while iterator
         while i < n_bins:
-            lowerB = self.__minValue + i * self.__step
-            upperB = self.__minValue + (i + 1) * self.__step
-            level = np.where((lowerB <= observations) & (observations < upperB),
-                             self.__level[i], level)
+            lower = self.__min_value + i * self.__step
+            upper = self.__min_value + (i + 1) * self.__step
+            discretized_obs = np.where((lower <= observations) & (observations < upper),
+                             self.__levels[i], discretized_obs)
             i += 1
 
         # Case: "observations" (testing set) is greater than the max_train_value 
         # level position the penultimate      
-        level = np.where(upperB <= observations, self.__level[-2], level)
+        discretized_obs = np.where(upper <= observations, self.__levels[-2], discretized_obs)
 
-        return level
+        return discretized_obs
 
 
 class TEGGenerator:
