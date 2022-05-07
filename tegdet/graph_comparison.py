@@ -98,45 +98,49 @@ class GraphComparator(ABC):
     """ 
     Graphs comparator operator (abstract class)
     """
+    def __init__(self, first_graph, second_graph):
+        """
+        Constructor that initializes the two operands
+        """
+        self._graph1 = first_graph
+        self._graph2 = second_graph
 
     def _normalize_matrices(self):
         """
         Flatten the matrices of the two graphs and normalize them
         """
-        # Get the two matrixes and convert them into arrays
-        first = self._graph1.get_matrix().flatten()
-        second = self._graph2.get_matrix().flatten()
+        # Get the two matrices and convert them into arrays
+        edges1 = self._graph1.get_matrix().flatten()
+        edges2 = self._graph2.get_matrix().flatten()
 
         # Set -1 entries to zero
-        first = np.where((first < 0), first * 0, first)
-        second = np.where((second < 0), second * 0, second)
+        edges1 = np.where((edges1 < 0), edges1 * 0, edges1)
+        edges2 = np.where((edges2 < 0), edges2 * 0, edges2)
 
         # Normalizes the matrices (PDF)
-        first = first / (first.sum())
-        second = second / (second.sum())
+        edges1 = edges1 / (edges1.sum())
+        edges2 = edges2 / (edges2.sum())
 
-        return first, second
+        return edges1, edges2
 
-    def resize_graphs(self,first,second):
+    def resize_graphs(self):
         """
         Compare the nodes of the two graphs and possibly expand them
         """
-        self._graph1 = first
-        self._graph2 = second
 
         # Union of the nodes
-        union = np.union1d(first.get_nodes(), second.get_nodes())
+        union = np.union1d(self._graph1.get_nodes(), self._graph2.get_nodes())
 
         # Compare the node list and possibly extend the graph(s)
         for i in range(union.size):
-            nodes = first.get_nodes()
+            nodes = self._graph1.get_nodes()
             if (nodes.size > i) and (nodes[i] != union[i]) or (nodes.size <= i):
-                first.expand_graph(i, union[i])
+                self._graph1.expand_graph(i, union[i])
 
         for i in range(union.size):
-            nodes = second.get_nodes()
+            nodes = self._graph2.get_nodes()
             if (nodes.size > i) and (nodes[i] != union[i]) or (nodes.size <= i):
-                second.expand_graph(i, union[i])
+                self._graph2.expand_graph(i, union[i])
 
     @abstractmethod
     def compare_graphs(self):  # signature only because it is overriden

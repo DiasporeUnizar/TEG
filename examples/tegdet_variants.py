@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: updated 02/05/2022
+@Date: updated 07/05/2022
 
 Input dataset:
 - Energy consumption (in kWh), every half-an-hour, registered by a smart meter.
@@ -41,30 +41,30 @@ alpha = 5
 
 def build_and_predict(metric):
     cwd = os.getcwd() 
-    train_ds_path = cwd + TRAINING_DS_PATH
+    train_path = cwd + TRAINING_DS_PATH
 
-    teg = TEGDetector(metric)
+    tegd = TEGDetector(metric)
     #Load training dataset
-    train_ds = teg.get_dataset(train_ds_path)
+    train = tegd.get_dataset(train_path)
     #Build model
-    model, time2build = teg.build_model(train_ds)
+    model, time2build = tegd.build_model(train)
 
     for testing in list_of_testing:
 
         #Path of the testing
-        test_ds_path = cwd + TEST_DS_PATH + testing + ".csv"               
+        test_path = cwd + TEST_DS_PATH + testing + ".csv"               
         #Load testing dataset
-        test_ds = teg.get_dataset(test_ds_path)
+        test = tegd.get_dataset(test_path)
         #Make prediction
-        outliers, obs, time2predict = teg.predict(test_ds, model)
+        outliers, n_periods, time2predict = tegd.predict(test, model)
         #Set ground true values
         if testing == "anomalous":
-            groundtrue = np.ones(obs)        
+            ground_true = np.ones(n_periods)        
         else:
-            groundtrue = np.zeros(obs)
+            ground_true = np.zeros(n_periods)
 
         #Compute confusion matrix
-        cm = teg.compute_confusion_matrix(groundtrue, outliers)
+        cm = tegd.compute_confusion_matrix(ground_true, outliers)
 
         #Collect detector configuration
         detector = {'metric': metric, 'n_bins': n_bins, 'n_obs_per_period':n_obs_per_period, 'alpha': alpha}
@@ -72,9 +72,9 @@ def build_and_predict(metric):
         perf = {'tmc': time2build, 'tmp': time2predict}
 
         #Print and store basic metrics
-        teg.print_metrics(detector, testing, perf, cm)
+        tegd.print_metrics(detector, testing, perf, cm)
         results_path = cwd + RESULTS_PATH
-        teg.metrics_to_csv(detector, testing, perf, cm, results_path)
+        tegd.metrics_to_csv(detector, testing, perf, cm, results_path)
         
 if __name__ == '__main__':
 
