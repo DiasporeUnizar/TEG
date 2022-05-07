@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: 02/05/2022
+@Date: 07/05/2022
 
 graph_comparison module Version 2.0.0
 
@@ -13,6 +13,7 @@ given measure
 
 import numpy as np
 
+from abc import ABC, abstractmethod
 from math import sqrt
 from scipy.stats import entropy #it is used to compute the KLD measure
 from scipy.spatial import distance #it is used to compute several distances
@@ -93,20 +94,11 @@ class Graph:
         self.__matrix = np.insert(self.__matrix, position, wildcard, axis=0)
 
 
-class GraphComparator:
+class GraphComparator(ABC):
     """ 
-    Graphs comparator operator
+    Graphs comparator operator (abstract class)
     """
 
-    def __init__(self,gr1,gr2):
-        """
-        Constructor that initializes the two operands (graphs)
-        """
-        # First operand
-        self._graph1 = gr1
-        # Second operand
-        self._graph2 = gr2
- 
     def _normalize_matrices(self):
         """
         Flatten the matrices of the two graphs and normalize them
@@ -125,12 +117,12 @@ class GraphComparator:
 
         return first, second
 
-    def resize_graphs(self):
+    def resize_graphs(self,first,second):
         """
         Compare the nodes of the two graphs and possibly expand them
         """
-        first = self._graph1
-        second = self._graph2
+        self._graph1 = first
+        self._graph2 = second
 
         # Union of the nodes
         union = np.union1d(first.get_nodes(), second.get_nodes())
@@ -146,12 +138,10 @@ class GraphComparator:
             if (nodes.size > i) and (nodes[i] != union[i]) or (nodes.size <= i):
                 second.expand_graph(i, union[i])
 
-
+    @abstractmethod
     def compare_graphs(self):  # signature only because it is overriden
-        return 0
+        pass
 
-
-# Strategy pattern (variant)
 
 
 #######################################################################

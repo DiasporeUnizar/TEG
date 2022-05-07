@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi, Raúl Javierre
-@Date: 06/05/2022
+@Date: 07/05/2022
 
 teg module Version 2.0.0
 This modules includes the following classes:
@@ -213,13 +213,14 @@ class GraphDistanceCollector:
         using the dissimilarity "metric"
         """
         
-        graph_comparator_metric = "Graph" + metric + "Dissimilarity"
+        gc_name = "Graph" + metric + "Dissimilarity"
+
         for period in range(self.__distance.size):
-            gc = GraphComparator(teg[period], global_graph)
+            #Create an instance of the metric specific graph comparator
+            #by converting a string to a class object
+            gc = getattr(sys.modules[__name__], gc_name)()
             #Graph resizing
-            gc.resize_graphs()
-            #Convert a string to a class object
-            gc.__class__ = getattr(sys.modules[__name__], graph_comparator_metric) 
+            gc.resize_graphs(teg[period], global_graph)
             #Compute the difference based on the metric
             self.__distance[period] = gc.compare_graphs()
         
