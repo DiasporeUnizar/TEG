@@ -30,7 +30,7 @@ The teg module includes the following classes:
 |--------------------- |--------------------------------------------------------------------------------------------------------------------------------   |
 | \_\_metric: string            | Dissimilarity metric used to compare two graphs. Input parameter.                              |
 | \_\_n_bins: int            | Level of discretization of real valued observations (number of levels). Input parameter. Default value=  \_\_N_BINS    |
-| \_\_n_obs_per_period: int 	 | Number of observation per period. Input parameter. Default value= \_\_N_OBS_PER_PERIOD                                            |
+| \_\_n_obs_per_period: int 	    | Number of observation per period. Input parameter. Default value= \_\_N_OBS_PER_PERIOD                                            |
 | \_\_alpha: int             |  Significance level 100-alpha. Input parameter. Default value=  \_\_ALPHA   |
 
 
@@ -61,7 +61,7 @@ The teg module includes the following classes:
 | \_\_sum_graphs(gr1: Graph, gr2: Graph)	| Adds to graph ```gr1``` the graph ```gr2```. __Pre-Condition: ```gr1``` nodes set includes the ```gr2```node set__ 	|
 | \_\_compute_global_graph(graphs: list of Graph): Graph | Creates and returns a *global graph* as the sum of a list of ```graphs```    |
 | get_level_extractor(): Dataframe | Returns ```__le``` |
-| get_baseline(self): numpy array of float | Returns ```__baseline``` |
+| get_baseline(): numpy array of float | Returns ```__baseline``` |
 | get_global_graph(): Graph  | Returns ```__global_graph``` |
 | build_model(metric: string, n_periods: int) | Computes and sets ```__global_graph``` and ```__baseline``` based on the ```metric```, number of periods ```n_periods``` and ```__obs```. 	|
 
