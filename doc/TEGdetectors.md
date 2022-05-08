@@ -11,9 +11,8 @@ The ```tegdet``` package depends on several well-known ```Python``` packages as 
 Each module includes a set of classes, which are detailed in the class diagram below,
 where the colour is used to map the classes to the module they belong to:
 
- <img src="https://github.com/DiasporeUnizar/TEG/blob/master/doc/tegdet.png" width="1000">
+ <img src="https://github.com/DiasporeUnizar/TEG/blob/master/doc/tegdetCD_v2.png" width="1000">
 
-(FIGURE TO BE UPDATED)
 
 ## teg module
 The teg module includes the following classes:
@@ -23,7 +22,7 @@ The teg module includes the following classes:
 | attributes  (class)       | description                                                                                       |
 |---------------------- |------------------------------------------------------------------------------------------------   |
 | \_\_N_BINS: int            | Level of discretization of real valued observations (number of levels). Value=30.     |
-| \_\_N_OBS_PER_PERIOD: int  | Number of observations per period. Value=336    |
+| \_\_N_OBS_PER_PERIOD: int   | Number of observations per period. Value=336    |
 | \_\_ALPHA: int             | Significance level 100-_ALPHA. Value=5.      |
 
 
