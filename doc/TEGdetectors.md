@@ -163,3 +163,16 @@ The rest of the classes are subclasses of ```GraphComparator``` that override th
 - The rest of the metrics are computed considering two vectors *P* and *Q* obtained by normalizing the incidence matrices of the two graphs.
 
   <img src="https://github.com/DiasporeUnizar/TEG/blob/master/doc/metricsTable.png" width="700">
+  
+  
+  
+## User script scenarios  
+The following sequence diagrams show two scenarios where a ```userScript``` uses the API of the ```tegdet``` library 1) to build a model from a training set; and 2) to make predictions with the model on a testing set and print the metrics of interest (confusion matrix and times to build & make predictions).
+
+### Model building scenario
+
+  <img src="https://github.com/DiasporeUnizar/TEG/blob/master/doc/modelConstruction_v2.png" width="1000">
+  
+### Anomaly detection and metric printing scenario
+
+  <img src="https://github.com/DiasporeUnizar/TEG/blob/master/doc/anomalyDetection_v2.png" width="1000">
