@@ -1,5 +1,5 @@
-# TEG Library 
-This repository includes the TEG library that has been created from the implementation of the TEG detectors.
+# ```tegdet``` Library 
+This repository includes the implementation of the TEG detectors packaged in the ```tegdet``` library.
 
 ## Structure of the repository
 The core structure is the following:
