@@ -51,7 +51,7 @@ The scripts can be run using the following command from the root directory of th
 The ```test``` folder  includes the test script ```test_detector_comparer_TEG.py``` that is used during debugging to check the correctness of the library. 
 
 ## Reference
-The creation of the library and the structure of the repository follows this  [guide](https://medium.com/analytics-vidhya/how-to-create-a-python-library-7d5aea80cc3f).
+
 
 
 
