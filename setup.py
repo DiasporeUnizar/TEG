@@ -6,7 +6,7 @@ setup(
     version='2.0.0',
     description='Time Evolving Graph detectors library',
     author='Diaspore team',
-    license='MIT',
+    license='GPL-2',
     install_requires=[
         'numpy>=1.14.5',
         'pandas>=1.1',
