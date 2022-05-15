@@ -8,11 +8,11 @@ setup(
     author='Diaspore team',
     license='MIT',
     install_requires=[
-        'numpy>=1.22',
-        'pandas>=1.4',
-        'scipy>=1.8'
+        'numpy>=1.14.5',
+        'pandas>=1.1',
+        'scipy>=1.5'
     ],
-    python_requires='>=3.10',
+    python_requires='>=3.6.1',
     setup_requires=['pytest-runner'],
     tests_require=['pytest>=6.2.2'],
     test_suite='test',

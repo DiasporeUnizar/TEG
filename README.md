@@ -5,7 +5,7 @@ This repository includes the implementation of the TEG detectors packaged in the
 The core structure is the following:
 - *dataset*: includes the dataset used in the library test and the usage examples
 - *dist*: contains  ```.whl``` files, i.e., package saved in the ```Wheel``` format (the standard built-package format used for Python distributions). 
-The last version of the TEG library can be directly installed   using ```pip install tegdet-2.0.0-py3-none-any.whl``` 
+The last version of the TEG library can be directly installed   using ```pip3 install tegdet-2.0.0-py3-none-any.whl``` 
 - *doc*: includes library documentation
 - *examples*: includes scripts that use the API of the library and post-process the results
 - *script_results*: includes all the result files from the test script and usage examples in ```csv``` format
@@ -25,7 +25,7 @@ It depends on the Python packages listed in the ```requirements.txt``` file whic
 
 The library is local to this repository (not published yet in the official PyPI repository) and can be installed using the command:
 
-```$ pip install dist/tegdet-2.0.0-py3-none-any.whl```
+```$ pip3 install dist/tegdet-2.0.0-py3-none-any.whl```
 
 
 ## User scripts
@@ -41,7 +41,7 @@ and produce a result file ```<name_of_the_script>_results.csv``` (with comma-sep
 The third one, relies on the files in the ```dataset``` folder and in the ```script_results``` folder to produce reports (comparison of the testing datasets, performance and  accuracy of the TEG-detectors).
 Since the script generates 3D plots, it is necessary to install the ```matplotlib``` package before running it:
 
-```$ pip install matplotlib```
+```$ pip3 install matplotlib```
 
 The scripts can be run using the following command from the root directory of this repository:
 
