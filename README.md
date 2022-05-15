@@ -21,7 +21,7 @@ The last version of the TEG library can be directly installed   using ```pip3 in
 The library can be used with ```Python_v3```.
 It depends on the Python packages listed in the ```requirements.txt``` file which need to be installed using the command:
 
-```$ pip install -r requirements.txt```
+```$ pip3 install -r requirements.txt```
 
 The library is local to this repository (not published yet in the official PyPI repository) and can be installed using the command:
 
