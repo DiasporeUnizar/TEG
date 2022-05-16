@@ -1,11 +1,14 @@
 # ```tegdet``` Library 
-The library includes the implementation of Time-Evolving-Graph detectors.
+A Time-Evolving-Graph (TEG) is a sequence of graphs generated from an univariate time series.
+
+The ```tegdet``` library includes a set anomaly detectors which rely on TEGs both for the generation of the *prediction model*, 
+from a *training dataset*, and for the prediction of ouliers, from  *testing datasets*.
+
 
 ## Structure of the repository
 The core structure is the following:
 - *dataset*: includes the dataset used in the library test and the usage examples
-- *dist*: contains  ```.whl``` files, i.e., package saved in the ```Wheel``` format (the standard built-package format used for Python distributions). 
-The last version of the TEG library can be directly installed   using ```pip3 install tegdet-2.0.0-py3-none-any.whl``` 
+- *dist*: contains the library distributions (in ```Wheel``` format and zipped ```tar.gz```). 
 - *doc*: includes library documentation
 - *examples*: includes scripts that use the API of the library and post-process the results
 - *script_results*: includes all the result files from the test script and usage examples in ```csv``` format
@@ -14,16 +17,16 @@ The last version of the TEG library can be directly installed   using ```pip3 in
 - *.gitignore*
 - *LICENSE*
 - *README.md*
-- *requirements.txt*: includes the ```Python``` required packages
+- *requirements.txt*: includes the ```Python3``` required packages 
 - *setup.py*:  this file contains all the package metadata information. 
  
 ## How to install the library
-The library can be used with ```Python_v3```.
-It depends on the Python packages listed in the ```requirements.txt``` file which need to be installed using the command:
+The library can be used with ```Python3```.
+The library can be installed using the command:
 
-```$ pip3 install -r requirements.txt```
+```$ pip3 install -i ``` (TO BE UPDATED) 
 
-The library is local to this repository (not published yet in the official PyPI repository) and can be installed using the command:
+In case you download this repository, you can install the library using the command:
 
 ```$ pip3 install dist/tegdet-2.0.0-py3-none-any.whl```
 
@@ -51,7 +54,5 @@ The scripts can be run using the following command from the root directory of th
 The ```test``` folder  includes the test script ```test_detector_comparer_TEG.py``` that is used during debugging to check the correctness of the library. 
 
 ## Reference
-
-
-
-
+''*tegdet*: A Python Library for Anomaly Detection using Time-Evolving Graphs'', submitted to the Journal of Statistical Software.
+(TO BE UPDATED)
