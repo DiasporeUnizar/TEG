@@ -1,11 +1,16 @@
 from setuptools import find_packages, setup
 
+#Read the contents of the README file
+#from pathlib import Path
+#this_directory = Path(__file__).parent
+#long_description = (this_directory / "README.md").read_text()
+
 setup(
     name='tegdet',
     packages=find_packages(include=['tegdet']),
     version='2.0.0',
     description='Time Evolving Graph detectors library',
-    long_description="README.md",
+    long_description="The library includes the implementation of Time-Evolving-Graph detectors.",
     long_description_content_type="text/markdown",
     url="https://github.com/DiasporeUnizar/TEG",
     author='Diaspore team',

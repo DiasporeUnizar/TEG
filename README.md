@@ -1,5 +1,5 @@
 # ```tegdet``` Library 
-This repository includes the implementation of the TEG detectors packaged in the ```tegdet``` library.
+The library includes the implementation of Time-Evolving-Graph detectors.
 
 ## Structure of the repository
 The core structure is the following:
