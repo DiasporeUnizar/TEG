@@ -16,7 +16,8 @@ The core structure is the following:
 - *test*: includes the test module (used to build and test the library)
 - *.gitignore*
 - *LICENSE*
-- *README.md*
+- *README.md*: this text 
+- *README.txt*: short readme
 - *requirements.txt*: includes the ```Python3``` required packages 
 - *setup.py*:  this file contains all the package metadata information. 
  
