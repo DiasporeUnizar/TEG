@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: 07/05/2022
+@Date: 31/05/2022
 
 graph_comparison module Version 2.0.0
 
@@ -159,7 +159,7 @@ class GraphHammingDissimilarity(GraphComparator):
         The two matrix arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Get just the matrices and convert into arrays
@@ -195,7 +195,7 @@ class GraphCosineDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Convert into arrays the node frequencies and matrices
@@ -229,7 +229,7 @@ class GraphJaccardDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
         # Matrices normalization
         first, second = self._normalize_matrices()
@@ -250,7 +250,7 @@ class GraphDiceDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
         # Matrices normalization
         first, second = self._normalize_matrices()
@@ -275,7 +275,7 @@ class GraphKLDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
         # Matrices normalization
         first, second = self._normalize_matrices()
@@ -293,7 +293,7 @@ class GraphJeffreysDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
         # Matrices normalization
         first, second = self._normalize_matrices()
@@ -319,7 +319,7 @@ class GraphJSDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
         # Matrices normalization
         first, second = self._normalize_matrices()
@@ -340,7 +340,7 @@ class GraphEuclideanDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -359,7 +359,7 @@ class GraphCityblockDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -378,7 +378,7 @@ class GraphChebyshevDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -397,7 +397,7 @@ class GraphMinkowskiDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -419,7 +419,7 @@ class GraphBraycurtisDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-        graph normalization has to be done before!
+        graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -438,7 +438,7 @@ class GraphGowerDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -457,7 +457,7 @@ class GraphSoergelDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -477,7 +477,7 @@ class GraphKulczynskiDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -505,7 +505,7 @@ class GraphCanberraDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -524,7 +524,7 @@ class GraphLorentzianDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -546,7 +546,7 @@ class GraphBhattacharyyaDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -572,7 +572,7 @@ class GraphHellingerDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -591,7 +591,7 @@ class GraphMatusitaDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -610,7 +610,7 @@ class GraphSquaredchordDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -633,7 +633,7 @@ class GraphPearsonDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -661,7 +661,7 @@ class GraphNeymanDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -688,7 +688,7 @@ class GraphSquaredDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -711,7 +711,7 @@ class GraphProbsymmetricDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -734,7 +734,7 @@ class GraphDivergenceDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -757,7 +757,7 @@ class GraphClarkDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
@@ -781,7 +781,7 @@ class GraphAdditivesymmetricDissimilarity(GraphComparator):
         The two arrays are assumed
         --  of the same length (minimum of the length is chosen)
         --  corresponding to the same ordered set of nodes:
-            graph normalization has to be done before!
+            graph resizing has to be done before!
         """
 
         # Matrices normalization
