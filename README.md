@@ -24,7 +24,7 @@ The core structure is the following:
 ## How to install the library
 
 The library can be used with ```Python3``` (version >=3.6.1).
-The library can be easily installed from the PyPi repository using the command:
+The library can be easily installed from the [PyPi](https://pypi.org/project/tegdet/) repository using the command:
 
 ```$ pip3 install tegdet``` 
 
