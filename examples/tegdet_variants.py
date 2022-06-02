@@ -1,12 +1,12 @@
 """
 @Author: Simona Bernardi
-@Date: updated 07/05/2022
+@Date: updated 02/06/2022
 
 Input dataset:
 - Energy consumption (in kWh), every half-an-hour, registered by a smart meter.
 - The training set is over 60 weeks and the two testing sets are over 15 weeks
 The script:
-- Builds a prediction model for a subset of dissimilarity metric (TEG-detectors variants)
+- Builds a prediction model for the set of dissimilarity metric (TEG-detectors variants)
 - Makes predictions with the two testing sets and
 - Compute the confusion matrix and performance metrics 
 Output:

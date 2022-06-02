@@ -7,7 +7,7 @@ with open("README.txt", "r") as fh:
 setup(
     name='tegdet',
     packages=find_packages(include=['tegdet']),
-    version='2.0.0',
+    version='1.0.0',
     description='Time Evolving Graph detectors library',
     long_description=long_description,
     long_description_content_type="text/x-rst",
@@ -24,11 +24,6 @@ setup(
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Operating System :: OS Independent"
-    ],
-    install_requires=[
-        'numpy>=1.14.5',
-        'pandas>=1.1',
-        'scipy>=1.5'
     ],
     python_requires='>=3.6.1',
     setup_requires=['pytest-runner'],
