@@ -62,5 +62,3 @@ The scripts can be run using the following command from the root directory of th
 ## Test script
 The ```test``` folder  includes the test script ```test_detector_comparer_TEG.py``` that is used during debugging to check the correctness of the library. 
 
-## Reference
-''*tegdet*: A Python Library for Anomaly Detection using Time-Evolving Graphs'', technical report
