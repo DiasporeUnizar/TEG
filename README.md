@@ -22,22 +22,22 @@ The core structure is the following:
 - *setup.py*:  this file contains all the package metadata information. 
  
 ## How to install the library
-
 The library can be used with ```Python3``` (version >=3.6.1).
-The library can be easily installed from the [PyPi](https://pypi.org/project/tegdet/) repository using the command:
-
-```$ pip3 install tegdet``` 
-
-In case you download this repository, you can install the library using the command:
-
-```$ pip3 install dist/tegdet-1.0.0-py3-none-any.whl```
 
 Since the library depends on the ```pandas```, ```numpy``` and ```scipy```  Python packages, these 
 should be installed before using the library.
 
-The library dependencies are also listed in the ```requirements.txt``` and  all the necessary packages  can be installed using the command:
+The library dependencies are also listed in the ```requirements.txt``` and  all the necessary packages can be installed using the command:
 
 ```$ pip3 install -r requirements.txt```
+
+The library can be easily installed from the [PyPi](https://pypi.org/project/tegdet/) repository using the command:
+
+```$ pip3 install tegdet``` 
+
+In case you clone (or download) this repository, you can install the library using the command:
+
+```$ pip3 install dist/tegdet-1.0.0-py3-none-any.whl```
 
 
 ## User scripts
