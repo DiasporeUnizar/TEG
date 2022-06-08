@@ -31,6 +31,7 @@ RESULTS_PATH = "/script_results/tegdet_params_sensitivity_results.csv"
 list_of_testing = ("normal", "anomalous")
 
 #List of metrics (detector variants)
+#Uncomment these lines to carry out an exhaustive analysis over all the available dissimilarity metrics
 list_of_metrics =   ["Hamming", "Clark" #, "Canberra", "Lorentzian", "Kulczynski", "Divergence", "Cosine"
                      #"Jaccard", "Dice", "KL", "Jeffreys", "JS", "Euclidean", "Cityblock", 
                      #"Chebyshev", "Minkowski", "Braycurtis", "Gower", "Soergel", "Bhattacharyya", "Hellinger", 
