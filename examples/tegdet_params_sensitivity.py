@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: updated 02/05/2022
+@Date: updated 08/06/2022
 
 Input dataset:
 - Energy consumption (in kWh), every half-an-hour, registered by a smart meter.
