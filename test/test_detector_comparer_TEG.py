@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: updated 02/05/2022
+@Date: updated 15/10/2022
 
 Input dataset:
 - energy consumption (in KhW), every half-an-hour, registered by a smartmeter.
@@ -27,10 +27,10 @@ from tegdet.teg import TEGDetector
 
 
 #Input datasets/output results Paths
-TRAINING_DS_PATH = "/dataset/training.csv"
-TEST_DS_PATH = "/dataset/test_"
-RESULTS_PATH = "/script_results/test_detector_comparer_TEG_results.csv"
-REFERENCE_PATH = "/script_results/reference_results.csv"
+TRAINING_DS_PATH = "/dataset/energy/training.csv"
+TEST_DS_PATH = "/dataset/energy/test_"
+RESULTS_PATH = "/script_results/energy/test_detector_comparer_TEG_results.csv"
+REFERENCE_PATH = "/script_results/energy/reference_results.csv"
 
 #List of testing
 list_of_testing = ("normal", "anomalous")
