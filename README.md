@@ -7,7 +7,7 @@ from a *training dataset*, and for the prediction of ouliers, from  *testing dat
 
 ## Structure of the repository
 The core structure is the following:
-- *dataset*: includes the dataset used in the library test and the usage examples
+- *dataset*: includes the datasets used in the library test and the usage examples
 - *dist*: contains the library distributions (in ```Wheel``` format and zipped ```tar.gz```). 
 - *doc*: includes library documentation
 - *examples*: includes scripts that use the API of the library and post-process the results
@@ -41,23 +41,28 @@ In case you clone (or download) this repository, you can install the library usi
 
 
 ## User scripts
-The ```example``` folder includes the following scripts:
+The ```example``` folder includes different examples (one per sub-folder) with some scripts. In particular:
  
 - *tegdet_variants.py*
 - *tegdet_params_sensitivity.py*: 
 - *post_processing.py*
 
-The first two scripts are examples of usage of the library APIs, they both rely on the dataset files in ```dataset``` folder, 
-and produce a result file ```<name_of_the_script>_results.csv``` (with comma-separated values format) in the ```script_results``` folder.
+The first two scripts are examples of usage of the library APIs, they both rely on the dataset files in ```dataset/<example>``` sub-folder, 
+and produce a result file ```<name_of_the_script>_results.csv``` (with comma-separated values format) in the ```script_results/<example>``` sub-folder.
 
-The third one, relies on the files in the ```dataset``` folder and in the ```script_results``` folder to produce reports (comparison of the testing datasets, performance and  accuracy of the TEG-detectors).
-Since the script generates 3D plots, it is necessary to install the ```matplotlib``` package before running it:
+The third one, relies on the files in the ```dataset/<example>```  sub-folder and in the ```script_results/<example>``` sub-folder 
+to produce reports (comparison of the testing datasets, performance and  accuracy of the TEG-detectors).
+Since some of the scripts generate 3D plots, it is necessary to install the ```matplotlib``` package before running it:
 
 ```$ pip3 install matplotlib```
 
 The scripts can be run using the following command from the root directory of this repository:
 
-```$ python3 examples/<name_of_the_script>.py```
+```$ python3 examples/<sub-folder>/<name_of_the_script>.py```
+
+Before running the scripts, remember to set the ```PYTHONPATH''' environment variable to the root directory of the ```tegdet``` project:
+
+```export PYTHONPATH="/my_tegdet_directory"
 
 ## Test script
 The ```test``` folder  includes the test script ```test_detector_comparer_TEG.py``` that is used during debugging to check the correctness of the library. 
