@@ -60,9 +60,9 @@ The scripts can be run using the following command from the root directory of th
 
 ```$ python3 examples/<sub-folder>/<name_of_the_script>.py```
 
-Before running the scripts, remember to set the ```PYTHONPATH''' environment variable to the root directory of the ```tegdet``` project:
+Before running the scripts, remember to set the ```PYTHONPATH``` environment variable to the root directory of the ```tegdet``` project:
 
-```export PYTHONPATH="/my_tegdet_directory"
+```export PYTHONPATH="/my_tegdet_directory"```
 
 ## Test script
 The ```test``` folder  includes the test script ```test_detector_comparer_TEG.py``` that is used during debugging to check the correctness of the library. 
