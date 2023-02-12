@@ -78,6 +78,7 @@ class Graph:
             col = self.__get_index(attr[i + 1])
             self.__matrix[row][col] += 1
 
+
     def expand_graph(self, position, vertex):
         """
         Expands the graph by inserting a new node "vertex" in "position". The new added fictious node

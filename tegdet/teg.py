@@ -1,8 +1,8 @@
 """
 @Author: Simona Bernardi, Raúl Javierre
-@Date: 07/05/2022
+@Date: 10/03/2023
 
-teg module Version 2.0.0
+teg module Version 2.0.1
 This modules includes the following classes:
 
 - TEGDetector (API class)
@@ -13,6 +13,8 @@ This modules includes the following classes:
 - AnomalyDetector
 
 that implements the detectors based on Time Evolving Graph (TEG) and graph dissimilarity distribution.
+
+---> added private attribute tegg to ModelBuilder
 
 """
 
@@ -48,6 +50,7 @@ class TEGDetector():
         df = pd.read_csv(ds_path)
         df.columns = ['TS','DP']
         return df
+
 
     def build_model(self, training_dataset):
         """
@@ -241,6 +244,7 @@ class ModelBuilder:
         step = (M - m) / n_bins  # usage increment step
         self.__obs = observations
         self.__le = LevelExtractor(m, step, n_bins)
+        self.__tegg = None
         self.__baseline = None
         self.__global_graph= None
 
@@ -252,6 +256,9 @@ class ModelBuilder:
 
     def get_global_graph(self):
         return self.__global_graph
+
+    def get_tegg(self):
+        return self.__tegg
 
     def __sum_graphs(self, gr1, gr2):
         """
@@ -290,8 +297,8 @@ class ModelBuilder:
         obs_discretized = self.__le.discretize(self.__obs)
 
         # Get the time-evolving graphs
-        tegg = TEGGenerator(obs_discretized, n_periods)
-        graphs = tegg.get_teg()
+        self.__tegg = TEGGenerator(obs_discretized, n_periods)
+        graphs = self.__tegg.get_teg()
 
         # Get the global graph of the training period
         self.__compute_global_graph(graphs)
