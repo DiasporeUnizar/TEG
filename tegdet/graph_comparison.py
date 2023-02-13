@@ -1,13 +1,15 @@
 """
 @Author: Simona Bernardi
-@Date: 31/05/2022
+@Date: 13/02/2023
 
-graph_comparison module Version 2.0.0
+graph_comparison module Version 2.0.1
 
 - Graph class enables to generate a causal graph (node frequency list, adjacency-frequency matrix)
 from the dataset
 - GraphComparator and sub-classes enable to compare two graphs and compute the "difference" between them according to a 
 given measure
+
+--> Graph expansion: changed wildcard from -1 to 0 
 
 """
 
@@ -82,10 +84,10 @@ class Graph:
     def expand_graph(self, position, vertex):
         """
         Expands the graph by inserting a new node "vertex" in "position". The new added fictious node
-        has frequency -1. The new added row and column of the adjacency matrix have -1 entries
+        has frequency 0. The new added row and column of the adjacency matrix have 0 entries
         """
         # Different from zero to differentiate from the absence of arc, but presence of the node
-        wildcard = '-1'
+        wildcard = '0'
         # Insert the new vertex in the list of nodes
         self.__nodes = np.insert(self.__nodes, position, vertex)
         self.__nodes_freq = np.insert(self.__nodes_freq, position, wildcard)
