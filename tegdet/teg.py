@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi, Raúl Javierre
-@Date: 10/03/2023
+@Date: 14/03/2023
 
 teg module Version 2.0.1
 This modules includes the following classes:
@@ -14,8 +14,8 @@ This modules includes the following classes:
 
 that implements the detectors based on Time Evolving Graph (TEG) and graph dissimilarity distribution.
 
----> added private attribute tegg to ModelBuilder
-
+---> added private attribute tegg to ModelBuilder and AnomalyDetector
+---> added private attribute ad to TEGDetector
 """
 
 from time import time
@@ -41,7 +41,11 @@ class TEGDetector():
         self.__n_bins = n_bins
         self.__n_obs_per_period= n_obs_per_period
         self.__alpha = alpha
+        self.__ad = None
 
+    def get_ad(self):
+        return self.__ad
+    
     def get_dataset(self,ds_path):
         """
         Load the dataset from "ds_path" (csv file), rename the two columns as TS (timestamp) and 
@@ -71,9 +75,9 @@ class TEGDetector():
         """
         t0 = time()
         data_points = testing_dataset['DP']
-        ad = AnomalyDetector(model)
-        test = ad.make_prediction(self.__metric, data_points, int(len(testing_dataset.index) / self.__n_obs_per_period))
-        outliers = ad.compute_outliers(test, 100 - self.__alpha)
+        self.__ad = AnomalyDetector(model)
+        test = self.__ad.make_prediction(self.__metric, data_points, int(len(testing_dataset.index) / self.__n_obs_per_period))
+        outliers = self.__ad.compute_outliers(test, 100 - self.__alpha)
 
         return outliers, int(len(testing_dataset.index) / self.__n_obs_per_period), time() - t0
         
@@ -316,6 +320,10 @@ class AnomalyDetector:
     def __init__(self, model):
 
         self.__model = model
+        self.__tegg = None
+
+    def get_tegg(self):
+        return self.__tegg
 
     def make_prediction(self, metric, observations, n_periods):
         """
@@ -327,8 +335,8 @@ class AnomalyDetector:
         obs_discretized = self.__model.get_level_extractor().discretize(observations)
 
         # Generates the time-evolving graphs
-        tegg = TEGGenerator(obs_discretized, n_periods)
-        graphs = tegg.get_teg()
+        self.__tegg = TEGGenerator(obs_discretized, n_periods)
+        graphs = self.__tegg.get_teg()
  
         # Computes the distance between each graph and the global graph        
         global_graph = self.__model.get_global_graph()
