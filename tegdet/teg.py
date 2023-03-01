@@ -1,8 +1,8 @@
 """
 @Author: Simona Bernardi, Raúl Javierre
-@Date: 14/03/2023
+@Date: 1/03/2023
 
-teg module Version 2.0.1
+teg module 
 This modules includes the following classes:
 
 - TEGDetector (API class)
@@ -14,8 +14,9 @@ This modules includes the following classes:
 
 that implements the detectors based on Time Evolving Graph (TEG) and graph dissimilarity distribution.
 
+v1.0.1:
 ---> added private attribute tegg to ModelBuilder and AnomalyDetector
----> added private attribute ad to TEGDetector
+---> added private attributes mb and ad to TEGDetector
 """
 
 from time import time
@@ -41,7 +42,11 @@ class TEGDetector():
         self.__n_bins = n_bins
         self.__n_obs_per_period= n_obs_per_period
         self.__alpha = alpha
+        self.__mb = None
         self.__ad = None
+
+    def get_md(self):
+        return self.__mb;
 
     def get_ad(self):
         return self.__ad
@@ -63,10 +68,10 @@ class TEGDetector():
         """
         t0 = time()
         obs = training_dataset['DP']
-        mb = ModelBuilder(obs, self.__n_bins)
-        mb.build_model(self.__metric, int(len(training_dataset.index) / self.__n_obs_per_period))
+        self.__mb = ModelBuilder(obs, self.__n_bins)
+        self.__mb.build_model(self.__metric, int(len(training_dataset.index) / self.__n_obs_per_period))
 
-        return mb, time() - t0
+        return self.__mb, time() - t0
 
     def predict(self, testing_dataset, model):
         """

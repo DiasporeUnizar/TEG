@@ -1,15 +1,14 @@
 """
 @Author: Simona Bernardi
-@Date: 13/02/2023
+@Date: 1/03/2023
 
-graph_comparison module Version 2.0.1
+graph_comparison module 
 
-- Graph class enables to generate a causal graph (node frequency list, adjacency-frequency matrix)
-from the dataset
+- Graph class enables to generate a causal graph (node frequency list, adjacency-frequency matrix) from the dataset
 - GraphComparator and sub-classes enable to compare two graphs and compute the "difference" between them according to a 
 given measure
 
---> Graph expansion: changed wildcard from -1 to 0 
+--> v1.0.1: Graph expansion: changed wildcard from -1 to 0 
 
 """
 
@@ -117,8 +116,8 @@ class GraphComparator(ABC):
         edges2 = self._graph2.get_matrix().flatten()
 
         # Set -1 entries to zero
-        edges1 = np.where((edges1 < 0), edges1 * 0, edges1)
-        edges2 = np.where((edges2 < 0), edges2 * 0, edges2)
+        #edges1 = np.where((edges1 < 0), edges1 * 0, edges1)
+        #edges2 = np.where((edges2 < 0), edges2 * 0, edges2)
 
         # Normalizes the matrices (PDF)
         edges1 = edges1 / (edges1.sum())
