@@ -67,3 +67,9 @@ Before running the scripts, remember to set the ```PYTHONPATH``` environment var
 ## Test script
 The ```test``` folder  includes the test script ```test_detector_comparer_TEG.py``` that is used during debugging to check the correctness of the library. 
 
+## References
+S. Bernardi, R. Javierre, J. Merseguer, *tegdet: An extensible Python library for anomaly detection using time evolving graphs*, SoftwareX, 2023 
+(available online soon).
+
+S. Bernardi, J. Merseguer, R. Javierre, *tegdet: An extensible Python Library for Anomaly Detection using Time-Evolving Graphs*, 
+[CoRR abs/2210.08847 (2022)](https://arxiv.org/abs/2210.08847).
