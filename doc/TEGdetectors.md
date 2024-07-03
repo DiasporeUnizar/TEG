@@ -162,7 +162,9 @@ The rest of the classes are subclasses of ```GraphComparator``` that override th
 - The __Cosine__ metric is computed considering two (n+1)-length vectors *P* and *Q* obtained by flattening the node-frequency and the incidence matrices of the two graphs
 - The rest of the metrics are computed considering two n-length vectors *P* and *Q* obtained by flattening and normalizing the incidence matrices of the two graphs.
 
-  <img src="https://github.com/DiasporeUnizar/TEG/blob/master/doc/metricsTable.png" width="700">
+  <img src="https://github.com/DiasporeUnizar/TEG/blob/master/doc/metricsTable1.png" width="700">
+  <img src="https://github.com/DiasporeUnizar/TEG/blob/master/doc/metricsTable2.png" width="700">
+  <img src="https://github.com/DiasporeUnizar/TEG/blob/master/doc/metricsTable3.png" width="700">
   
   
   
