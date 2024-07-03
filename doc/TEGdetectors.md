@@ -158,9 +158,9 @@ This module includes the following classes:
 
 The rest of the classes are subclasses of ```GraphComparator``` that override the method ```compare_graphs()```. Each subclass ```Graph```__Metric__```Dissimilarity``` implements the dissimilarity metric included in the following Table. 
 
-- The __Hamming__ metric is computed considering two vectors *P* and *Q* obtained by flattening the incidence matrices of the two graphs
-- The __Cosine__ metric is computed considering two vectors *P* and *Q* obtained by flattening the node-frequency and the incidence matrices of the two graphs
-- The rest of the metrics are computed considering two vectors *P* and *Q* obtained by normalizing the incidence matrices of the two graphs.
+- The __Hamming__ metric is computed considering two n-length vectors *P* and *Q* obtained by flattening the incidence matrices of the two graphs 
+- The __Cosine__ metric is computed considering two (n+1)-length vectors *P* and *Q* obtained by flattening the node-frequency and the incidence matrices of the two graphs
+- The rest of the metrics are computed considering two n-length vectors *P* and *Q* obtained by flattening and normalizing the incidence matrices of the two graphs.
 
   <img src="https://github.com/DiasporeUnizar/TEG/blob/master/doc/metricsTable.png" width="700">
   
