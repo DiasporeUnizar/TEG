@@ -118,6 +118,21 @@ def test_results():
     results = results[cm]
     reference = reference[cm]
 
+    # Ensure both DataFrames have the same index and columns
+    results = results.reset_index(drop=True).sort_index(axis=1)
+    reference = reference.reset_index(drop=True).sort_index(axis=1)
+
+    # Find differences
+    try:
+        diff = results.compare(reference)
+        if not diff.empty:
+            print("Differences found between results and reference:")
+            print(diff)
+        else:
+            print("No differences found. Results match the reference.")
+    except ValueError as e:
+        print(f"Error comparing results: {e}")
+
     #Compare results with  the reference results
     assert results.equals(reference), "Results are not equal to the reference results."
 
