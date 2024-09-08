@@ -89,7 +89,7 @@ def generate_report_teg_variants(cwd):
     fig, ax = plt.subplots()
     y_pos = np.arange(len(detectors))
     ax.barh(y_pos, accuracy, align='center', color='green', ecolor='black')
-    ax.set_yticks(y_pos,fontsize=10)
+    ax.set_yticks(y_pos)
     ax.set_yticklabels(detectors,fontsize=10)
     ax.invert_yaxis()  
     ax.set_xlabel('Accuracy')
