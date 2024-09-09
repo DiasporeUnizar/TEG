@@ -29,6 +29,20 @@ class Graph:
         """
         Constructor that initializes the graph attributes
         """       
+
+        # Make sure the items are pre-sorted by index, per row.
+        if nodes is not None:
+            # Sort the nodes and reorder their frequencies and the rows of the matrix.
+            sorted_indices = np.argsort(nodes)
+            nodes = np.array(nodes)[sorted_indices]
+            nodes_freq = np.array(nodes_freq)[sorted_indices]
+
+            # If the matrix is not None, reorder the rows and columns according to the nodes.
+            if matrix is not None:
+                matrix = np.array(matrix)
+                matrix = matrix[sorted_indices, :]
+                matrix = matrix[:, sorted_indices]
+
         self.__nodes = nodes
         self.__nodes_freq = nodes_freq
         # Initialize as lil_matrix for more efficient matrix construction
