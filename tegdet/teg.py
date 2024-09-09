@@ -276,14 +276,16 @@ class ModelBuilder:
         """
         nodes = gr2.get_nodes()
         nodes_freq = gr2.get_nodes_freq()
-        matrix = gr2.get_matrix()        
-        n_nodes = nodes.size
-        for i in range(n_nodes):
-            row = nodes[i]
-            gr1.update_node_freq(row, nodes_freq[i])
-            for j in range(n_nodes):
-                col = nodes[j]
-                gr1.update_matrix_entry(row,col,matrix[i][j])
+        matrix = gr2.get_matrix()
+
+        # Updating node frequencies in a single pass
+        for i, node in enumerate(nodes):
+            gr1.update_node_freq(node, nodes_freq[i])
+
+        # Only iterate over the non-zero entries of the matrix
+        rows, cols = matrix.nonzero()
+        for i, j in zip(rows, cols):
+            gr1.update_matrix_entry(nodes[i], nodes[j], matrix[i, j])
 
     def __compute_global_graph(self, graphs):
         """

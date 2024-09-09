@@ -31,10 +31,8 @@ class Graph:
         """       
         self.__nodes = nodes
         self.__nodes_freq = nodes_freq
-        if matrix is None:
-            self.__matrix = lil_matrix((0, 0), dtype=int)  # Use sparse LIL matrix for initialization
-        else:
-            self.__matrix = lil_matrix(matrix)
+        # Initialize as lil_matrix for more efficient matrix construction
+        self.__matrix = lil_matrix(matrix)
 
     def get_nodes(self):
         return self.__nodes
