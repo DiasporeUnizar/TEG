@@ -20,19 +20,23 @@ from scipy.stats import entropy #it is used to compute the KLD measure
 from scipy.spatial import distance #it is used to compute several distances
 from scipy.sparse import lil_matrix # it is used for sparse matrix
 
+
+import numpy as np
+from scipy.sparse import lil_matrix, csr_matrix
+
 class Graph:
     """
-    Graph generator and manipulator (graph expansion)
+    Optimized Graph generator and manipulator (graph expansion)
     """
 
     def __init__(self, nodes=None, nodes_freq=None, matrix=None):
         """
-        Constructor that initializes the graph attributes
+        Constructor that initializes the graph attributes efficiently.
         """
-        self.__nodes = np.array(nodes) if nodes is not None else np.array([])
-        self.__nodes_freq = np.array(nodes_freq) if nodes_freq is not None else np.zeros(len(self.__nodes), dtype=int)
-        self.__node_index = {node: idx for idx, node in enumerate(self.__nodes)}  # O(1) index lookup
-        self.__matrix = lil_matrix(matrix) if matrix is not None else lil_matrix((len(self.__nodes), len(self.__nodes)))
+        self.__nodes = np.array(nodes, dtype=object) if nodes is not None else np.array([], dtype=object)
+        self.__nodes_freq = np.array(nodes_freq, dtype=int) if nodes_freq is not None else np.zeros(len(self.__nodes), dtype=int)
+        self.__node_index = {node: idx for idx, node in enumerate(self.__nodes)} if nodes is not None else {}
+        self.__matrix = lil_matrix(matrix) if matrix is not None else lil_matrix((len(self.__nodes), len(self.__nodes)), dtype=int)
         self.__csr_converted = False  # Flag to track if the matrix has been converted to CSR
 
     def get_nodes(self):
@@ -47,68 +51,76 @@ class Graph:
         """
         if not self.__csr_converted:
             self.__matrix = self.__matrix.tocsr()
-            self.__csr_converted = True  # Set the flag to avoid reconverting
+            self.__csr_converted = True
         return self.__matrix
 
     def update_node_freq(self, pos, value):
+        """
+        Update the frequency of a node at a given position.
+        """
         self.__nodes_freq[pos] += value
 
     def update_matrix_entry(self, row, col, value):
-        # Efficient update using LIL format, no need to convert yet
+        """
+        Efficient update of matrix using LIL format, only convert to CSR when requested.
+        """
+        if isinstance(self.__matrix, csr_matrix):
+            self.__matrix = self.__matrix.tolil()  # Only convert to LIL if it's CSR
         self.__matrix[row, col] += value
-        self.__csr_converted = False  # Matrix has changed, so reset CSR flag
-
-    def __get_index(self, element):
-        """
-        Returns the index of the matrix row (column) based on "element"
-        """
-        return self.__node_index.get(element, -1)  # O(1) lookup
+        self.__csr_converted = False  # Mark matrix as modified
 
     def generate_graph(self, obs_discretized):
         """
-        Generates the graph from the discretized observations "obs_discretized"
+        Generates the graph from the discretized observations "obs_discretized".
+        This version reduces unnecessary operations and optimizes the process of matrix filling.
         """
-        values, counts = np.unique(obs_discretized['DP'].to_numpy(), return_counts=True)
-        self.__nodes = values
-        self.__nodes_freq = counts
-        self.__node_index = {node: idx for idx, node in enumerate(self.__nodes)}  # Update index map
-
-        dim = len(self.__nodes)
-        self.__matrix = lil_matrix((dim, dim), dtype=int)  # Initialize adjacency matrix in LIL format
-        self.__csr_converted = False  # Reset CSR flag as the matrix is being modified
-
+        # Extract node data and their frequency counts
         attr = obs_discretized['DP'].to_numpy()
 
-        # Vectorized approach to set matrix entries
-        rows = np.array([self.__get_index(attr[i]) for i in range(len(attr) - 1)])
-        cols = np.array([self.__get_index(attr[i + 1]) for i in range(len(attr) - 1)])
+        # Get unique values and counts
+        values, counts = np.unique(attr, return_counts=True)
+        self.__nodes = values
+        self.__nodes_freq = counts
+        self.__node_index = {node: idx for idx, node in enumerate(self.__nodes)}
 
-        valid_pairs = (rows != -1) & (cols != -1)
-        rows, cols = rows[valid_pairs], cols[valid_pairs]
+        dim = len(self.__nodes)
+        self.__matrix = lil_matrix((dim, dim), dtype=int)  # Initialize a new LIL format matrix
+        self.__csr_converted = False  # Reset CSR flag
 
-        bincounts = np.bincount(rows * dim + cols)
+        # Precompute row and column indices in one pass
+        transitions = np.array([self.__node_index[attr[i]] * dim + self.__node_index[attr[i + 1]]
+                                for i in range(len(attr) - 1)])
+
+        # Count the transitions efficiently using bincount
+        bincounts = np.bincount(transitions, minlength=dim * dim)
         nonzero_indices = np.nonzero(bincounts)[0]
 
+        # Update the matrix using the counted transitions
         for idx in nonzero_indices:
             row, col = divmod(idx, dim)
             self.__matrix[row, col] = bincounts[idx]
 
     def expand_graph(self, position, vertex):
         """
-        Expands the graph by inserting a new node "vertex" in "position".
+        Expands the graph by inserting a new node "vertex" at a given "position".
+        Optimized to avoid unnecessary matrix conversions.
         """
-        wildcard = 0  # Initialize the new node with a frequency of 0
+        wildcard = 0  # New node starts with a frequency of 0
 
-        # Insert new node and update frequencies and index map
+        # Insert the new node into the list of nodes and frequencies
         self.__nodes = np.insert(self.__nodes, position, vertex)
         self.__nodes_freq = np.insert(self.__nodes_freq, position, wildcard)
-        self.__node_index = {node: idx for idx, node in enumerate(self.__nodes)}  # Update all indices at once
+        self.__node_index = {node: idx for idx, node in enumerate(self.__nodes)}  # Rebuild node index
 
-        self.__matrix = self.__matrix.tolil()  # Ensure it's LIL for modifications
-        self.__csr_converted = False  # Reset CSR flag since matrix changes
-
+        # Resize the adjacency matrix in LIL format, avoiding conversion if already LIL
+        if not isinstance(self.__matrix, lil_matrix):
+            self.__matrix = self.__matrix.tolil()  # Ensure matrix is in LIL format for modification
+            
         new_size = len(self.__nodes)
-        self.__matrix.resize((new_size, new_size))  # Efficiently resize the matrix
+        self.__matrix.resize((new_size, new_size))  # Efficiently resize matrix for new node
+
+        self.__csr_converted = False  # Reset CSR flag since matrix was modified
+
 
 
 class GraphComparator(ABC):
