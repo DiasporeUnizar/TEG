@@ -23,7 +23,7 @@ from time import time
 import numpy as np
 import pandas as pd
 import os
-import sys      
+import sys   
 
 from tegdet.graph_comparison import *
 
@@ -66,11 +66,13 @@ class TEGDetector():
         Build the prediction model based on the "training_dataset" and return it together with
         the time to build the model
         """
+
         t0 = time()
         obs = training_dataset['DP']
         self.__mb = ModelBuilder(obs, self.__n_bins)
         self.__mb.build_model(self.__metric, int(len(training_dataset.index) / self.__n_obs_per_period))
 
+        # Devolver el modelo y el tiempo de construcción
         return self.__mb, time() - t0
 
     def predict(self, testing_dataset, model):

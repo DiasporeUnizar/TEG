@@ -28,25 +28,12 @@ class Graph:
     def __init__(self, nodes=None, nodes_freq=None, matrix=None):
         """
         Constructor that initializes the graph attributes
-        """       
-
-        # Make sure the items are pre-sorted by index, per row.
-        if nodes is not None:
-            # Sort the nodes and reorder their frequencies and the rows of the matrix.
-            sorted_indices = np.argsort(nodes)
-            nodes = np.array(nodes)[sorted_indices]
-            nodes_freq = np.array(nodes_freq)[sorted_indices]
-
-            # If the matrix is not None, reorder the rows and columns according to the nodes.
-            if matrix is not None:
-                matrix = np.array(matrix)
-                matrix = matrix[sorted_indices, :]
-                matrix = matrix[:, sorted_indices]
-
-        self.__nodes = nodes
-        self.__nodes_freq = nodes_freq
-        # Initialize as lil_matrix for more efficient matrix construction
-        self.__matrix = lil_matrix(matrix)
+        """
+        self.__nodes = np.array(nodes) if nodes is not None else np.array([])
+        self.__nodes_freq = np.array(nodes_freq) if nodes_freq is not None else np.zeros(len(self.__nodes), dtype=int)
+        self.__node_index = {node: idx for idx, node in enumerate(self.__nodes)}  # O(1) index lookup
+        self.__matrix = lil_matrix(matrix) if matrix is not None else lil_matrix((len(self.__nodes), len(self.__nodes)))
+        self.__csr_converted = False  # Flag to track if the matrix has been converted to CSR
 
     def get_nodes(self):
         return self.__nodes
@@ -55,64 +42,74 @@ class Graph:
         return self.__nodes_freq
 
     def get_matrix(self):
-        # Convert the LIL matrix to CSR format for efficient operations
-        return self.__matrix.tocsr()
+        """
+        Return matrix in CSR format. Convert to CSR only when requested to avoid unnecessary conversions.
+        """
+        if not self.__csr_converted:
+            self.__matrix = self.__matrix.tocsr()
+            self.__csr_converted = True  # Set the flag to avoid reconverting
+        return self.__matrix
 
     def update_node_freq(self, pos, value):
         self.__nodes_freq[pos] += value
 
     def update_matrix_entry(self, row, col, value):
+        # Efficient update using LIL format, no need to convert yet
         self.__matrix[row, col] += value
+        self.__csr_converted = False  # Matrix has changed, so reset CSR flag
 
     def __get_index(self, element):
         """
         Returns the index of the matrix row (column) based on "element"
         """
-        idx = -1  # not assigned
-        for i, node in enumerate(self.__nodes):
-            if element == node:
-                idx = i
-                break
-        return idx
+        return self.__node_index.get(element, -1)  # O(1) lookup
 
     def generate_graph(self, obs_discretized):
         """
         Generates the graph from the discretized observations "obs_discretized"
         """
-        grouped = obs_discretized.groupby('DP').count()
-        # Sets vertices: they are ordered according to the levels 
-        self.__nodes = grouped.index.to_numpy()
-        self.__nodes_freq = grouped.to_numpy().flatten()
+        values, counts = np.unique(obs_discretized['DP'].to_numpy(), return_counts=True)
+        self.__nodes = values
+        self.__nodes_freq = counts
+        self.__node_index = {node: idx for idx, node in enumerate(self.__nodes)}  # Update index map
+
         dim = len(self.__nodes)
+        self.__matrix = lil_matrix((dim, dim), dtype=int)  # Initialize adjacency matrix in LIL format
+        self.__csr_converted = False  # Reset CSR flag as the matrix is being modified
 
-        # Initialize the adjacency matrix as a sparse LIL matrix for efficient row operations
-        self.__matrix = lil_matrix((dim, dim), dtype=int)
-        attr = obs_discretized.DP.to_numpy()
+        attr = obs_discretized['DP'].to_numpy()
 
-        # Sets the adjacency matrix with the frequencies
-        for i in range(len(attr) - 1):
-            row = self.__get_index(attr[i])
-            col = self.__get_index(attr[i + 1])
-            self.update_matrix_entry(row, col, 1)
+        # Vectorized approach to set matrix entries
+        rows = np.array([self.__get_index(attr[i]) for i in range(len(attr) - 1)])
+        cols = np.array([self.__get_index(attr[i + 1]) for i in range(len(attr) - 1)])
 
-        # Once matrix construction is done, convert to a more memory-efficient format (CSR)
-        self.__matrix = self.__matrix.tocsr()
+        valid_pairs = (rows != -1) & (cols != -1)
+        rows, cols = rows[valid_pairs], cols[valid_pairs]
 
+        bincounts = np.bincount(rows * dim + cols)
+        nonzero_indices = np.nonzero(bincounts)[0]
+
+        for idx in nonzero_indices:
+            row, col = divmod(idx, dim)
+            self.__matrix[row, col] = bincounts[idx]
 
     def expand_graph(self, position, vertex):
         """
         Expands the graph by inserting a new node "vertex" in "position".
         """
-        wildcard = '0'
-        # Insert the new vertex
+        wildcard = 0  # Initialize the new node with a frequency of 0
+
+        # Insert new node and update frequencies and index map
         self.__nodes = np.insert(self.__nodes, position, vertex)
         self.__nodes_freq = np.insert(self.__nodes_freq, position, wildcard)
+        self.__node_index = {node: idx for idx, node in enumerate(self.__nodes)}  # Update all indices at once
 
-        # Resize the sparse matrix using lil_matrix
+        self.__matrix = self.__matrix.tolil()  # Ensure it's LIL for modifications
+        self.__csr_converted = False  # Reset CSR flag since matrix changes
+
         new_size = len(self.__nodes)
-        new_matrix = lil_matrix((new_size, new_size), dtype=int)
-        new_matrix[:self.__matrix.shape[0], :self.__matrix.shape[1]] = self.__matrix
-        self.__matrix = new_matrix
+        self.__matrix.resize((new_size, new_size))  # Efficiently resize the matrix
+
 
 class GraphComparator(ABC):
     """
@@ -127,19 +124,19 @@ class GraphComparator(ABC):
 
     def _normalize_matrices(self):
         """
-        Normalize the sparse matrices without converting to dense arrays.
+        Flatten the matrices of the two graphs and normalize them
         """
-        edges1 = self._graph1.get_matrix()
-        edges2 = self._graph2.get_matrix()
+        # Get the two matrices and convert them into arrays
+        edges1 = self._graph1.get_matrix().toarray().flatten()
+        edges2 = self._graph2.get_matrix().toarray().flatten()
 
-        # Normalize in sparse domain
-        edges1_sum = edges1.sum()
-        edges2_sum = edges2.sum()
+        # Set -1 entries to zero
+        #edges1 = np.where((edges1 < 0), edges1 * 0, edges1)
+        #edges2 = np.where((edges2 < 0), edges2 * 0, edges2)
 
-        if edges1_sum > 0:
-            edges1 = edges1.multiply(1 / edges1_sum)
-        if edges2_sum > 0:
-            edges2 = edges2.multiply(1 / edges2_sum)
+        # Normalizes the matrices (PDF)
+        edges1 = edges1 / (edges1.sum())
+        edges2 = edges2 / (edges2.sum())
 
         return edges1, edges2
 
@@ -177,17 +174,21 @@ class GraphHammingDissimilarity(GraphComparator):
             graph resizing has to be done before!
         """
 
-        # Get the matrices and ensure they're sparse
-        first_matrix = self._graph1.get_matrix()
-        second_matrix = self._graph2.get_matrix()
+        # Get just the matrices and convert into arrays
+        first = self._graph1.get_matrix().toarray().flatten()
+        second = self._graph2.get_matrix().toarray().flatten()
+        # Just the adjacency matrix
+        dim = min(len(first), len(second))
+        # Setting a counter vector to zero
+        counter = np.zeros(dim)
+        # Count if both elements are either positive or zero
+        counter = np.where(((first > 0) & (second > 0)) |
+                           ((first == 0) & (second == 0)), counter + 1, counter)
 
-        # Sparse matrix element-wise comparison
-        diff_matrix = first_matrix != second_matrix
+        distance = 1.0 - np.sum(counter) / float(dim)
 
-        # Calculate the total number of differing elements
-        distance = diff_matrix.nnz / first_matrix.shape[0]
+        return distance  #returns the dissimilarity (distance)
 
-        return distance  # Returns the dissimilarity (distance)
 
 '''
 Reference of the following implemented dissimilarity metrics:
@@ -212,9 +213,9 @@ class GraphCosineDissimilarity(GraphComparator):
 
         # Convert into arrays the node frequencies and matrices
         first = np.concatenate(
-            (self._graph1.get_nodes_freq(), self._graph1.get_matrix().flatten()), axis=None)
+            (self._graph1.get_nodes_freq(), self._graph1.get_matrix().toarray().flatten()), axis=None)
         second = np.concatenate(
-            (self._graph2.get_nodes_freq(), self._graph2.get_matrix().flatten()), axis=None)
+            (self._graph2.get_nodes_freq(), self._graph2.get_matrix().toarray().flatten()), axis=None)
     
         # Normalization factor
         nfactor = 1.0
