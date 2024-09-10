@@ -18,11 +18,7 @@ from abc import ABC, abstractmethod
 from math import sqrt
 from scipy.stats import entropy #it is used to compute the KLD measure
 from scipy.spatial import distance #it is used to compute several distances
-from scipy.sparse import lil_matrix # it is used for sparse matrix
-
-
-import numpy as np
-from scipy.sparse import lil_matrix, csr_matrix
+from scipy.sparse import lil_matrix, csr_matrix # it is used for sparse matrix
 
 class Graph:
     """
@@ -115,7 +111,7 @@ class Graph:
         # Resize the adjacency matrix in LIL format, avoiding conversion if already LIL
         if not isinstance(self.__matrix, lil_matrix):
             self.__matrix = self.__matrix.tolil()  # Ensure matrix is in LIL format for modification
-            
+
         new_size = len(self.__nodes)
         self.__matrix.resize((new_size, new_size))  # Efficiently resize matrix for new node
 
