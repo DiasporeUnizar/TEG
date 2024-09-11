@@ -72,7 +72,6 @@ class TEGDetector():
         self.__mb = ModelBuilder(obs, self.__n_bins)
         self.__mb.build_model(self.__metric, int(len(training_dataset.index) / self.__n_obs_per_period))
 
-        # Devolver el modelo y el tiempo de construcción
         return self.__mb, time() - t0
 
     def predict(self, testing_dataset, model):
@@ -82,7 +81,7 @@ class TEGDetector():
         """
         t0 = time()
         data_points = testing_dataset['DP']
-        self.__ad = AnomalyDetector(model)
+        self.__ad = AnomalyDetector(model, np.arange(self.__n_bins+2))
         test = self.__ad.make_prediction(self.__metric, data_points, int(len(testing_dataset.index) / self.__n_obs_per_period))
         outliers = self.__ad.compute_outliers(test, 100 - self.__alpha)
 
@@ -191,7 +190,7 @@ class TEGGenerator:
     Time Evolving Graph generator
     """
 
-    def __init__(self, observations_discretized, n_periods):
+    def __init__(self, observations_discretized, n_periods, n_bins):
         """
         Generates and set the time evolving graphs series from the discretized observations
         "observation_discretized" and the number of periods "n_periods"
@@ -202,7 +201,7 @@ class TEGGenerator:
             obs_discr_period = observations_discretized[period * n_obs:(period + 1) * n_obs]
             # Transforms to a dataframe (needed to generate the graph)
             df = pd.DataFrame({'Period': period * np.ones(n_obs), 'DP': obs_discr_period})
-            gr = Graph()
+            gr = Graph(np.arange(n_bins, dtype=int), np.zeros((n_bins), dtype=int), np.zeros((n_bins, n_bins), dtype=int))     
             gr.generate_graph(df)
             self.__teg.append(gr)
 
@@ -274,20 +273,21 @@ class ModelBuilder:
     def __sum_graphs(self, gr1, gr2):
         """
         Pre: Graph "gr1" nodes set includes graph "gr2" nodes set
-        Post: Added the graph "gr2" to graph "gr1" 
+        Post: Added the graph "gr2" to graph "gr1" by summing their adjacency matrices directly.
         """
+        # Sum the frequency of the nodes
         nodes = gr2.get_nodes()
         nodes_freq = gr2.get_nodes_freq()
-        matrix = gr2.get_matrix()
 
-        # Updating node frequencies in a single pass
         for i, node in enumerate(nodes):
             gr1.update_node_freq(node, nodes_freq[i])
 
-        # Only iterate over the non-zero entries of the matrix
-        rows, cols = matrix.nonzero()
-        for i, j in zip(rows, cols):
-            gr1.update_matrix_entry(nodes[i], nodes[j], matrix[i, j])
+        # Get the matrix in CSR format
+        matrix1 = gr1.get_matrix()
+        matrix2 = gr2.get_matrix()
+
+        # Add the matrix to the global graph
+        gr1.update_matrix(matrix1 + matrix2)
 
     def __compute_global_graph(self, graphs):
         """
@@ -310,7 +310,8 @@ class ModelBuilder:
         obs_discretized = self.__le.discretize(self.__obs)
 
         # Get the time-evolving graphs
-        self.__tegg = TEGGenerator(obs_discretized, n_periods)
+        n_bins = len(self.__le.get_levels())
+        self.__tegg = TEGGenerator(obs_discretized, n_periods, n_bins)
         graphs = self.__tegg.get_teg()
 
         # Get the global graph of the training period
@@ -326,10 +327,10 @@ class AnomalyDetector:
     Make predictions and compute outliers 
     """
 
-    def __init__(self, model):
-
+    def __init__(self, model, n_bins):
         self.__model = model
         self.__tegg = None
+        self.__n_bins = n_bins
 
     def get_tegg(self):
         return self.__tegg
@@ -344,7 +345,7 @@ class AnomalyDetector:
         obs_discretized = self.__model.get_level_extractor().discretize(observations)
 
         # Generates the time-evolving graphs
-        self.__tegg = TEGGenerator(obs_discretized, n_periods)
+        self.__tegg = TEGGenerator(obs_discretized, n_periods, len(self.__n_bins))
         graphs = self.__tegg.get_teg()
  
         # Computes the distance between each graph and the global graph        

@@ -33,7 +33,6 @@ class Graph:
         self.__nodes_freq = np.array(nodes_freq, dtype=int) if nodes_freq is not None else np.zeros(len(self.__nodes), dtype=int)
         self.__node_index = {node: idx for idx, node in enumerate(self.__nodes)} if nodes is not None else {}
         self.__matrix = lil_matrix(matrix) if matrix is not None else lil_matrix((len(self.__nodes), len(self.__nodes)), dtype=int)
-        self.__csr_converted = False  # Flag to track if the matrix has been converted to CSR
 
     def get_nodes(self):
         return self.__nodes
@@ -43,11 +42,8 @@ class Graph:
 
     def get_matrix(self):
         """
-        Return matrix in CSR format. Convert to CSR only when requested to avoid unnecessary conversions.
+        Return matrix in CSR format.
         """
-        if not self.__csr_converted:
-            self.__matrix = self.__matrix.tocsr()
-            self.__csr_converted = True
         return self.__matrix
 
     def update_node_freq(self, pos, value):
@@ -56,14 +52,11 @@ class Graph:
         """
         self.__nodes_freq[pos] += value
 
-    def update_matrix_entry(self, row, col, value):
+    def update_matrix(self, matrix):
         """
-        Efficient update of matrix using LIL format, only convert to CSR when requested.
+        Update the structure of the matrix
         """
-        if isinstance(self.__matrix, csr_matrix):
-            self.__matrix = self.__matrix.tolil()  # Only convert to LIL if it's CSR
-        self.__matrix[row, col] += value
-        self.__csr_converted = False  # Mark matrix as modified
+        self.__matrix = matrix
 
     def generate_graph(self, obs_discretized):
         """
@@ -80,9 +73,6 @@ class Graph:
         self.__node_index = {node: idx for idx, node in enumerate(self.__nodes)}
 
         dim = len(self.__nodes)
-        self.__matrix = lil_matrix((dim, dim), dtype=int)  # Initialize a new LIL format matrix
-        self.__csr_converted = False  # Reset CSR flag
-
         # Precompute row and column indices in one pass
         transitions = np.array([self.__node_index[attr[i]] * dim + self.__node_index[attr[i + 1]]
                                 for i in range(len(attr) - 1)])
@@ -95,6 +85,9 @@ class Graph:
         for idx in nonzero_indices:
             row, col = divmod(idx, dim)
             self.__matrix[row, col] = bincounts[idx]
+
+        # Convert to CSR after matrix construction
+        self.__matrix = self.__matrix.tocsr()
 
     def expand_graph(self, position, vertex):
         """
@@ -114,10 +107,6 @@ class Graph:
 
         new_size = len(self.__nodes)
         self.__matrix.resize((new_size, new_size))  # Efficiently resize matrix for new node
-
-        self.__csr_converted = False  # Reset CSR flag since matrix was modified
-
-
 
 class GraphComparator(ABC):
     """
@@ -319,7 +308,6 @@ class GraphJeffreysDissimilarity(GraphComparator):
         # Matrices normalization
         first, second = self._normalize_matrices()
 
-
         # Compute the Jeffreys of first  w.r.t second 
         
         # Check possible case of division by 0 
@@ -368,9 +356,9 @@ class GraphEuclideanDissimilarity(GraphComparator):
         first, second = self._normalize_matrices()
 
         # Compute the Euclidean distance 
-        eucl = distance.euclidean(first,second)
+        eucl = distance.euclidean(first, second)
 
-        return eucl #returns the dissimilarity (distance)
+        return eucl  # returns the dissimilarity (distance)
 
 class GraphCityblockDissimilarity(GraphComparator):
 
