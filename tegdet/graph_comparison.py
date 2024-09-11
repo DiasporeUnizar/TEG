@@ -18,7 +18,7 @@ from abc import ABC, abstractmethod
 from math import sqrt
 from scipy.stats import entropy #it is used to compute the KLD measure
 from scipy.spatial import distance #it is used to compute several distances
-from scipy.sparse import lil_matrix, csr_matrix # it is used for sparse matrix
+from scipy.sparse import lil_array # it is used for sparse matrix
 
 class Graph:
     """
@@ -32,7 +32,7 @@ class Graph:
         self.__nodes = np.array(nodes, dtype=object) if nodes is not None else np.array([], dtype=object)
         self.__nodes_freq = np.array(nodes_freq, dtype=int) if nodes_freq is not None else np.zeros(len(self.__nodes), dtype=int)
         self.__node_index = {node: idx for idx, node in enumerate(self.__nodes)} if nodes is not None else {}
-        self.__matrix = lil_matrix(matrix) if matrix is not None else lil_matrix((len(self.__nodes), len(self.__nodes)), dtype=int)
+        self.__matrix = lil_array(matrix) if matrix is not None else lil_array((len(self.__nodes), len(self.__nodes)), dtype=int)
 
     def get_nodes(self):
         return self.__nodes
@@ -41,9 +41,6 @@ class Graph:
         return self.__nodes_freq
 
     def get_matrix(self):
-        """
-        Return matrix in CSR format.
-        """
         return self.__matrix
 
     def update_node_freq(self, pos, value):
@@ -102,7 +99,7 @@ class Graph:
         self.__node_index = {node: idx for idx, node in enumerate(self.__nodes)}  # Rebuild node index
 
         # Resize the adjacency matrix in LIL format, avoiding conversion if already LIL
-        if not isinstance(self.__matrix, lil_matrix):
+        if not isinstance(self.__matrix, lil_array):
             self.__matrix = self.__matrix.tolil()  # Ensure matrix is in LIL format for modification
 
         new_size = len(self.__nodes)
