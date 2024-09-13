@@ -1,6 +1,6 @@
 """
-@Author: Simona Bernardi
-@Date: 1/03/2023
+@Authors: Simona Bernardi, Ángel Villanueva
+@Date: 13/09/2024
 
 graph_comparison module 
 
@@ -9,6 +9,9 @@ graph_comparison module
 given measure
 
 --> v1.0.1: Graph expansion: changed wildcard from -1 to 0 
+--> v1.1.0: Major updates:
+    - Code refactored to work with sparse matrices using `lil_array` for graph construction and `csr` format for comparison operations.
+    - Removed the `get_index` method from the `Graph` class.
 
 """
 
