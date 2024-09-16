@@ -46,7 +46,7 @@ def build_and_predict(metric):
     #Load training dataset
     train = tegd.get_dataset(train_path)
     #Build model
-    model, time2build, time2graphs, time2global, time2metrics = tegd.build_model(train)
+    model, time2build, time2graphs, time2global, time2metrics, mem2graphs = tegd.build_model(train)
 
     for testing in list_of_testing:
 
@@ -68,7 +68,7 @@ def build_and_predict(metric):
         #Collect detector configuration
         detector = {'metric': metric, 'n_bins': n_bins, 'n_obs_per_period':n_obs_per_period, 'alpha': alpha}
         #Collect performance metrics in a dictionary
-        perf = {'tmc': time2build, 'tmg': time2graphs, 'tmgl': time2global, 'tmm': time2metrics, 'tmp': time2predict}
+        perf = {'tmc': time2build, 'tmg': time2graphs, 'tmgl': time2global, 'tmm': time2metrics, 'tmp': time2predict, 'm2g': mem2graphs}
 
         #Print and store basic metrics
         tegd.print_metrics(detector, testing, perf, cm)

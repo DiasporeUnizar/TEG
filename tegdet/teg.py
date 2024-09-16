@@ -21,11 +21,12 @@ v1.0.2:
 ---> added `n_bins` parameter to the `__init__` method of the `TEGGenerator` class to enable the creation of graphs with the same size as the global graph.
 ---> updated `sum_graphs` function in the `ModelBuilder` class to adapt it for sparse matrix operations.
 ---> added `n_bins` parameter to the `__init__` method of the `AnomalyDetector` class to generate graphs with the correct dimensions.
----> changed the `build_model` function in the `ModelBuilder` class to measure different times taking part in the construction of a model
+---> changed the `build_model` function in the `ModelBuilder` class to measure different times taking part in the construction of a model as well as the memory taken for building all TEGs
 ---> changed the `print_metrics` and `metrics_to_csv` functions in the `TEGDetector` class to print a more exhaustive report
 """
 
 from time import time
+import tracemalloc
 import numpy as np
 import pandas as pd
 import os
@@ -76,9 +77,9 @@ class TEGDetector():
         t0 = time()
         obs = training_dataset['DP']
         self.__mb = ModelBuilder(obs, self.__n_bins)
-        time2graphs, time2global, time2metrics = self.__mb.build_model(self.__metric, int(len(training_dataset.index) / self.__n_obs_per_period))
+        time2graphs, time2global, time2metrics, mem2graphs = self.__mb.build_model(self.__metric, int(len(training_dataset.index) / self.__n_obs_per_period))
 
-        return self.__mb, time() - t0, time2graphs, time2global, time2metrics
+        return self.__mb, time() - t0, time2graphs, time2global, time2metrics, mem2graphs
 
     def predict(self, testing_dataset, model):
         """
@@ -122,6 +123,7 @@ class TEGDetector():
         print("Time to compute global graph:\t", perf['tmgl'], "seconds")
         print("Time to compute all metrics:\t", perf['tmm'], "seconds")
         print("Time to make prediction:\t", perf['tmp'], "seconds")
+        print("Memory to build all graphs:\t", perf['m2g'], "mb")
         print("Confusion matrix:\t\n\n", cm)
 
     def metrics_to_csv(self, detector, testing_set, perf, cm,results_csv_path):
@@ -141,6 +143,7 @@ class TEGDetector():
                            'time2global': perf['tmgl'],
                            'time2metrics': perf['tmm'],
                            'time2predict': perf['tmp'],
+                           'mem2graphs': perf['m2g'],
                            'tp': cm['tp'],
                            'tn': cm['tn'],
                            'fp': cm['fp'],
@@ -323,6 +326,7 @@ class ModelBuilder:
 
         # Measure time when generating TEGs
         time2graphs = time()
+        tracemalloc.start()
 
         # Get the time-evolving graphs
         n_bins = len(self.__le.get_levels())
@@ -332,6 +336,9 @@ class ModelBuilder:
 
         # Measure time when generating the global graph
         time2global = time()
+        _, memory2graphs = tracemalloc.get_traced_memory()
+        memory2graphs = memory2graphs / (1024 * 1024)
+        tracemalloc.stop()
 
         # Get the global graph of the training period
         self.__compute_global_graph(graphs)
@@ -345,7 +352,7 @@ class ModelBuilder:
         self.__baseline = gdc.compute_graphs_dist(graphs, self.__global_graph, metric)
         time2metrics = time() - time2metrics
 
-        return time2graphs, time2global, time2metrics
+        return time2graphs, time2global, time2metrics, memory2graphs
 
 
 class AnomalyDetector:
