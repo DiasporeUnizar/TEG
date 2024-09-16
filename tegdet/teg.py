@@ -122,7 +122,6 @@ class TEGDetector():
         print("Time to compute global graph:\t", perf['tmgl'], "seconds")
         print("Time to compute all metrics:\t", perf['tmm'], "seconds")
         print("Time to make prediction:\t", perf['tmp'], "seconds")
-        print("Memory to build all graphs:\t", perf['m2g'], "mb")
         print("Confusion matrix:\t\n\n", cm)
 
     def metrics_to_csv(self, detector, testing_set, perf, cm,results_csv_path):
