@@ -237,7 +237,13 @@ class GraphDistanceCollector:
         Compute and return the distances between  each graph in "teg" and the "global_graph"
         using the dissimilarity "metric"
         """
+        df = pd.DataFrame({
+            'first': global_graph.get_matrix().toarray().flatten()
+        })
         
+        # Save the DataFrame to a CSV file
+        df.to_csv("dispers.csv", index=False)
+        print(f"Global saved")
         gc_name = "Graph" + metric + "Dissimilarity"
 
         for period in range(self.__distance.size):

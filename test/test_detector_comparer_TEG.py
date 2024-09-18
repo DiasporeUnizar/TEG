@@ -36,9 +36,13 @@ REFERENCE_PATH = "/script_results/energy/reference_results.csv"
 list_of_testing = ("normal", "anomalous")
 
 #List of metrics (detector variants)
-list_of_metrics = [ "Cosine",  "Jaccard", "Hamming", "KL", "Jeffreys", "JS", "Euclidean", 
-                    "Cityblock", "Chebyshev", "Minkowski", "Braycurtis", "Kulczynski", 
-                    "Canberra", "Bhattacharyya", "Squared", "Divergence", "Additivesymmetric"]
+list_of_metrics = [ #"Cosine",  "Jaccard", "Hamming", 
+    
+    "KL", 
+    #"Jeffreys", "JS", "Euclidean", 
+                    #"Cityblock", "Chebyshev", "Minkowski", "Braycurtis", "Kulczynski", 
+                    #"Canberra", "Bhattacharyya", "Squared", "Divergence", "Additivesymmetric"
+                    ]
 
 #Parameters of TEG detectors: default values
 n_bins = 30
