@@ -80,7 +80,6 @@ class Graph:
         # Sets vertices: they are ordered according to the levels 
         self.__nodes = grouped.index.to_numpy()          
         self.__nodes_freq = grouped.to_numpy()
-        print(self.__nodes)
 
         attr = obs_discretized.DP.to_numpy()
         # Sets the adjacent matrix with the frequencies
@@ -102,10 +101,6 @@ class Graph:
         # Insert the new node into the list of nodes and frequencies
         self.__nodes = np.insert(self.__nodes, position, vertex)
         self.__nodes_freq = np.insert(self.__nodes_freq, position, wildcard)
-        self.__node_index = {node: idx for idx, node in enumerate(self.__nodes)}  # Rebuild node index
-
-        new_size = len(self.__nodes)
-        self.__matrix.resize((new_size, new_size))  # Efficiently resize matrix for new node
 
 class GraphComparator(ABC):
     """
