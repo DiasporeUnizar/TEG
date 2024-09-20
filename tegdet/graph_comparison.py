@@ -32,9 +32,8 @@ class Graph:
         """
         Constructor that initializes the graph attributes efficiently.
         """
-        self.__nodes = np.array(nodes, dtype=object) if nodes is not None else np.array([], dtype=object)
-        self.__nodes_freq = np.array(nodes_freq, dtype=int) if nodes_freq is not None else np.zeros(len(self.__nodes), dtype=int)
-        self.__node_index = {node: idx for idx, node in enumerate(self.__nodes)} if nodes is not None else {}
+        self.__nodes = nodes          
+        self.__nodes_freq = nodes_freq
         self.__matrix = lil_array(matrix) if matrix is not None else lil_array((len(self.__nodes), len(self.__nodes)), dtype=int)
 
     def get_nodes(self):
@@ -81,8 +80,8 @@ class Graph:
         # Sets vertices: they are ordered according to the levels 
         self.__nodes = grouped.index.to_numpy()          
         self.__nodes_freq = grouped.to_numpy()
+        print(self.__nodes)
 
-        # Initializes the adjacent matrix
         attr = obs_discretized.DP.to_numpy()
         # Sets the adjacent matrix with the frequencies
         for i in range(attr.size - 1):
@@ -90,8 +89,8 @@ class Graph:
             col = self.__get_index(attr[i + 1])
             self.__matrix[row,col] += 1
 
-        # Convert to CSR after matrix construction
-        # self.__matrix = self.__matrix.tocsr()
+        self.__matrix = self.__matrix.tocsr()
+
 
     def expand_graph(self, position, vertex):
         """

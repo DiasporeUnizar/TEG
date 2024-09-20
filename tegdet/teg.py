@@ -213,7 +213,7 @@ class TEGGenerator:
             obs_discr_period = observations_discretized[period * n_obs:(period + 1) * n_obs]
             # Transforms to a dataframe (needed to generate the graph)
             df = pd.DataFrame({'Period': period * np.ones(n_obs), 'DP': obs_discr_period})
-            gr = Graph(np.arange(n_bins, dtype=int), np.zeros((n_bins), dtype=int), np.zeros((n_bins, n_bins), dtype=int))     
+            gr = Graph(matrix= np.zeros((n_bins, n_bins), dtype=int))     
             gr.generate_graph(df)
             self.__teg.append(gr)
 
@@ -237,13 +237,6 @@ class GraphDistanceCollector:
         Compute and return the distances between  each graph in "teg" and the "global_graph"
         using the dissimilarity "metric"
         """
-        df = pd.DataFrame({
-            'first': global_graph.get_matrix().toarray().flatten()
-        })
-        
-        # Save the DataFrame to a CSV file
-        df.to_csv("dispers.csv", index=False)
-        print(f"Global saved")
         gc_name = "Graph" + metric + "Dissimilarity"
 
         for period in range(self.__distance.size):
