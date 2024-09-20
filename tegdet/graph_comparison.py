@@ -60,36 +60,38 @@ class Graph:
         """
         self.__matrix = matrix
 
+    def __get_index(self, element):
+        """
+        Returns the index of the matrix row (column) based on "element"
+        """
+        idx = -1  # not assigned
+        i = 0
+        while i < len(self.__nodes) and idx == -1:
+            if element == self.__nodes[i]:
+                idx = i
+            i += 1
+
+        return idx
+
     def generate_graph(self, obs_discretized):
         """
-        Generates the graph from the discretized observations "obs_discretized".
-        This version reduces unnecessary operations and optimizes the process of matrix filling.
+        Generates the graph from the discretized observations "obs_discretized"
         """
-        # Extract node data and their frequency counts
-        attr = obs_discretized['DP'].to_numpy()
+        grouped = obs_discretized.groupby('DP').count()
+        # Sets vertices: they are ordered according to the levels 
+        self.__nodes = grouped.index.to_numpy()          
+        self.__nodes_freq = grouped.to_numpy()
 
-        # Get unique values and counts
-        values, counts = np.unique(attr, return_counts=True)
-        self.__nodes = values
-        self.__nodes_freq = counts
-        self.__node_index = {node: idx for idx, node in enumerate(self.__nodes)}
-
-        dim = len(self.__nodes)
-        # Precompute row and column indices in one pass
-        transitions = np.array([self.__node_index[attr[i]] * dim + self.__node_index[attr[i + 1]]
-                                for i in range(len(attr) - 1)])
-
-        # Count the transitions efficiently using bincount
-        bincounts = np.bincount(transitions, minlength=dim * dim)
-        nonzero_indices = np.nonzero(bincounts)[0]
-
-        # Update the matrix using the counted transitions
-        for idx in nonzero_indices:
-            row, col = divmod(idx, dim)
-            self.__matrix[row, col] = bincounts[idx]
+        # Initializes the adjacent matrix
+        attr = obs_discretized.DP.to_numpy()
+        # Sets the adjacent matrix with the frequencies
+        for i in range(attr.size - 1):
+            row = self.__get_index(attr[i])
+            col = self.__get_index(attr[i + 1])
+            self.__matrix[row,col] += 1
 
         # Convert to CSR after matrix construction
-        self.__matrix = self.__matrix.tocsr()
+        # self.__matrix = self.__matrix.tocsr()
 
     def expand_graph(self, position, vertex):
         """
