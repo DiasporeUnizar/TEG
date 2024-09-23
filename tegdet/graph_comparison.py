@@ -76,17 +76,36 @@ class Graph:
         """
         grouped = obs_discretized.groupby('DP').count()
         # Sets vertices: they are ordered according to the levels 
-        self.__nodes = grouped.index.to_numpy()          
+        self.__nodes = grouped.index.to_numpy()
         self.__nodes_freq = grouped.to_numpy()
 
         attr = obs_discretized.DP.to_numpy()
-        # Sets the adjacent matrix with the frequencies
+
+        rows = []
+        cols = []
+        values = []
+
         for i in range(attr.size - 1):
             row = self.__get_index(attr[i])
             col = self.__get_index(attr[i + 1])
-            self.__matrix[row, col] = self.__matrix[row, col] + 1
+            self.__matrix[row, col] += 1
 
+            # Store the indx and actual value
+            rows.append(row)
+            cols.append(col)
+            values.append(self.__matrix[row, col])
+
+        # Convert to CSR for efficiency
         self.__matrix = self.__matrix.tocsr()
+
+        # write a csv file
+        import csv
+        with open('matriz_indices.csv', 'w', newline='') as csvfile:
+            csvwriter = csv.writer(csvfile)
+            csvwriter.writerow(['fila', 'columna', 'valor'])
+            for r, c, v in zip(rows, cols, values):
+                csvwriter.writerow([r, c, v])
+
 
 
     def expand_graph(self, position, vertex):
