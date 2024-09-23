@@ -47,7 +47,7 @@ n_obs_per_period=336
 alpha=5
 
 def print_and_store_graphs(graphs,graphs_path):
-    with open(graphs_path,"a") as csvfile:
+    with open(graphs_path,"a",newline='') as csvfile:
         writer = csv.writer(csvfile,delimiter=',')
         for g in range(len(graphs)):
             matrix = graphs[g].get_matrix()

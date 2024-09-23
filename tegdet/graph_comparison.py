@@ -84,7 +84,7 @@ class Graph:
         for i in range(attr.size - 1):
             row = self.__get_index(attr[i])
             col = self.__get_index(attr[i + 1])
-            self.__matrix[row,col] += 1
+            self.__matrix[row, col] = self.__matrix[row, col] + 1
 
         self.__matrix = self.__matrix.tocsr()
 
