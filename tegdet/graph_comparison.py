@@ -43,8 +43,6 @@ class Graph:
         return self.__nodes_freq
 
     def get_matrix(self):
-        if not isinstance(self.__matrix, csr_array):
-            self.__matrix = self.__matrix.tocsr()
         return self.__matrix
 
     def update_node_freq(self, pos, value):
