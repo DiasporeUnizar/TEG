@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import os
 
@@ -18,6 +19,49 @@ def compare_matrices(small_matrix, large_matrix):
                 return f"No coinciden en la posición ({i}, {j})"
     
     return "Coinciden"
+
+def sum_small_matrices(small_folder):
+    """
+    Suma todas las matrices pequeñas dentro de una matriz de tamaño 32x32.
+    """
+    small_files = sorted(os.listdir(small_folder))
+    
+    # Inicializar una matriz vacía de tamaño 32x32
+    matrix_sum = np.zeros((32, 32))
+    
+    for small_file in small_files:
+        # Leer cada archivo CSV y convertirlo en una matriz (array de numpy)
+        small_matrix = pd.read_csv(os.path.join(small_folder, small_file), header=None).values
+        
+        # Obtener las dimensiones de la matriz pequeña
+        rows_small, cols_small = small_matrix.shape
+        
+        # Sumar la matriz pequeña dentro de la matriz de 32x32
+        matrix_sum[:rows_small, :cols_small] += small_matrix
+    
+    return matrix_sum
+
+def sum_large_matrices(large_folder):
+    """
+    Suma todas las matrices grandes contenidas en los archivos CSV en la carpeta especificada.
+    """
+    large_files = sorted(os.listdir(large_folder))
+    
+    # Inicializar la suma con None (a la espera de cargar la primera matriz)
+    matrix_sum = None
+    
+    for large_file in large_files:
+        # Leer cada archivo CSV y convertirlo en una matriz (array de numpy)
+        large_matrix = pd.read_csv(os.path.join(large_folder, large_file), header=None).values
+        
+        # Si es la primera matriz, inicializamos la suma con ella
+        if matrix_sum is None:
+            matrix_sum = large_matrix
+        else:
+            # Acumular la suma de las matrices
+            matrix_sum = np.add(matrix_sum, large_matrix)
+    
+    return matrix_sum
 
 def compare_all_matrices(small_folder, large_folder):
     """
@@ -50,3 +94,34 @@ comparison_results = compare_all_matrices(small_folder, large_folder)
 # Imprimir los resultados
 for file, result in comparison_results.items():
     print(f"Comparación para {file}: {result}")
+
+total_sum_matrix = sum_large_matrices(large_folder)
+
+# Mostrar la matriz suma total
+print("La suma de todas las matrices grandes es:")
+print(total_sum_matrix)
+
+matrix_df = pd.DataFrame(total_sum_matrix)
+
+# Ruta del archivo CSV
+file_path = 'genGS.csv'
+
+# Verificar si el archivo ya existe
+if not os.path.exists(file_path):
+    # Guardar el DataFrame en un archivo CSV si no existe
+    matrix_df.to_csv(file_path, index=False)
+else:
+    print(f"El archivo {file_path} ya existe. No se sobrescribió.")
+
+total_sum_small_matrix = sum_small_matrices(small_folder)
+matrix_df = pd.DataFrame(total_sum_matrix)
+
+# Ruta del archivo CSV
+file_path = 'genGD.csv'
+
+# Verificar si el archivo ya existe
+if not os.path.exists(file_path):
+    # Guardar el DataFrame en un archivo CSV si no existe
+    matrix_df.to_csv(file_path, index=False)
+else:
+    print(f"El archivo {file_path} ya existe. No se sobrescribió.")
