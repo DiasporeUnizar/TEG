@@ -103,17 +103,17 @@ class GraphComparator(ABC):
         """
         Flatten the matrices of the two graphs and normalize them
         """
-        # Get the two matrices and convert them into arrays
-        edges1 = self._graph1.get_matrix().toarray().flatten()
-        edges2 = self._graph2.get_matrix().toarray().flatten()
+        # Get the two matrices in CSR format (sparse matrices)
+        edges1 = self._graph1.get_matrix()  # CSR format
+        edges2 = self._graph2.get_matrix()  # CSR format
 
-        # Set -1 entries to zero
-        #edges1 = np.where((edges1 < 0), edges1 * 0, edges1)
-        #edges2 = np.where((edges2 < 0), edges2 * 0, edges2)
+        # Sum the entries of each matrix
+        sum1 = edges1.sum()
+        sum2 = edges2.sum()
 
-        # Normalizes the matrices (PDF)
-        edges1 = edges1 / (edges1.sum())
-        edges2 = edges2 / (edges2.sum())
+        # Normalize the matrices by dividing each entry by the sum
+        edges1 = edges1.multiply(1.0 / sum1)
+        edges2 = edges2.multiply(1.0 / sum2)
 
         return edges1, edges2
 
@@ -274,6 +274,10 @@ class GraphKLDissimilarity(GraphComparator):
         # Matrices normalization
         first, second = self._normalize_matrices()
 
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
+
         # Compute the KLD of first  w.r.t second 
         kld = entropy(first,second,base=2)
 
@@ -291,6 +295,10 @@ class GraphJeffreysDissimilarity(GraphComparator):
         """
         # Matrices normalization
         first, second = self._normalize_matrices()
+
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
 
         # Compute the Jeffreys of first  w.r.t second 
         
@@ -317,6 +325,10 @@ class GraphJSDissimilarity(GraphComparator):
         # Matrices normalization
         first, second = self._normalize_matrices()
 
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
+
         # Compute the JSD 
         jsd = distance.jensenshannon(first,second,base=2)
 
@@ -339,6 +351,10 @@ class GraphEuclideanDissimilarity(GraphComparator):
         # Matrices normalization
         first, second = self._normalize_matrices()
 
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
+
         # Compute the Euclidean distance 
         eucl = distance.euclidean(first, second)
 
@@ -357,6 +373,10 @@ class GraphCityblockDissimilarity(GraphComparator):
 
         # Matrices normalization
         first, second = self._normalize_matrices()
+
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
 
         # Compute the Cityblock distance 
         city = distance.cityblock(first,second)
@@ -377,6 +397,10 @@ class GraphChebyshevDissimilarity(GraphComparator):
         # Matrices normalization
         first, second = self._normalize_matrices()
 
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
+
         # Compute the Chebyshev distance 
         cheb = distance.chebyshev(first,second)
 
@@ -395,6 +419,10 @@ class GraphMinkowskiDissimilarity(GraphComparator):
 
         # Matrices normalization
         first, second = self._normalize_matrices()
+
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
 
         # Compute the Minkowski distance 
         mink = distance.minkowski(first,second,3)
@@ -418,6 +446,10 @@ class GraphBraycurtisDissimilarity(GraphComparator):
         # Matrices normalization
         first, second = self._normalize_matrices()
 
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
+
         # Compute the Bray-Curtis distance 
         bray = distance.braycurtis(first,second)
 
@@ -436,6 +468,10 @@ class GraphGowerDissimilarity(GraphComparator):
 
         # Matrices normalization
         first, second = self._normalize_matrices()
+
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
 
         # Compute the Gower distance (=Cityblock divided by the number of elements)
         gower = distance.cityblock(first,second) / len(first)
@@ -456,6 +492,10 @@ class GraphSoergelDissimilarity(GraphComparator):
         # Matrices normalization
         first, second = self._normalize_matrices()
 
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
+
         # Compute the Soergel distance (=Cityblock divided by the 
         # sum of the pairwise_max_elements)
         soergel = distance.cityblock(first,second) / np.maximum(first,second).sum()
@@ -475,6 +515,10 @@ class GraphKulczynskiDissimilarity(GraphComparator):
 
         # Matrices normalization
         first, second = self._normalize_matrices()
+
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
 
         # Compute the Kulczynski distance (=Cityblock divided by the 
         # sum of the pairwise_min_elements)
@@ -503,6 +547,10 @@ class GraphCanberraDissimilarity(GraphComparator):
 
         # Matrices normalization
         first, second = self._normalize_matrices()
+
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
 
         # Compute the Canberra distance 
         canb = distance.canberra(first,second)
@@ -687,6 +735,10 @@ class GraphSquaredDissimilarity(GraphComparator):
         # Matrices normalization
         first, second = self._normalize_matrices()
 
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
+
         # Compute the Squared Chi^2 distance
         num =  (first - second) 
         den = (first + second)
@@ -732,6 +784,10 @@ class GraphDivergenceDissimilarity(GraphComparator):
 
         # Matrices normalization
         first, second = self._normalize_matrices()
+
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
 
         # Compute the Divergence
         num =  (first - second) 
@@ -779,6 +835,10 @@ class GraphAdditivesymmetricDissimilarity(GraphComparator):
 
         # Matrices normalization
         first, second = self._normalize_matrices()
+
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
 
         # Compute the Additive symmetric Chi^2 distance
         term1 =  (first - second) 

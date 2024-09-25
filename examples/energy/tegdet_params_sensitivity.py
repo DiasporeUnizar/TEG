@@ -32,7 +32,8 @@ list_of_testing = ("normal", "anomalous")
 
 #List of metrics (detector variants)
 #Uncomment these lines to carry out an exhaustive analysis over all the available dissimilarity metrics
-list_of_metrics =   ["Hamming", #"Clark" , "Canberra", "Lorentzian", "Kulczynski", "Divergence", "Cosine"
+list_of_metrics =   [#"Hamming", "Clark" , "Canberra", "Lorentzian", "Kulczynski", "Divergence", 
+    "Cosine"
                      #"Jaccard", "Dice", "KL", "Jeffreys", "JS", "Euclidean", "Cityblock", 
                      #"Chebyshev", "Minkowski", "Braycurtis", "Gower", "Soergel", "Bhattacharyya", "Hellinger", 
                      #"Matusita", "Squaredchord", "Pearson", "Neyman", "Squared", "Probsymmetric", "Additivesymmetric" 
