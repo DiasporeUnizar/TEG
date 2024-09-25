@@ -227,7 +227,7 @@ class GraphJaccardDissimilarity(GraphComparator):
         """
         # Matrices normalization
         first, second = self._normalize_matrices()
- 
+
         # Compute the Jaccard similarity (equal to Peak Correlation Energy)
         sumprod = (first * second).sum()
         quadnorm1 = (first*first).sum()
@@ -571,6 +571,10 @@ class GraphLorentzianDissimilarity(GraphComparator):
         # Matrices normalization
         first, second = self._normalize_matrices()
 
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
+
         # Compute the Lorentzian distance 
         lore = np.log(1 + (first - second))
 
@@ -680,6 +684,10 @@ class GraphPearsonDissimilarity(GraphComparator):
         # Matrices normalization
         first, second = self._normalize_matrices()
 
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
+
         num =  (first - second) 
         num = num * num
         
@@ -707,6 +715,10 @@ class GraphNeymanDissimilarity(GraphComparator):
 
         # Matrices normalization
         first, second = self._normalize_matrices()
+
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
 
         num =  (first - second) 
         num = num * num
@@ -762,6 +774,10 @@ class GraphProbsymmetricDissimilarity(GraphComparator):
         # Matrices normalization
         first, second = self._normalize_matrices()
 
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
+
         # Compute the Probabistic symmetric Chi^2 distance
         num =  (first - second) 
         den = (first + second)
@@ -811,6 +827,10 @@ class GraphClarkDissimilarity(GraphComparator):
 
         # Matrices normalization
         first, second = self._normalize_matrices()
+
+        # Convert into a dense format
+        first = first.toarray().flatten()
+        second = second.toarray().flatten()
 
         # Compute the Clark distance
         num =  abs(first - second) 
