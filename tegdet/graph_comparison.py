@@ -11,7 +11,8 @@ given measure
 --> v1.0.1: Graph expansion: changed wildcard from -1 to 0 
 --> v1.1.0: Major updates:
     - Code refactored to work with sparse matrices using `lil_array` for graph construction and `csr` format for comparison operations.
-    - Removed the `get_index` method from the `Graph` class.
+    - Removed the `get_index` and `expand_graph` methods from the `Graph` class.
+    - Removed the `resize_graphs` method from the `GraphComparator` class
 
 """
 
@@ -21,7 +22,7 @@ from abc import ABC, abstractmethod
 from math import sqrt
 from scipy.stats import entropy #it is used to compute the KLD measure
 from scipy.spatial import distance #it is used to compute several distances
-from scipy.sparse import lil_array, csr_array # it is used for sparse matrix
+from scipy.sparse import lil_array # it is used for sparse matrix
 
 class Graph:
     """
@@ -57,67 +58,35 @@ class Graph:
         """
         self.__matrix = matrix
 
-    def __get_index(self, element):
-        """
-        Returns the index of the matrix row (column) based on "element"
-        """
-        idx = -1  # not assigned
-        i = 0
-        while i < len(self.__nodes) and idx == -1:
-            if element == self.__nodes[i]:
-                idx = i
-            i += 1
-
-        return idx
-
     def generate_graph(self, obs_discretized):
         """
-        Generates the graph from the discretized observations "obs_discretized"
+        Generates the graph from the discretized observations "obs_discretized".
+        This version reduces unnecessary operations and optimizes the process of matrix filling.
         """
-        grouped = obs_discretized.groupby('DP').count()
-        # Sets vertices: they are ordered according to the levels 
-        self.__nodes = grouped.index.to_numpy()
-        self.__nodes_freq = grouped.to_numpy()
+        # Extract node data and their frequency counts
+        attr = obs_discretized['DP'].to_numpy()
+        # Get unique values and counts
+        values, counts = np.unique(attr, return_counts=True)
+        self.__nodes = values
+        self.__nodes_freq = counts
 
-        attr = obs_discretized.DP.to_numpy()
+        dim = max(values)+1
+        # Precompute row and column indices in one pass
+        transitions = np.array([attr[i] * dim + attr[i + 1]
+                                for i in range(len(attr) - 1)])
 
-        rows = []
-        cols = []
-        values = []
+        # Count the transitions efficiently using bincount
+        bincounts = np.bincount(transitions) #, minlength=dim * dim)
+        
+        nonzero_indices = np.nonzero(bincounts)[0]
 
-        for i in range(attr.size - 1):
-            row = self.__get_index(attr[i])
-            col = self.__get_index(attr[i + 1])
-            self.__matrix[row, col] += 1
+        # Update the matrix using the counted transitions
+        for idx in nonzero_indices:
+            row, col = divmod(idx, dim)            
+            self.__matrix[row, col] = bincounts[idx]
 
-            # Store the indx and actual value
-            rows.append(row)
-            cols.append(col)
-            values.append(self.__matrix[row, col])
-
-        # Convert to CSR for efficiency
-        self.__matrix = self.__matrix.tocsr()
-
-        # write a csv file
-        import csv
-        with open('matriz_indices.csv', 'w', newline='') as csvfile:
-            csvwriter = csv.writer(csvfile)
-            csvwriter.writerow(['fila', 'columna', 'valor'])
-            for r, c, v in zip(rows, cols, values):
-                csvwriter.writerow([r, c, v])
-
-
-
-    def expand_graph(self, position, vertex):
-        """
-        Expands the graph by inserting a new node "vertex" at a given "position".
-        Optimized to avoid unnecessary matrix conversions.
-        """
-        wildcard = 0  # New node starts with a frequency of 0
-
-        # Insert the new node into the list of nodes and frequencies
-        self.__nodes = np.insert(self.__nodes, position, vertex)
-        self.__nodes_freq = np.insert(self.__nodes_freq, position, wildcard)
+        # Convert to CSR after matrix construction
+        self.__matrix.tocsr()
 
 class GraphComparator(ABC):
     """
@@ -148,24 +117,9 @@ class GraphComparator(ABC):
 
         return edges1, edges2
 
-    def resize_graphs(self):
-        """
-        Compare the nodes of the two graphs and possibly expand them
-        """
-
-        # Union of the nodes
-        union = np.union1d(self._graph1.get_nodes(), self._graph2.get_nodes())
-
-        for i, node in enumerate(union):
-            if i >= len(self._graph1.get_nodes()) or self._graph1.get_nodes()[i] != node:
-                self._graph1.expand_graph(i, node)
-            if i >= len(self._graph2.get_nodes()) or self._graph2.get_nodes()[i] != node:
-                self._graph2.expand_graph(i, node)
-
     @abstractmethod
     def compare_graphs(self):  # signature only because it is overriden
         pass
-
 
 
 #######################################################################
@@ -219,28 +173,47 @@ class GraphCosineDissimilarity(GraphComparator):
             graph resizing has to be done before!
         """
 
-        # Convert into arrays the node frequencies and matrices
-        first = np.concatenate(
-            (self._graph1.get_nodes_freq(), self._graph1.get_matrix().toarray().flatten()), axis=None)
-        second = np.concatenate(
-            (self._graph2.get_nodes_freq(), self._graph2.get_matrix().toarray().flatten()), axis=None)
-    
+        # Get node frequencies and matrices as sparse arrays
+        freq1 = self._graph1.get_nodes_freq()
+        freq2 = self._graph2.get_nodes_freq()
+        
+        mat1 = self._graph1.get_matrix()
+        mat2 = self._graph2.get_matrix()
+
+        # Ensure both graphs have the same number of nodes and resize them if needed
+        min_size = min(len(freq1), len(freq2))
+
+        # Truncate or pad node frequencies to the same size
+        freq1 = freq1[:min_size]
+        freq2 = freq2[:min_size]
+
+        # Truncate or pad matrices to the same size and keep them sparse
+        mat1 = mat1[:min_size, :min_size]
+        mat2 = mat2[:min_size, :min_size]
+
+        # Convert sparse matrices to arrays and flatten them
+        first = np.concatenate((freq1, mat1.toarray().flatten()), axis=None)
+        second = np.concatenate((freq2, mat2.toarray().flatten()), axis=None)
+
         # Normalization factor
         nfactor = 1.0
+
+        # Compute dot product
         sp = first * second / nfactor
+
         # Frobenius norm (L2-norm Euclidean)
         norm1 = np.linalg.norm(first)
         norm2 = np.linalg.norm(second)
         den = np.sum(sp)
-        
+
         if den > 0:
-            # Compute the product
-            cosinus =  den / (norm1 * norm2)
+            # Compute the cosine similarity
+            cosinus = den / (norm1 * norm2)
         else:
             cosinus = 0
 
-        #Since some entries of the matrices can be -1 the cosinus maybe be negative!
-        return 1.0 - cosinus #returns the dissimilarity (distance)
+        # Since some entries of the matrices can be -1, the cosine may be negative!
+        return 1.0 - cosinus  # returns the dissimilarity (distance)
 
 class GraphJaccardDissimilarity(GraphComparator):
 

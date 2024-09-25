@@ -229,7 +229,6 @@ class GraphDistanceCollector:
 
     def __init__(self, n_periods):
 
-        
         self.__distance = np.empty(n_periods)
  
     def compute_graphs_dist(self, teg, global_graph, metric):
@@ -243,8 +242,7 @@ class GraphDistanceCollector:
             #Create an instance of the metric specific graph comparator
             #by converting a string to a class object
             gc = getattr(sys.modules[__name__], gc_name)(teg[period], global_graph)
-            #Graph resizing
-            gc.resize_graphs()
+
             #Compute the difference based on the metric
             self.__distance[period] = gc.compare_graphs()
         
