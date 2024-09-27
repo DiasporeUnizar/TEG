@@ -34,9 +34,8 @@ TEGDET_VARIANTS_RESULTS_PATH = "/script_results/energy/tegdet_variants_results.c
 TEGDET_PARAMS_SENSITIVITY_RESULTS_PATH = "/script_results/energy/tegdet_params_sensitivity_results.csv"
 
 #Uncomment these lines to post-process the results related to all the available dissimilarity metrics
-list_of_metrics = [#"Hamming", "Clark", "Canberra", "Lorentzian", "Kulczynski", "Divergence", 
-    "Cosine",
-                  #  "Jaccard", "Dice", "KL", "Jeffreys", "JS", "Euclidean", "Cityblock", 
+list_of_metrics = ["Hamming", "Clark", #"Canberra", "Lorentzian", "Kulczynski", "Divergence", "Cosine",
+                  #  "Jaccard", "Dice", #"KL", "Jeffreys", "JS", "Euclidean", "Cityblock", 
                   #   "Chebyshev", "Minkowski", "Braycurtis", "Gower", "Soergel", "Bhattacharyya", "Hellinger", 
                   #   "Matusita", "Squaredchord", "Pearson", "Neyman", "Squared", "Probsymmetric", "Additivesymmetric" 
                     ]
