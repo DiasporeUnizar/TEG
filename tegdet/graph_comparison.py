@@ -65,10 +65,21 @@ class Graph:
         """
         # Extract node data and their frequency counts
         attr = obs_discretized['DP'].to_numpy()
+
+        # Get the graph dimension
+        dim = self.__matrix.shape[0]
+
         # Get unique values and counts
         values, counts = np.unique(attr, return_counts=True)
-        self.__nodes = values
-        self.__nodes_freq = counts
+
+        # Generate the node vector
+        self.__nodes = np.arange(0, dim)
+
+        # Build a numpyArray with as much 0 as dimension
+        self.__nodes_freq = np.zeros_like(self.__nodes)
+
+        # Fill the frequency with the values observated
+        self.__nodes_freq[np.isin(self.__nodes, values)] = counts
 
         dim = max(values)+1
         # Precompute row and column indices in one pass
@@ -179,17 +190,6 @@ class GraphCosineDissimilarity(GraphComparator):
         
         mat1 = self._graph1.get_matrix()
         mat2 = self._graph2.get_matrix()
-
-        # Ensure both graphs have the same number of nodes and resize them if needed
-        min_size = min(len(freq1), len(freq2))
-
-        # Truncate or pad node frequencies to the same size
-        freq1 = freq1[:min_size]
-        freq2 = freq2[:min_size]
-
-        # Truncate or pad matrices to the same size and keep them sparse
-        mat1 = mat1[:min_size, :min_size]
-        mat2 = mat2[:min_size, :min_size]
 
         # Convert sparse matrices to arrays and flatten them
         first = np.concatenate((freq1, mat1.toarray().flatten()), axis=None)
