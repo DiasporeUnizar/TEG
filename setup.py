@@ -7,7 +7,7 @@ with open("README.txt", "r") as fh:
 setup(
     name='tegdet',
     packages=find_packages(include=['tegdet']),
-    version='1.0.1',
+    version='1.1.0',
     description='Time Evolving Graph detectors library',
     long_description=long_description,
     long_description_content_type="text/x-rst",
