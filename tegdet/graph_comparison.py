@@ -1,6 +1,6 @@
 """
-@Author: Simona Bernardi
-@Date: 1/03/2023
+@Authors: Simona Bernardi, Ángel Villanueva
+@Date: 13/09/2024
 
 graph_comparison module 
 
@@ -9,6 +9,10 @@ graph_comparison module
 given measure
 
 --> v1.0.1: Graph expansion: changed wildcard from -1 to 0 
+--> v1.1.0: Major updates:
+    - Code refactored to work with sparse matrices using `lil_array` for graph construction and `csr` format for comparison operations.
+    - Removed the `get_index` and `expand_graph` methods from the `Graph` class.
+    - Removed the `resize_graphs` method from the `GraphComparator` class
 
 """
 
@@ -18,19 +22,20 @@ from abc import ABC, abstractmethod
 from math import sqrt
 from scipy.stats import entropy #it is used to compute the KLD measure
 from scipy.spatial import distance #it is used to compute several distances
+from scipy.sparse import lil_array # it is used for sparse matrix
 
 class Graph:
     """
-    Graph generator and manipulator (graph expansion)
+    Optimized Graph generator and manipulator (graph expansion)
     """
 
     def __init__(self, nodes=None, nodes_freq=None, matrix=None):
         """
-        Constructor that initializes the graph attributes
-        """       
+        Constructor that initializes the graph attributes efficiently.
+        """
         self.__nodes = nodes          
         self.__nodes_freq = nodes_freq
-        self.__matrix = matrix
+        self.__matrix = lil_array(matrix) if matrix is not None else lil_array((len(self.__nodes), len(self.__nodes)), dtype=int)
 
     def get_nodes(self):
         return self.__nodes
@@ -42,62 +47,54 @@ class Graph:
         return self.__matrix
 
     def update_node_freq(self, pos, value):
+        """
+        Update the frequency of a node at a given position.
+        """
         self.__nodes_freq[pos] += value
 
-    def update_matrix_entry(self, row, col, value):
-        self.__matrix[row][col] += value
-
-    def __get_index(self, element):
+    def update_matrix(self, matrix):
         """
-        Returns the index of the matrix row (column) based on "element"
+        Update the structure of the matrix
         """
-        idx = -1  # not assigned
-        i = 0
-        while i < len(self.__nodes) and idx == -1:
-            if element == self.__nodes[i]:
-                idx = i
-            i += 1
+        self.__matrix = matrix
 
-        return idx
-   
     def generate_graph(self, obs_discretized):
         """
-        Generates the graph from the discretized observations "obs_discretized"
+        Generates the graph from the discretized observations "obs_discretized".
+        This version reduces unnecessary operations and optimizes the process of matrix filling.
         """
-        grouped = obs_discretized.groupby('DP').count()
-        # Sets vertices: they are ordered according to the levels 
-        self.__nodes = grouped.index.to_numpy()          
-        self.__nodes_freq = grouped.to_numpy()
-        dim = len(self.__nodes)
+        # Extract node data and their frequency counts
+        attr = obs_discretized['DP'].to_numpy()
 
-        # Initializes the adjacent matrix
-        self.__matrix = np.zeros((dim, dim), dtype=int)
-        attr = obs_discretized.DP.to_numpy()
-        # Sets the adjacent matrix with the frequencies
-        for i in range(attr.size - 1):
-            row = self.__get_index(attr[i])
-            col = self.__get_index(attr[i + 1])
-            self.__matrix[row][col] += 1
+        # Get the graph dimension
+        dim = self.__matrix.shape[0]
 
+        # Get unique values and counts
+        values, counts = np.unique(attr, return_counts=True)
 
-    def expand_graph(self, position, vertex):
-        """
-        Expands the graph by inserting a new node "vertex" in "position". The new added fictious node
-        has frequency 0. The new added row and column of the adjacency matrix have 0 entries
-        """
-        # Different from zero to differentiate from the absence of arc, but presence of the node
-        wildcard = '0'
-        # Insert the new vertex in the list of nodes
-        self.__nodes = np.insert(self.__nodes, position, vertex)
-        self.__nodes_freq = np.insert(self.__nodes_freq, position, wildcard)
-        # Insert the new column in the matrix
-        self.__matrix = np.insert(self.__matrix, position, wildcard, axis=1)
-        # Insert the new row in the matrix
-        self.__matrix = np.insert(self.__matrix, position, wildcard, axis=0)
+        # Fill the frequency with the values observated
+        self.__nodes_freq[np.isin(self.__nodes, values)] = counts
 
+        dim = max(values)+1
+        # Precompute row and column indices in one pass
+        transitions = np.array([attr[i] * dim + attr[i + 1]
+                                for i in range(len(attr) - 1)])
+
+        # Count the transitions efficiently using bincount
+        bincounts = np.bincount(transitions) #, minlength=dim * dim)
+        
+        nonzero_indices = np.nonzero(bincounts)[0]
+
+        # Update the matrix using the counted transitions
+        for idx in nonzero_indices:
+            row, col = divmod(idx, dim)            
+            self.__matrix[row, col] = bincounts[idx]
+
+        # Convert to CSR after matrix construction
+        self.__matrix.tocsr()
 
 class GraphComparator(ABC):
-    """ 
+    """
     Graphs comparator operator (abstract class)
     """
     def __init__(self, first_graph, second_graph):
@@ -112,12 +109,8 @@ class GraphComparator(ABC):
         Flatten the matrices of the two graphs and normalize them
         """
         # Get the two matrices and convert them into arrays
-        edges1 = self._graph1.get_matrix().flatten()
-        edges2 = self._graph2.get_matrix().flatten()
-
-        # Set -1 entries to zero
-        #edges1 = np.where((edges1 < 0), edges1 * 0, edges1)
-        #edges2 = np.where((edges2 < 0), edges2 * 0, edges2)
+        edges1 = self._graph1.get_matrix().toarray().flatten()
+        edges2 = self._graph2.get_matrix().toarray().flatten()
 
         # Normalizes the matrices (PDF)
         edges1 = edges1 / (edges1.sum())
@@ -125,29 +118,9 @@ class GraphComparator(ABC):
 
         return edges1, edges2
 
-    def resize_graphs(self):
-        """
-        Compare the nodes of the two graphs and possibly expand them
-        """
-
-        # Union of the nodes
-        union = np.union1d(self._graph1.get_nodes(), self._graph2.get_nodes())
-
-        # Compare the node list and possibly extend the graph(s)
-        for i in range(union.size):
-            nodes = self._graph1.get_nodes()
-            if (nodes.size > i) and (nodes[i] != union[i]) or (nodes.size <= i):
-                self._graph1.expand_graph(i, union[i])
-
-        for i in range(union.size):
-            nodes = self._graph2.get_nodes()
-            if (nodes.size > i) and (nodes[i] != union[i]) or (nodes.size <= i):
-                self._graph2.expand_graph(i, union[i])
-
     @abstractmethod
     def compare_graphs(self):  # signature only because it is overriden
         pass
-
 
 
 #######################################################################
@@ -165,8 +138,8 @@ class GraphHammingDissimilarity(GraphComparator):
         """
 
         # Get just the matrices and convert into arrays
-        first = self._graph1.get_matrix().flatten()
-        second = self._graph2.get_matrix().flatten()
+        first = self._graph1.get_matrix().toarray().flatten()
+        second = self._graph2.get_matrix().toarray().flatten()
         # Just the adjacency matrix
         dim = min(len(first), len(second))
         # Setting a counter vector to zero
@@ -178,6 +151,7 @@ class GraphHammingDissimilarity(GraphComparator):
         distance = 1.0 - np.sum(counter) / float(dim)
 
         return distance  #returns the dissimilarity (distance)
+
 
 '''
 Reference of the following implemented dissimilarity metrics:
@@ -202,9 +176,9 @@ class GraphCosineDissimilarity(GraphComparator):
 
         # Convert into arrays the node frequencies and matrices
         first = np.concatenate(
-            (self._graph1.get_nodes_freq(), self._graph1.get_matrix().flatten()), axis=None)
+            (self._graph1.get_nodes_freq(), self._graph1.get_matrix().toarray().flatten()), axis=None)
         second = np.concatenate(
-            (self._graph2.get_nodes_freq(), self._graph2.get_matrix().flatten()), axis=None)
+            (self._graph2.get_nodes_freq(), self._graph2.get_matrix().toarray().flatten()), axis=None)
     
         # Normalization factor
         nfactor = 1.0
@@ -235,7 +209,7 @@ class GraphJaccardDissimilarity(GraphComparator):
         """
         # Matrices normalization
         first, second = self._normalize_matrices()
- 
+
         # Compute the Jaccard similarity (equal to Peak Correlation Energy)
         sumprod = (first * second).sum()
         quadnorm1 = (first*first).sum()
@@ -300,7 +274,6 @@ class GraphJeffreysDissimilarity(GraphComparator):
         # Matrices normalization
         first, second = self._normalize_matrices()
 
-
         # Compute the Jeffreys of first  w.r.t second 
         
         # Check possible case of division by 0 
@@ -349,9 +322,9 @@ class GraphEuclideanDissimilarity(GraphComparator):
         first, second = self._normalize_matrices()
 
         # Compute the Euclidean distance 
-        eucl = distance.euclidean(first,second)
+        eucl = distance.euclidean(first, second)
 
-        return eucl #returns the dissimilarity (distance)
+        return eucl  # returns the dissimilarity (distance)
 
 class GraphCityblockDissimilarity(GraphComparator):
 

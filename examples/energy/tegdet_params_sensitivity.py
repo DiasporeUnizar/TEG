@@ -32,8 +32,8 @@ list_of_testing = ("normal", "anomalous")
 
 #List of metrics (detector variants)
 #Uncomment these lines to carry out an exhaustive analysis over all the available dissimilarity metrics
-list_of_metrics =   ["Hamming", "Clark" #, "Canberra", "Lorentzian", "Kulczynski", "Divergence", "Cosine"
-                     #"Jaccard", "Dice", "KL", "Jeffreys", "JS", "Euclidean", "Cityblock", 
+list_of_metrics =   ["Hamming", "Clark" , #"Canberra", "Lorentzian", "Kulczynski", "Divergence", "Cosine"
+                     #"Jaccard", "Dice", #"KL", "Jeffreys", "JS", "Euclidean", "Cityblock", 
                      #"Chebyshev", "Minkowski", "Braycurtis", "Gower", "Soergel", "Bhattacharyya", "Hellinger", 
                      #"Matusita", "Squaredchord", "Pearson", "Neyman", "Squared", "Probsymmetric", "Additivesymmetric" 
                     ]
@@ -52,7 +52,7 @@ def build_and_predict(metric, n_bins, n_obs_per_period, alpha):
     #Load training dataset
     train_ds = teg.get_dataset(train_ds_path)
     #Build model
-    model, time2build = teg.build_model(train_ds)
+    model, time2build, time2graphs, time2global, time2metrics = teg.build_model(train_ds)
     for testing in list_of_testing:
         #Path of the testing
         test_ds_path = cwd + TEST_DS_PATH + testing + ".csv"               
@@ -70,7 +70,7 @@ def build_and_predict(metric, n_bins, n_obs_per_period, alpha):
         #Collect detector configuration
         detector = {'metric': metric, 'n_bins': n_bins,'n_obs_per_period':n_obs_per_period,'alpha': alpha}
         #Collect performance metrics in a dictionary
-        perf = {'tmc': time2build, 'tmp': time2predict}
+        perf = {'tmc': time2build, 'tmg': time2graphs, 'tmgl': time2global, 'tmm': time2metrics, 'tmp': time2predict}
         #Print and store basic metrics
         teg.print_metrics(detector, testing, perf, cm)
         results_path = cwd + RESULTS_PATH

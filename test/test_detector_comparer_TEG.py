@@ -1,6 +1,6 @@
 """
 @Author: Simona Bernardi
-@Date: updated 15/10/2022
+@Date: updated 13/09/2024
 
 Input dataset:
 - energy consumption (in KhW), every half-an-hour, registered by a smartmeter.
@@ -38,7 +38,8 @@ list_of_testing = ("normal", "anomalous")
 #List of metrics (detector variants)
 list_of_metrics = [ "Cosine",  "Jaccard", "Hamming", "KL", "Jeffreys", "JS", "Euclidean", 
                     "Cityblock", "Chebyshev", "Minkowski", "Braycurtis", "Kulczynski", 
-                    "Canberra", "Bhattacharyya", "Squared", "Divergence", "Additivesymmetric"]
+                    "Canberra", "Bhattacharyya", "Squared", "Divergence", "Additivesymmetric"
+                    ]
 
 #Parameters of TEG detectors: default values
 n_bins = 30
@@ -63,7 +64,7 @@ def test_generate_results():
 
         
         #Build model
-        model, time2build = teg.build_model(train_ds)
+        model, time2build, time2graphs, time2global, time2metrics = teg.build_model(train_ds)
 
         for testing in list_of_testing:
 
@@ -91,7 +92,7 @@ def test_generate_results():
             detector = {'metric': metric, 'n_bins': n_bins, 'n_obs_per_period':n_obs_per_period, 'alpha': alpha}
 
             #Collect performance metrics in a dictionary
-            perf = {'tmc': time2build, 'tmp': time2predict}
+            perf = {'tmc': time2build, 'tmg': time2graphs, 'tmgl': time2global, 'tmm': time2metrics, 'tmp': time2predict}
 
             #Print and store basic metrics
             teg.print_metrics(detector, testing, perf, cm)
@@ -117,6 +118,21 @@ def test_results():
     cm = ['tp','tn','fp','fn']
     results = results[cm]
     reference = reference[cm]
+
+    # Ensure both DataFrames have the same index and columns
+    results = results.reset_index(drop=True).sort_index(axis=1)
+    reference = reference.reset_index(drop=True).sort_index(axis=1)
+
+    # Find differences
+    try:
+        diff = results.compare(reference)
+        if not diff.empty:
+            print("Differences found between results and reference:")
+            print(diff)
+        else:
+            print("No differences found. Results match the reference.")
+    except ValueError as e:
+        print(f"Error comparing results: {e}")
 
     #Compare results with  the reference results
     assert results.equals(reference), "Results are not equal to the reference results."
