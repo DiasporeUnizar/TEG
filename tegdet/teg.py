@@ -17,7 +17,7 @@ that implements the detectors based on Time Evolving Graph (TEG) and graph dissi
 v1.0.1:
 ---> added private attribute tegg to ModelBuilder and AnomalyDetector
 ---> added private attributes mb and ad to TEGDetector
-v1.0.2:
+v1.1.0:
 ---> added `n_bins` parameter to the `__init__` method of the `TEGGenerator` class to enable the creation of graphs with the same size as the global graph.
 ---> updated `sum_graphs` function in the `ModelBuilder` class to adapt it for sparse matrix operations.
 ---> added `n_bins` parameter to the `__init__` method of the `AnomalyDetector` class to generate graphs with the correct dimensions.
