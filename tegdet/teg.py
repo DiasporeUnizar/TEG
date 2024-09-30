@@ -213,7 +213,7 @@ class TEGGenerator:
             obs_discr_period = observations_discretized[period * n_obs:(period + 1) * n_obs]
             # Transforms to a dataframe (needed to generate the graph)
             df = pd.DataFrame({'Period': period * np.ones(n_obs), 'DP': obs_discr_period})
-            gr = Graph(matrix= np.zeros((n_bins, n_bins), dtype=int))     
+            gr = Graph(np.arange(n_bins, dtype=int), np.zeros((n_bins), dtype=int), np.zeros((n_bins, n_bins), dtype=int))     
             gr.generate_graph(df)
             self.__teg.append(gr)
 

@@ -72,12 +72,6 @@ class Graph:
         # Get unique values and counts
         values, counts = np.unique(attr, return_counts=True)
 
-        # Generate the node vector
-        self.__nodes = np.arange(0, dim)
-
-        # Build a numpyArray with as much 0 as dimension
-        self.__nodes_freq = np.zeros_like(self.__nodes)
-
         # Fill the frequency with the values observated
         self.__nodes_freq[np.isin(self.__nodes, values)] = counts
 
