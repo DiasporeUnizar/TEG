@@ -72,3 +72,10 @@ S. Bernardi, R. Javierre, J. Merseguer, *tegdet: An extensible Python library fo
 
 S. Bernardi, J. Merseguer, R. Javierre, *tegdet: An extensible Python Library for Anomaly Detection using Time-Evolving Graphs*, 
 [CoRR abs/2210.08847 (2022)](https://arxiv.org/abs/2210.08847).
+
+
+## Contributors 
+- Simona Bernardi
+- Raúl Javierre
+- José Merseguer
+- Ángel Villanueva
