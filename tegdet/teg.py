@@ -343,6 +343,90 @@ class ModelBuilder:
         time2metrics = time() - time2metrics
 
         return time2graphs, time2global, time2metrics
+    
+class SlidingWindow:
+    """
+    Sliding Window model based on a incremental change of the data inside
+    """
+
+    def __init__(self, window_size, step_size, model :ModelBuilder):
+        """
+        Constructor that initializes attributes based on the dataset used.
+        """
+        self.__window_size = window_size # Window size (Number of observations)
+        self.__step_size = step_size # Number of observations the window scrolls through
+        self.__current_window = None
+        self.__current_position = 0
+        self.__mb = model
+
+    def initialize_window(self, dataset):
+        """
+        Initializes the window given a dataset
+        """
+        self.__current_window = dataset.iloc[:self.__window_size] # Initial dataset + window size
+        self.__current_position = self.__window_size
+        self.slide_window(dataset) # Moves the window immediately after the original build process
+
+    def slide_window(self, dataset):
+        """
+        Slides the window to a next observation given a dataset
+        """
+        if self.__current_position + self.__step_size <= len(dataset):
+            self.__current_window = dataset.iloc[self.__current_position:self.__current_position + self.__window_size]
+            self.__current_position += self.__step_size
+        else:
+            # if there isn't enough data
+            self.__current_window = None
+        return self.__current_window
+
+    def process_window(self, obs_discr_period, period, n_bins, n_obs):
+        """
+        Process the actual window adding the new observations and eliminates the old data
+        """
+        if self.__current_window is not None:
+            # Get the actual global graph and the old data
+            global_graph = self.__mb.get_global_graph()
+            graphs = self.__mb.__tegg.get_teg()
+            old = graphs.pop(0)
+
+            # Generate the new graph data
+            df = pd.DataFrame({'Period': period * np.ones(n_obs), 'DP': obs_discr_period})
+            new = Graph(np.arange(n_bins, dtype=int), np.zeros((n_bins), dtype=int), np.zeros((n_bins, n_bins), dtype=int))     
+            new.generate_graph(df)
+            graphs.append(new)
+
+            self.__update_data(old,new,global_graph)
+        else:
+            raise ValueError("There is no window specified")
+        
+    def __update_data(self, old, new, global_graph):
+        """
+        Updates the data of the model given the old and new graphs
+        """
+        # Sum the frequency of the new nodes
+        nodes_new = new.get_nodes()
+        nodes_freq_new = new.get_nodes_freq()
+
+        for i, node in enumerate(nodes_new):
+            global_graph.update_node_freq(node, nodes_freq_new[i])
+
+        # Substract the frecuency of the old nodes
+        nodes_old = old.get_nodes()
+        nodes_freq_old = old.get_nodes_freq()
+
+        for i, node in enumerate(nodes_old):
+            global_graph.update_node_freq(node, - nodes_freq_old[i])
+
+        # Get the matrix in CSR format
+        old = old.get_matrix()
+        new = new.get_matrix()
+        global_matrix = global_matrix.get_matrix()
+
+        # Compute the new global_graph
+        global_matrix = ( global_matrix - old ) + new
+
+        # Add the matrix to the global graph
+        global_graph.update_matrix(global_matrix)
 
 
 class AnomalyDetector:
