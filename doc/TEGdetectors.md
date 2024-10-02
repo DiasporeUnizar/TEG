@@ -1,5 +1,7 @@
 # TEG detectors implementation
 
+**Version 1.0.0**
+
 The ```tegdet``` package includes the  modules that implements the TEG detectors:
 - ```teg.py```: it is the main module that includes the API;
 - ```graph_comparison.py```: it includes the graph class and it is responsible to compute the difference between two graphs according to a given metric (variant of strategy pattern). 
