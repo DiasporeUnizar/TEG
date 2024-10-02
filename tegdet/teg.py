@@ -278,6 +278,9 @@ class ModelBuilder:
 
     def get_tegg(self):
         return self.__tegg
+    
+    def update_global(self, new_global):
+        self.__global_graph = new_global
 
     def __sum_graphs(self, gr1, gr2):
         """
@@ -431,6 +434,7 @@ class SlidingWindow:
         # Add the matrix to the global graph
         global_graph.update_matrix(global_matrix)
 
+        self.__mb.update_global(global_graph)
 
 class AnomalyDetector:
     """
