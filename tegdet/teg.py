@@ -51,7 +51,7 @@ class TEGDetector():
         self.__mb = None
         self.__ad = None
 
-    def get_md(self):
+    def get_mb(self):
         return self.__mb;
 
     def get_ad(self):
@@ -379,7 +379,7 @@ class SlidingWindow:
             self.__current_window = None
         return self.__current_window
 
-    def process_window(self, obs_discr_period, period, n_bins, n_obs):
+    def process_window(self, obs_discr_period, n_periods, n_bins, n_obs, metric):
         """
         Process the actual window adding the new observations and eliminates the old data
         """
@@ -390,12 +390,15 @@ class SlidingWindow:
             old = graphs.pop(0)
 
             # Generate the new graph data
-            df = pd.DataFrame({'Period': period * np.ones(n_obs), 'DP': obs_discr_period})
+            df = pd.DataFrame({'Period': len(graphs) + 1, 'DP': obs_discr_period})
             new = Graph(np.arange(n_bins, dtype=int), np.zeros((n_bins), dtype=int), np.zeros((n_bins, n_bins), dtype=int))     
             new.generate_graph(df)
             graphs.append(new)
 
             self.__update_data(old,new,global_graph)
+
+            gdc = GraphDistanceCollector(n_periods)
+            baseline = gdc.compute_graphs_dist(graphs, global_graph, metric)
         else:
             raise ValueError("There is no window specified")
         
