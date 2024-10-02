@@ -426,7 +426,7 @@ class SlidingWindow:
         # Get the matrix in CSR format
         old = old.get_matrix()
         new = new.get_matrix()
-        global_matrix = global_matrix.get_matrix()
+        global_matrix = global_graph.get_matrix()
 
         # Compute the new global_graph
         global_matrix = ( global_matrix - old ) + new
