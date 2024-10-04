@@ -46,7 +46,6 @@ n_bins = 30
 n_obs_per_period=336
 alpha=5
 
-
 def test_generate_results():
 
     cwd = os.getcwd() 
@@ -62,9 +61,11 @@ def test_generate_results():
 
         assert not train_ds.empty, "The training dataset is empty."
 
-        
         #Build model
         model, time2build, time2graphs, time2global, time2metrics = teg.build_model(train_ds)
+
+        # Slide window method after the first build
+        slide_window_scheme = teg.get_sw()
 
         for testing in list_of_testing:
 
@@ -76,8 +77,30 @@ def test_generate_results():
 
             assert not test_ds.empty, "The testing dataset is empty."
 
-            #Make prediction
-            outliers, obs, time2predict = teg.predict(test_ds, model)
+            # Full dataset with test and train
+            full_ds = pd.concat([train_ds, test_ds], ignore_index=True)
+
+            # Initialize the window using the Initial sheme given a test dataset (normal or anomalous)
+            slide_window = slide_window_scheme
+            slide_window.initialize_window(full_ds)
+
+            #Make prediction only on the first week
+            outliers, obs, time2predict = teg.predict(test_ds.head(n_obs_per_period), model)
+
+            # Compute the rest of the weeks on the testing data
+            while True:
+
+                window = slide_window.slide_window(full_ds) # Moves the window immediately after the original build process and the latest one
+
+                if window is None:
+                    #print(f"No more data available for sliding window in dataset {testing}.")
+                    break
+
+                teg.process_window(train_ds, n_bins + 2)
+
+                # Make prediction on latest week
+                model_w = teg.get_mb()
+                outliers, obs, time2predict = teg.predict(window.iloc[-n_obs_per_period:], model_w)
 
             #Set ground true values
             if testing == "anomalous":

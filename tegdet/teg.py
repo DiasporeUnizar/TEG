@@ -50,12 +50,16 @@ class TEGDetector():
         self.__alpha = alpha
         self.__mb = None
         self.__ad = None
+        self.__sw = None
 
     def get_mb(self):
         return self.__mb;
 
     def get_ad(self):
         return self.__ad
+    
+    def get_sw(self):
+        return self.__sw
     
     def get_dataset(self,ds_path):
         """
@@ -78,10 +82,12 @@ class TEGDetector():
         self.__mb = ModelBuilder(obs, self.__n_bins)
         time2graphs, time2global, time2metrics = self.__mb.build_model(self.__metric, int(len(training_dataset.index) / self.__n_obs_per_period))
 
+        self.__sw = SlidingWindow(len(training_dataset) + self.__n_obs_per_period, self.__n_obs_per_period, self.__mb)
+
         return self.__mb, time() - t0, time2graphs, time2global, time2metrics
     
-    def process_window(self, obs_discr_period, n_periods, n_bins, n_obs, metric):
-        pass
+    def process_window(self, training_data, n_bins):
+        return self.__sw.process_window(self.__metric, int(len(training_data.index) / self.__n_obs_per_period), n_bins)
 
     def predict(self, testing_dataset, model):
         """
@@ -376,7 +382,6 @@ class SlidingWindow:
         """
         self.__current_window = dataset.iloc[:self.__window_size] # Initial dataset + window size
         self.__current_position = self.__window_size
-        self.slide_window(dataset) # Moves the window immediately after the original build process
 
     def slide_window(self, dataset):
         """
@@ -389,37 +394,7 @@ class SlidingWindow:
             # if there isn't enough data
             self.__current_window = None
         return self.__current_window
-
-    def process_window(self, n_periods, metric):
-        """
-        Process the actual window adding the new observations and eliminates the old data
-        """
-        if self.__current_window is not None:
-
-            n_bins = len(self.__mb.__le.get_levels())
-            obs_discretized = self.__mb.__le.discretize(self.__mb.__obs)
-            n_obs = int(len(obs_discretized) / n_periods)
-            # Get the actual global graph and the old data
-            old = self.__graphs.pop(0)
-
-            # Generate the new graph data
-            period = len(self.__graphs) + 1
-            obs_discr_period = obs_discretized[period * n_obs:(period + 1) * n_obs]
-            df = pd.DataFrame({'Period': period, 'DP': obs_discr_period})
-            new = Graph(np.arange(n_bins, dtype=int), np.zeros((n_bins), dtype=int), np.zeros((n_bins, n_bins), dtype=int))     
-            new.generate_graph(df)
-            self.__graphs.append(new)
-
-            self.__update_data(old,new, self.__global_graph)
-
-            gdc = GraphDistanceCollector(n_periods)
-            baseline = gdc.compute_graphs_dist(self.__graphs, self.__global_graph, metric)
-
-            # Update data from the model
-            self.__mb.update_data(self.__global_graph, self.__graphs, baseline)
-        else:
-            raise ValueError("There is no window specified")
-        
+    
     def __update_data(self, old, new, global_graph):
         """
         Updates the data of the model given the old and new graphs
@@ -448,6 +423,35 @@ class SlidingWindow:
 
         # Add the matrix to the global graph
         global_graph.update_matrix(global_matrix)
+
+    def process_window(self, metric, n_periods, n_bins):
+        """
+        Process the actual window adding the new observations and eliminates the old data
+        """
+        if self.__current_window is not None:
+
+            obs_discretized = self.__mb._ModelBuilder__le.discretize(self.__mb._ModelBuilder__obs)
+            n_obs = int(len(obs_discretized) / n_periods)
+            # Get the actual global graph and the old data
+            old = self.__graphs.pop(0)
+
+            # Generate the new graph data
+            period = len(self.__graphs)
+            obs_discr_period = obs_discretized[period * n_obs:(period + 1) * n_obs]
+            df = pd.DataFrame({'Period': period, 'DP': obs_discr_period})
+            new = Graph(np.arange(n_bins, dtype=int), np.zeros((n_bins), dtype=int), np.zeros((n_bins, n_bins), dtype=int))     
+            new.generate_graph(df)
+            self.__graphs.append(new)
+
+            self.__update_data(old,new, self.__global_graph)
+
+            gdc = GraphDistanceCollector(n_periods)
+            baseline = gdc.compute_graphs_dist(self.__graphs, self.__global_graph, metric)
+
+            # Update data from the model
+            self.__mb.update_data(self.__global_graph, self.__graphs, baseline)
+        else:
+            raise ValueError("There is no window specified")
 
 
 class AnomalyDetector:
