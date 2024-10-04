@@ -37,7 +37,7 @@ The library can be easily installed from the [PyPi](https://pypi.org/project/teg
 
 In case you clone (or download) this repository, you can install the library using the command:
 
-```$ pip3 install dist/tegdet-1.0.0-py3-none-any.whl```
+```$ pip3 install dist/tegdet-<current-version>-py3-none-any.whl```
 
 
 ## User scripts
@@ -72,3 +72,10 @@ S. Bernardi, R. Javierre, J. Merseguer, *tegdet: An extensible Python library fo
 
 S. Bernardi, J. Merseguer, R. Javierre, *tegdet: An extensible Python Library for Anomaly Detection using Time-Evolving Graphs*, 
 [CoRR abs/2210.08847 (2022)](https://arxiv.org/abs/2210.08847).
+
+
+## Contributors 
+- Simona Bernardi
+- Raúl Javierre
+- José Merseguer
+- Ángel Villanueva

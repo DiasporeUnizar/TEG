@@ -1,12 +1,12 @@
 """
 @Author: Simona Bernardi
-@Date: updated 15/10/2022
+@Date: updated 02/10/2024
 
 The script:
 - Produces the plot of the two testing sets during the first week
 - From the file TEGDET_VARIANTS_RESULTS_PATH
 -- Prints on stdout the statistics of the times to build and to make predictions 
--- Shows the accuracy of the TEG-detectors variants as a barplot
+-- Shows the accuracy of the TEG-detectors variants as a barplot --> minor bug in labels corrected
 - From the file TEGDET_PARAMS_SENSITIVITY_RESULTS_PATH
 For a given TEG-detector variant:
 --- Shows the mean times to build and to execute vs/ n_bins and n_obs_per_period
@@ -93,10 +93,10 @@ def generate_report_teg_variants(cwd):
 
     #Generate barplot
     fig, ax = plt.subplots()
-    y_pos = np.arange(len(detectors))
-    ax.barh(y_pos, accuracy, align='center', color='green', ecolor='black')
-    ax.set_yticks(y_pos)
-    ax.set_yticklabels(detectors,fontsize=10)
+    #y_pos = np.arange(len(detectors))
+    ax.barh(detectors, accuracy, align='center', color='green', ecolor='black')
+    #ax.set_yticks(y_pos)
+    #ax.set_yticklabels(detectors,fontsize=10)
     ax.invert_yaxis()  
     ax.set_xlabel('Accuracy')
     plt.show()
