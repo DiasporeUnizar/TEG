@@ -390,16 +390,22 @@ class SlidingWindow:
             self.__current_window = None
         return self.__current_window
 
-    def process_window(self, obs_discr_period, n_periods, n_bins, n_obs, metric):
+    def process_window(self, n_periods, metric):
         """
         Process the actual window adding the new observations and eliminates the old data
         """
         if self.__current_window is not None:
+
+            n_bins = len(self.__mb.__le.get_levels())
+            obs_discretized = self.__mb.__le.discretize(self.__mb.__obs)
+            n_obs = int(len(obs_discretized) / n_periods)
             # Get the actual global graph and the old data
             old = self.__graphs.pop(0)
 
             # Generate the new graph data
-            df = pd.DataFrame({'Period': len(self.__graphs) + 1, 'DP': obs_discr_period})
+            period = len(self.__graphs) + 1
+            obs_discr_period = obs_discretized[period * n_obs:(period + 1) * n_obs]
+            df = pd.DataFrame({'Period': period, 'DP': obs_discr_period})
             new = Graph(np.arange(n_bins, dtype=int), np.zeros((n_bins), dtype=int), np.zeros((n_bins, n_bins), dtype=int))     
             new.generate_graph(df)
             self.__graphs.append(new)
