@@ -346,6 +346,11 @@ class ModelBuilder:
         time2metrics = time() - time2metrics
 
         return time2graphs, time2global, time2metrics
+    
+    def update_data(self, global_graph, tegs, baseline):
+        self.__global_graph = global_graph
+        self.__tegg = tegs
+        self.__baseline = baseline
 
 
 class SlidingWindow:
@@ -353,7 +358,7 @@ class SlidingWindow:
     Sliding Window model based on a incremental change of the data inside
     """
 
-    def __init__(self, window_size, step_size, global_graph, graphs):
+    def __init__(self, window_size, step_size, model:ModelBuilder):
         """
         Constructor that initializes attributes based on the dataset used.
         """
@@ -361,8 +366,9 @@ class SlidingWindow:
         self.__step_size = step_size # Number of observations the window scrolls through
         self.__current_window = None
         self.__current_position = 0
-        self.__global_graph = global_graph
-        self.__graphs = graphs
+        self.__global_graph = model.get_global_graph()
+        self.__graphs = model.get_tegg().get_teg()
+        self.__mb = model
 
     def initialize_window(self, dataset):
         """
@@ -402,6 +408,9 @@ class SlidingWindow:
 
             gdc = GraphDistanceCollector(n_periods)
             baseline = gdc.compute_graphs_dist(self.__graphs, self.__global_graph, metric)
+
+            # Update data from the model
+            self.__mb.update_data(self.__global_graph, self.__graphs, baseline)
         else:
             raise ValueError("There is no window specified")
         
@@ -433,6 +442,7 @@ class SlidingWindow:
 
         # Add the matrix to the global graph
         global_graph.update_matrix(global_matrix)
+
 
 class AnomalyDetector:
     """
