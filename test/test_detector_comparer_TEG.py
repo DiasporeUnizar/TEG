@@ -69,6 +69,9 @@ def test_generate_results():
 
         for testing in list_of_testing:
 
+            # cm to store all cms generated during sliding window
+            cm_accumulative = {'tp': 0, 'tn': 0, 'fp': 0, 'fn': 0}
+
             #Path of the testing
             test_ds_path = cwd + TEST_DS_PATH + testing + ".csv"
                 
@@ -87,6 +90,21 @@ def test_generate_results():
             #Make prediction only on the first week
             outliers, obs, time2predict = teg.predict(test_ds.head(n_obs_per_period), model)
 
+            #Set ground true values
+            if testing == "anomalous":
+                groundtrue = np.ones(obs)        
+            else:
+                groundtrue = np.zeros(obs)
+
+            #Compute confusion matrix
+            cm = teg.compute_confusion_matrix(groundtrue, outliers)
+
+            # Accumulate the cms
+            cm_accumulative['tp'] += cm['tp']
+            cm_accumulative['tn'] += cm['tn']
+            cm_accumulative['fp'] += cm['fp']
+            cm_accumulative['fn'] += cm['fn']
+
             # Compute the rest of the weeks on the testing data
             while True:
 
@@ -102,14 +120,20 @@ def test_generate_results():
                 model_w = teg.get_mb()
                 outliers, obs, time2predict = teg.predict(window.iloc[-n_obs_per_period:], model_w)
 
-            #Set ground true values
-            if testing == "anomalous":
-                groundtrue = np.ones(obs)        
-            else:
-                groundtrue = np.zeros(obs)
+                #Set ground true values
+                if testing == "anomalous":
+                    groundtrue = np.ones(obs)        
+                else:
+                    groundtrue = np.zeros(obs)
 
-            #Compute confusion matrix
-            cm = teg.compute_confusion_matrix(groundtrue, outliers)
+                #Compute confusion matrix
+                cm = teg.compute_confusion_matrix(groundtrue, outliers)
+
+                # Accumulate the cms
+                cm_accumulative['tp'] += cm['tp']
+                cm_accumulative['tn'] += cm['tn']
+                cm_accumulative['fp'] += cm['fp']
+                cm_accumulative['fn'] += cm['fn']
 
             #Collect detector configuration
             detector = {'metric': metric, 'n_bins': n_bins, 'n_obs_per_period':n_obs_per_period, 'alpha': alpha}
@@ -118,9 +142,9 @@ def test_generate_results():
             perf = {'tmc': time2build, 'tmg': time2graphs, 'tmgl': time2global, 'tmm': time2metrics, 'tmp': time2predict}
 
             #Print and store basic metrics
-            teg.print_metrics(detector, testing, perf, cm)
+            teg.print_metrics(detector, testing, perf, cm_accumulative)
             results_path = cwd + RESULTS_PATH
-            teg.metrics_to_csv(detector, testing, perf, cm, results_path)
+            teg.metrics_to_csv(detector, testing, perf, cm_accumulative, results_path)
 
         assert os.path.exists(results_path), "Results file has not been created."
         assert os.path.getsize(results_path) > 0, "The result file is empty"
