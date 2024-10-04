@@ -79,6 +79,9 @@ class TEGDetector():
         time2graphs, time2global, time2metrics = self.__mb.build_model(self.__metric, int(len(training_dataset.index) / self.__n_obs_per_period))
 
         return self.__mb, time() - t0, time2graphs, time2global, time2metrics
+    
+    def process_window(self, obs_discr_period, n_periods, n_bins, n_obs, metric):
+        pass
 
     def predict(self, testing_dataset, model):
         """
@@ -278,9 +281,6 @@ class ModelBuilder:
 
     def get_tegg(self):
         return self.__tegg
-    
-    def update_global(self, new_global):
-        self.__global_graph = new_global
 
     def __sum_graphs(self, gr1, gr2):
         """
@@ -346,13 +346,14 @@ class ModelBuilder:
         time2metrics = time() - time2metrics
 
         return time2graphs, time2global, time2metrics
-    
+
+
 class SlidingWindow:
     """
     Sliding Window model based on a incremental change of the data inside
     """
 
-    def __init__(self, window_size, step_size, model :ModelBuilder):
+    def __init__(self, window_size, step_size, global_graph, graphs):
         """
         Constructor that initializes attributes based on the dataset used.
         """
@@ -360,7 +361,8 @@ class SlidingWindow:
         self.__step_size = step_size # Number of observations the window scrolls through
         self.__current_window = None
         self.__current_position = 0
-        self.__mb = model
+        self.__global_graph = global_graph
+        self.__graphs = graphs
 
     def initialize_window(self, dataset):
         """
@@ -388,20 +390,18 @@ class SlidingWindow:
         """
         if self.__current_window is not None:
             # Get the actual global graph and the old data
-            global_graph = self.__mb.get_global_graph()
-            graphs = self.__mb.__tegg.get_teg()
-            old = graphs.pop(0)
+            old = self.__graphs.pop(0)
 
             # Generate the new graph data
-            df = pd.DataFrame({'Period': len(graphs) + 1, 'DP': obs_discr_period})
+            df = pd.DataFrame({'Period': len(self.__graphs) + 1, 'DP': obs_discr_period})
             new = Graph(np.arange(n_bins, dtype=int), np.zeros((n_bins), dtype=int), np.zeros((n_bins, n_bins), dtype=int))     
             new.generate_graph(df)
-            graphs.append(new)
+            self.__graphs.append(new)
 
-            self.__update_data(old,new,global_graph)
+            self.__update_data(old,new, self.__global_graph)
 
             gdc = GraphDistanceCollector(n_periods)
-            baseline = gdc.compute_graphs_dist(graphs, global_graph, metric)
+            baseline = gdc.compute_graphs_dist(self.__graphs, self.__global_graph, metric)
         else:
             raise ValueError("There is no window specified")
         
@@ -433,8 +433,6 @@ class SlidingWindow:
 
         # Add the matrix to the global graph
         global_graph.update_matrix(global_matrix)
-
-        self.__mb.update_global(global_graph)
 
 class AnomalyDetector:
     """
