@@ -53,7 +53,10 @@ class TEGDetector():
         self.__sw = None
 
     def get_mb(self):
-        return self.__mb;
+        return self.__mb
+
+    def update_mb(self, model):
+        self.__mb = model
 
     def get_ad(self):
         return self.__ad

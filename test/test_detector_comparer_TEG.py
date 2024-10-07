@@ -69,6 +69,10 @@ def test_generate_results():
 
         for testing in list_of_testing:
 
+            # We preserve the schema from the model built, for anomalous and normal datasets
+            OriginalModel = model
+            teg.update_mb(OriginalModel)
+
             # cm to store all cms generated during sliding window
             cm_accumulative = {'tp': 0, 'tn': 0, 'fp': 0, 'fn': 0}
 
@@ -88,7 +92,7 @@ def test_generate_results():
             slide_window.initialize_window(full_ds)
 
             #Make prediction only on the first week
-            outliers, obs, time2predict = teg.predict(test_ds.head(n_obs_per_period), model)
+            outliers, obs, time2predict = teg.predict(test_ds.head(n_obs_per_period), OriginalModel)
 
             #Set ground true values
             if testing == "anomalous":
