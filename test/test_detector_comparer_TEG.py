@@ -105,6 +105,9 @@ def test_generate_results():
             cm_accumulative['fp'] += cm['fp']
             cm_accumulative['fn'] += cm['fn']
 
+            # Metrics to store the time during window processing
+            time2window = 0
+
             # Compute the rest of the weeks on the testing data
             while True:
 
@@ -114,7 +117,7 @@ def test_generate_results():
                     #print(f"No more data available for sliding window in dataset {testing}.")
                     break
 
-                teg.process_window(train_ds, n_bins + 2)
+                time2window += teg.process_window(train_ds, n_bins + 2)
 
                 # Make prediction on latest week
                 model_w = teg.get_mb()
@@ -139,7 +142,7 @@ def test_generate_results():
             detector = {'metric': metric, 'n_bins': n_bins, 'n_obs_per_period':n_obs_per_period, 'alpha': alpha}
 
             #Collect performance metrics in a dictionary
-            perf = {'tmc': time2build, 'tmg': time2graphs, 'tmgl': time2global, 'tmm': time2metrics, 'tmp': time2predict}
+            perf = {'tmc': time2build, 'tmg': time2graphs, 'tmgl': time2global, 'tmm': time2metrics, 'tmp': time2predict, 'tmw': time2window}
 
             #Print and store basic metrics
             teg.print_metrics(detector, testing, perf, cm_accumulative)

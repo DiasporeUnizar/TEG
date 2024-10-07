@@ -87,7 +87,10 @@ class TEGDetector():
         return self.__mb, time() - t0, time2graphs, time2global, time2metrics
     
     def process_window(self, training_data, n_bins):
-        return self.__sw.process_window(self.__metric, int(len(training_data.index) / self.__n_obs_per_period), n_bins)
+        # Time to process the current window
+        t0 = time()
+        self.__sw.process_window(self.__metric, int(len(training_data.index) / self.__n_obs_per_period), n_bins)
+        return time() - t0
 
     def predict(self, testing_dataset, model):
         """
@@ -131,6 +134,7 @@ class TEGDetector():
         print("Time to compute global graph:\t", perf['tmgl'], "seconds")
         print("Time to compute all metrics:\t", perf['tmm'], "seconds")
         print("Time to make prediction:\t", perf['tmp'], "seconds")
+        print("Time to process all windows:\t", perf['tmw'], "seconds")
         print("Confusion matrix:\t\n\n", cm)
 
     def metrics_to_csv(self, detector, testing_set, perf, cm,results_csv_path):
@@ -150,6 +154,7 @@ class TEGDetector():
                            'time2global': perf['tmgl'],
                            'time2metrics': perf['tmm'],
                            'time2predict': perf['tmp'],
+                           'time2window': perf['tmw'],
                            'tp': cm['tp'],
                            'tn': cm['tn'],
                            'fp': cm['fp'],
