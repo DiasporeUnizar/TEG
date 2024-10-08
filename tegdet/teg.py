@@ -23,6 +23,9 @@ v1.1.0:
 ---> added `n_bins` parameter to the `__init__` method of the `AnomalyDetector` class to generate graphs with the correct dimensions.
 ---> changed the `build_model` function in the `ModelBuilder` class to measure different times taking part in the construction of a model
 ---> changed the `print_metrics` and `metrics_to_csv` functions in the `TEGDetector` class to print a more exhaustive report
+v1.1.1:
+---> added the new class `Sliding Window` to perform the new training and test process
+---> updated `TEGDetector`, adding the `update_mb` method to update model data and `ModelBuilder` class adding the `update_data` to update the data of the model
 """
 
 from time import time
