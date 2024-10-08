@@ -56,7 +56,10 @@ def build_and_predict(metric):
     #Build model
     model, time2build, time2graphs, time2global, time2metrics = tegd.build_model(train)
 
-    ############### This part should be implemented as a new API to export the teg
+    # Slide window method after the first build
+    slide_window_scheme = tegd.get_sw()
+
+    '''############### This part should be implemented as a new API to export the teg
     tegg_path = cwd + "/script_results/energy/tegg_training.txt"
     f = open(tegg_path,'a')
 
@@ -70,13 +73,13 @@ def build_and_predict(metric):
  
     # Global graph
     print("Global graph:", matrix_global)
-    np.savetxt(f,matrix_global, fmt='%.1f', delimiter=" ", newline= " ")
+    np.savetxt(f,matrix_global.toarray().flatten(), fmt='%.1f', delimiter=" ", newline= " ")
     
     # Graphs of the training period
     for g in range(n):
         matrix = teg[g].get_matrix()
         print(matrix)
-        np.savetxt(f,matrix, fmt='%.1f', delimiter=" ", newline= " ")
+        np.savetxt(f,matrix.toarray().flatten(), fmt='%.1f', delimiter=" ", newline= " ")
         f.write("\n")
 
     f.close()
@@ -89,17 +92,32 @@ def build_and_predict(metric):
     print("Baseline:", baseline)
     f.close()
  
-    #######################################
+    #######################################'''
 
 
     for (test_set, test_type) in zip(TEST_DS_PATH, list_of_testing):
+
+        # We preserve the schema from the model built, for anomalous and normal datasets
+        OriginalModel = model
+        tegd.update_mb(OriginalModel)
+
+        # cm to store all cms generated during sliding window
+        cm_accumulative = {'tp': 0, 'tn': 0, 'fp': 0, 'fn': 0}
 
         #Path of the testing
         test_path = cwd + test_set             
         #Load testing dataset
         test = tegd.get_dataset(test_path)
+
+        # Full dataset with test and train
+        full_ds = pd.concat([train, test], ignore_index=True)
+
+        # Initialize the window using the Initial sheme given a test dataset (normal or anomalous)
+        slide_window = slide_window_scheme
+        slide_window.initialize_window(full_ds)
+
         #Make prediction
-        outliers, n_periods, time2predict = tegd.predict(test, model)
+        outliers, n_periods, time2predict = tegd.predict(test.head(n_obs_per_period), model)
         #Set ground true values
         if test_type == "normal":
             ground_true = np.zeros(n_periods)        
@@ -109,17 +127,56 @@ def build_and_predict(metric):
         #Compute confusion matrix
         cm = tegd.compute_confusion_matrix(ground_true, outliers)
 
+        # Accumulate the cms
+        cm_accumulative['tp'] += cm['tp']
+        cm_accumulative['tn'] += cm['tn']
+        cm_accumulative['fp'] += cm['fp']
+        cm_accumulative['fn'] += cm['fn']
+
+        # Metrics to store the time during window processing
+        time2window = 0
+
+        # Compute the rest of the weeks on the testing data
+        while True:
+
+            window = slide_window.slide_window(full_ds) # Moves the window immediately after the original build process and the latest one
+
+            if window is None:
+                #print(f"No more data available for sliding window in dataset {testing}.")
+                break
+
+            time2window += tegd.process_window(train, n_bins + 2)
+
+            # Make prediction on latest week
+            model_w = tegd.get_mb()
+            outliers, obs, time2predict = tegd.predict(window.iloc[-n_obs_per_period:], model_w)
+
+            #Set ground true values
+            if test_type == "normal":
+                ground_true = np.zeros(n_periods)        
+            else:
+                ground_true = np.ones(n_periods)
+
+            #Compute confusion matrix
+            cm = tegd.compute_confusion_matrix(ground_true, outliers)
+
+            # Accumulate the cms
+            cm_accumulative['tp'] += cm['tp']
+            cm_accumulative['tn'] += cm['tn']
+            cm_accumulative['fp'] += cm['fp']
+            cm_accumulative['fn'] += cm['fn']
+
         #Collect detector configuration
         detector = {'metric': metric, 'n_bins': n_bins, 'n_obs_per_period':n_obs_per_period, 'alpha': alpha}
         #Collect performance metrics in a dictionary
-        perf = {'tmc': time2build, 'tmg': time2graphs, 'tmgl': time2global, 'tmm': time2metrics, 'tmp': time2predict}
+        perf = {'tmc': time2build, 'tmg': time2graphs, 'tmgl': time2global, 'tmm': time2metrics, 'tmp': time2predict, 'tmw': time2window }
 
         #Print and store basic metrics
         tegd.print_metrics(detector, test_type, perf, cm)
         results_path = cwd + RESULTS_PATH
         tegd.metrics_to_csv(detector, test_type, perf, cm, results_path)
 
-        ############### This part should be implemented as a new API to export the teg
+        '''############### This part should be implemented as a new API to export the teg
         tegg_path = cwd + "/script_results/energy/tegg_testing.txt"
         f = open(tegg_path,'a')
 
@@ -142,7 +199,7 @@ def build_and_predict(metric):
 
         f.close()
 
-        ###############
+        ###############'''
         
 if __name__ == '__main__':
 
