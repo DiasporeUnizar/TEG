@@ -56,17 +56,25 @@ def generate_report_teg_variants(cwd):
     results_path = cwd + TEGDET_VARIANTS_RESULTS_PATH
     df = pd.read_csv(results_path)   
     #Remove parameters and testing_set columns
-    df = df[['detector','time2build','time2predict','tp','tn','fp','fn']]
+    df = df[['detector','time2build', 'time2graphs', 'time2global', 'time2metrics','time2predict','time2window','tp','tn','fp','fn']]
     #Group by detector and takes the sum (of the two testing sets results)
     df_grouped = df.groupby('detector').sum()
     
 
     #Extract execution times (in ms.: sum_of_the_times / 2 * 1000)
     time2build = df_grouped['time2build'] * 500
+    time2graphs = df_grouped['time2graphs'] * 500
+    time2global = df_grouped['time2global'] * 500
+    time2metrics = df_grouped['time2metrics'] * 500
     time2predict = df_grouped['time2predict'] * 500
+    time2window = df_grouped['time2window'] * 500
     #Timing statistics on stdout
     print("Time to build the model (ms):", time2build.describe())
+    print("Time to generate TEGs (ms):", time2graphs.describe())
+    print("Time to compute global graph (ms):", time2global.describe())
+    print("Time to compute metrics (ms):", time2metrics.describe())
     print("Time to make predictions: (ms)", time2predict.describe())
+    print("Time to process all windows: (ms)", time2window.describe())
     print("------------------------------------------------------")
 
     #Get the detectors list

@@ -23,6 +23,9 @@ v1.1.0:
 ---> added `n_bins` parameter to the `__init__` method of the `AnomalyDetector` class to generate graphs with the correct dimensions.
 ---> changed the `build_model` function in the `ModelBuilder` class to measure different times taking part in the construction of a model
 ---> changed the `print_metrics` and `metrics_to_csv` functions in the `TEGDetector` class to print a more exhaustive report
+v1.1.1:
+---> added the new class `Sliding Window` to perform the new training and test process
+---> updated `TEGDetector`, adding the `update_mb` method to update model data and `ModelBuilder` class adding the `update_data` to update the data of the model
 """
 
 from time import time
@@ -50,12 +53,19 @@ class TEGDetector():
         self.__alpha = alpha
         self.__mb = None
         self.__ad = None
+        self.__sw = None
 
-    def get_md(self):
-        return self.__mb;
+    def get_mb(self):
+        return self.__mb
+
+    def update_mb(self, model):
+        self.__mb = model
 
     def get_ad(self):
         return self.__ad
+    
+    def get_sw(self):
+        return self.__sw
     
     def get_dataset(self,ds_path):
         """
@@ -78,7 +88,15 @@ class TEGDetector():
         self.__mb = ModelBuilder(obs, self.__n_bins)
         time2graphs, time2global, time2metrics = self.__mb.build_model(self.__metric, int(len(training_dataset.index) / self.__n_obs_per_period))
 
+        self.__sw = SlidingWindow(len(training_dataset) + self.__n_obs_per_period, self.__n_obs_per_period, self.__mb)
+
         return self.__mb, time() - t0, time2graphs, time2global, time2metrics
+    
+    def process_window(self, training_data, n_bins):
+        # Time to process the current window
+        t0 = time()
+        self.__sw.process_window(self.__metric, int(len(training_data.index) / self.__n_obs_per_period), n_bins)
+        return time() - t0
 
     def predict(self, testing_dataset, model):
         """
@@ -122,6 +140,7 @@ class TEGDetector():
         print("Time to compute global graph:\t", perf['tmgl'], "seconds")
         print("Time to compute all metrics:\t", perf['tmm'], "seconds")
         print("Time to make prediction:\t", perf['tmp'], "seconds")
+        print("Time to process all windows:\t", perf['tmw'], "seconds")
         print("Confusion matrix:\t\n\n", cm)
 
     def metrics_to_csv(self, detector, testing_set, perf, cm,results_csv_path):
@@ -141,6 +160,7 @@ class TEGDetector():
                            'time2global': perf['tmgl'],
                            'time2metrics': perf['tmm'],
                            'time2predict': perf['tmp'],
+                           'time2window': perf['tmw'],
                            'tp': cm['tp'],
                            'tn': cm['tn'],
                            'fp': cm['fp'],
@@ -343,6 +363,106 @@ class ModelBuilder:
         time2metrics = time() - time2metrics
 
         return time2graphs, time2global, time2metrics
+    
+    def update_data(self, global_graph, tegs, baseline):
+        self.__global_graph = global_graph
+        self.__tegg = tegs
+        self.__baseline = baseline
+
+
+class SlidingWindow:
+    """
+    Sliding Window model based on a incremental change of the data inside
+    """
+
+    def __init__(self, window_size, step_size, model:ModelBuilder):
+        """
+        Constructor that initializes attributes based on the dataset used.
+        """
+        self.__window_size = window_size # Window size (Number of observations)
+        self.__step_size = step_size # Number of observations the window scrolls through
+        self.__current_window = None
+        self.__current_position = 0
+        self.__global_graph = model.get_global_graph()
+        self.__graphs = model.get_tegg().get_teg()
+        self.__mb = model
+
+    def initialize_window(self, dataset):
+        """
+        Initializes the window given a dataset
+        """
+        self.__current_window = dataset.iloc[:self.__window_size] # Initial dataset + window size
+        self.__current_position = self.__window_size
+
+    def slide_window(self, dataset):
+        """
+        Slides the window to a next observation given a dataset
+        """
+        if self.__current_position + self.__step_size <= len(dataset):
+            self.__current_window = dataset.iloc[self.__current_position:self.__current_position + self.__window_size]
+            self.__current_position += self.__step_size
+        else:
+            # if there isn't enough data
+            self.__current_window = None
+        return self.__current_window
+    
+    def __update_data(self, old, new, global_graph):
+        """
+        Updates the data of the model given the old and new graphs
+        """
+        # Sum the frequency of the new nodes
+        nodes_new = new.get_nodes()
+        nodes_freq_new = new.get_nodes_freq()
+
+        for i, node in enumerate(nodes_new):
+            global_graph.update_node_freq(node, nodes_freq_new[i])
+
+        # Substract the frecuency of the old nodes
+        nodes_old = old.get_nodes()
+        nodes_freq_old = old.get_nodes_freq()
+
+        for i, node in enumerate(nodes_old):
+            global_graph.update_node_freq(node, - nodes_freq_old[i])
+
+        # Get the matrix in CSR format
+        old = old.get_matrix()
+        new = new.get_matrix()
+        global_matrix = global_graph.get_matrix()
+
+        # Compute the new global_graph
+        global_matrix = ( global_matrix - old ) + new
+
+        # Add the matrix to the global graph
+        global_graph.update_matrix(global_matrix)
+
+    def process_window(self, metric, n_periods, n_bins):
+        """
+        Process the actual window adding the new observations and eliminates the old data
+        """
+        if self.__current_window is not None:
+
+            obs_discretized = self.__mb._ModelBuilder__le.discretize(self.__mb._ModelBuilder__obs)
+            n_obs = int(len(obs_discretized) / n_periods)
+            # Get the actual global graph and the old data
+            old = self.__graphs.pop(0)
+
+            # Generate the new graph data
+            period = len(self.__graphs)
+            obs_discr_period = obs_discretized[period * n_obs:(period + 1) * n_obs]
+            df = pd.DataFrame({'Period': period, 'DP': obs_discr_period})
+            new = Graph(np.arange(n_bins, dtype=int), np.zeros((n_bins), dtype=int), np.zeros((n_bins, n_bins), dtype=int))     
+            new.generate_graph(df)
+            self.__graphs.append(new)
+
+            self.__update_data(old,new, self.__global_graph)
+
+            gdc = GraphDistanceCollector(n_periods)
+            baseline = gdc.compute_graphs_dist(self.__graphs, self.__global_graph, metric)
+
+            # Update data from the model
+            self.__mb.update_data(self.__global_graph, self.__graphs, baseline)
+        else:
+            raise ValueError("There is no window specified")
 
 
 class AnomalyDetector:
