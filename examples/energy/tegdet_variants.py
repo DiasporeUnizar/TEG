@@ -48,14 +48,7 @@ def build_and_predict(metric):
     #Build model
     model, time2build, time2graphs, time2global, time2metrics = tegd.build_model(train)
 
-    # Slide window method after the first build
-    slide_window_scheme = tegd.get_sw()
-
     for testing in list_of_testing:
-
-        # We preserve the schema from the model built, for anomalous and normal datasets
-        OriginalModel = model
-        tegd.update_mb(OriginalModel)
 
         # cm to store all cms generated during sliding window
         cm_accumulative = {'tp': 0, 'tn': 0, 'fp': 0, 'fn': 0}
@@ -69,11 +62,10 @@ def build_and_predict(metric):
         full_ds = pd.concat([train, test], ignore_index=True)
 
         # Initialize the window using the Initial sheme given a test dataset (normal or anomalous)
-        slide_window = slide_window_scheme
-        slide_window.initialize_window(full_ds)
+        tegd.initialize_window(full_ds)
 
         #Make prediction
-        outliers, n_periods, time2predict = tegd.predict(test.head(n_obs_per_period), OriginalModel)
+        outliers, n_periods, time2predict = tegd.predict(test.head(n_obs_per_period), model)
         #Set ground true values
         if testing == "anomalous":
             ground_true = np.ones(n_periods)        
@@ -95,7 +87,7 @@ def build_and_predict(metric):
         # Compute the rest of the weeks on the testing data
         while True:
 
-            window = slide_window.slide_window(full_ds) # Moves the window immediately after the original build process and the latest one
+            window = tegd.slide_window(full_ds) # Moves the window immediately after the original build process and the latest one
 
             if window is None:
                 #print(f"No more data available for sliding window in dataset {testing}.")
@@ -104,8 +96,7 @@ def build_and_predict(metric):
             time2window += tegd.process_window(train, n_bins + 2)
 
             # Make prediction on latest week
-            model_w = tegd.get_mb()
-            outliers, obs, time2predict = tegd.predict(window.iloc[-n_obs_per_period:], model_w)
+            outliers, obs, time2predict = tegd.predict(window.iloc[-n_obs_per_period:], model)
 
             #Set ground true values
             if testing == "anomalous":

@@ -75,8 +75,13 @@ class TEGDetector():
         df = pd.read_csv(ds_path)
         df.columns = ['TS','DP']
         return df
+    
+    def initialize_window(self, dataset):
+        self.__sw.initialize_window(dataset)
 
-
+    def slide_window(self, dataset):
+        self.__sw.slide_window(dataset)
+    
     def build_model(self, training_dataset):
         """
         Build the prediction model based on the "training_dataset" and return it together with
