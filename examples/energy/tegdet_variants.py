@@ -61,37 +61,14 @@ def build_and_predict(metric):
         # Full dataset with test and train
         full_ds = pd.concat([train, test], ignore_index=True)
 
-        # Initialize the window using the Initial sheme given a test dataset (normal or anomalous)
-        tegd.initialize_window(full_ds)
-
-        #Make prediction
-        outliers, n_periods, time2predict = tegd.predict(test.head(n_obs_per_period), model)
-        #Set ground true values
-        if testing == "anomalous":
-            ground_true = np.ones(n_periods)        
-        else:
-            ground_true = np.zeros(n_periods)
-
-        #Compute confusion matrix
-        cm = tegd.compute_confusion_matrix(ground_true, outliers)
-
-        # Accumulate the cms
-        cm_accumulative['tp'] += cm['tp']
-        cm_accumulative['tn'] += cm['tn']
-        cm_accumulative['fp'] += cm['fp']
-        cm_accumulative['fn'] += cm['fn']
+        # Initialize the window using the Initial scheme given a test dataset (normal or anomalous)
+        window = tegd.initialize_window(full_ds)
 
         # Metrics to store the time during window processing
         time2window = 0
 
         # Compute the rest of the weeks on the testing data
-        while True:
-
-            window = tegd.slide_window(full_ds) # Moves the window immediately after the original build process and the latest one
-
-            if window is None:
-                #print(f"No more data available for sliding window in dataset {testing}.")
-                break
+        while window is not None:
 
             time2window += tegd.process_window(train, n_bins + 2)
 
@@ -112,6 +89,8 @@ def build_and_predict(metric):
             cm_accumulative['tn'] += cm['tn']
             cm_accumulative['fp'] += cm['fp']
             cm_accumulative['fn'] += cm['fn']
+
+            window = tegd.slide_window(full_ds) # Moves the window immediately after the original build process and the latest one
 
         #Collect detector configuration
         detector = {'metric': metric, 'n_bins': n_bins, 'n_obs_per_period':n_obs_per_period, 'alpha': alpha}

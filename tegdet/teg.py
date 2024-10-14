@@ -77,7 +77,7 @@ class TEGDetector():
         return df
     
     def initialize_window(self, dataset):
-        self.__sw.initialize_window(dataset)
+        return self.__sw.initialize_window(dataset)
 
     def slide_window(self, dataset):
         return self.__sw.slide_window(dataset)
@@ -394,6 +394,8 @@ class SlidingWindow:
         self.__current_window = dataset.iloc[:self.__window_size] # Initial dataset + window size
         self.__current_position = self.__window_size
 
+        return self.__current_window
+
     def slide_window(self, dataset):
         """
         Slides the window to a next observation given a dataset
@@ -439,7 +441,8 @@ class SlidingWindow:
         """
         Process the actual window adding the new observations and eliminates the old data
         """
-        if self.__current_window is not None:
+        # If the actual window is not None and the position is not the initial one we process the window.
+        if self.__current_window is not None and self.__current_position != self.__step_size:
 
             obs_discretized = self.__mb.get_level_extractor().discretize(self.__mb.get_obs())
             n_obs = int(len(obs_discretized) / n_periods)
