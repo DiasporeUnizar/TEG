@@ -101,7 +101,8 @@ def build_and_predict(metric):
         tegd.print_metrics(detector, testing, perf, cm_accumulative)
         results_path = cwd + RESULTS_PATH
         tegd.metrics_to_csv(detector, testing, perf, cm_accumulative, results_path)
-        
+
+
 if __name__ == '__main__':
 
     for metric in list_of_metrics:
