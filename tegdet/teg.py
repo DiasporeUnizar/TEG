@@ -1,6 +1,6 @@
 """
 @Authors: Simona Bernardi, Raúl Javierre, Ángel Villanueva
-@Date: 13/09/2024
+@Date: 14/10/2024
 
 teg module 
 This modules includes the following classes:
@@ -11,6 +11,7 @@ This modules includes the following classes:
 - GraphDistanceCollector
 - ModelBuilder
 - AnomalyDetector
+- Sliding Window
 
 that implements the detectors based on Time Evolving Graph (TEG) and graph dissimilarity distribution.
 
@@ -23,9 +24,14 @@ v1.1.0:
 ---> added `n_bins` parameter to the `__init__` method of the `AnomalyDetector` class to generate graphs with the correct dimensions.
 ---> changed the `build_model` function in the `ModelBuilder` class to measure different times taking part in the construction of a model
 ---> changed the `print_metrics` and `metrics_to_csv` functions in the `TEGDetector` class to print a more exhaustive report
-v1.1.1:
+v1.1.1: --> possibly update the version (¿major changes? ¿v2.0.0?)
 ---> added the new class `Sliding Window` to perform the new training and test process
----> updated `TEGDetector`, adding the `update_mb` method to update model data and `ModelBuilder` class adding the `update_data` to update the data of the model
+---> updated `TEGDetector`, new APIs:
+        `update_mb`  to update the model 
+        ... 
+    Old API "build_model" has been changed
+---> updated `ModelBuilder` class adding the `update_data` to update the data of the model 
+    ¿Has it been changed? 
 """
 
 from time import time
@@ -297,8 +303,8 @@ class ModelBuilder:
 
     def __sum_graphs(self, gr1, gr2):
         """
-        Pre: Graph "gr1" nodes set includes graph "gr2" nodes set
-        Post: Added the graph "gr2" to graph "gr1" by summing their adjacency matrices directly.
+        Pre: Graph "gr1" nodes and graph "gr2" nodes have the same set of nodes
+        Post: Added the graph "gr2" to graph "gr1" by summing their matrices directly.
         """
         # Sum the frequency of the nodes
         nodes = gr2.get_nodes()
@@ -408,7 +414,7 @@ class SlidingWindow:
             self.__current_window = None
         return self.__current_window
     
-    def __update_data(self, old, new, global_graph):
+    def __update_global_graph(self, old, new, global_graph):
         """
         Updates the data of the model given the old and new graphs
         """
@@ -459,7 +465,7 @@ class SlidingWindow:
             new.generate_graph(df)
             graphs.append(new)
 
-            self.__update_data(old,new, self.__global_graph)
+            self.__update_global_graph(old,new, self.__global_graph)
 
             gdc = GraphDistanceCollector(n_periods)
             self.__baseline = gdc.compute_graphs_dist(graphs, self.__global_graph, metric)
