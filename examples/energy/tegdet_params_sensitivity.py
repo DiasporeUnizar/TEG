@@ -58,9 +58,6 @@ def build_and_predict(metric, n_bins, n_obs_per_period, alpha):
     slide_window_scheme = teg.get_sw()
 
     for testing in list_of_testing:
-        # We preserve the schema from the model built, for anomalous and normal datasets
-        OriginalModel = model
-        teg.update_mb(OriginalModel)
 
         # cm to store all cms generated during sliding window
         cm_accumulative = {'tp': 0, 'tn': 0, 'fp': 0, 'fn': 0}
@@ -73,43 +70,19 @@ def build_and_predict(metric, n_bins, n_obs_per_period, alpha):
         # Full dataset with test and train
         full_ds = pd.concat([train_ds, test_ds], ignore_index=True)
 
-        # Initialize the window using the Initial sheme given a test dataset (normal or anomalous)
-        slide_window = slide_window_scheme
-        slide_window.initialize_window(full_ds)
-
-        #Make prediction
-        outliers, obs, time2predict = teg.predict(test_ds.head(n_obs_per_period), OriginalModel)
-        #Set ground true values
-        if testing == "anomalous":
-            groundtrue = np.ones(obs)        
-        else:
-            groundtrue = np.zeros(obs)
-        #Compute confusion matrix
-        cm = teg.compute_confusion_matrix(groundtrue, outliers)
-
-        # Accumulate the cms
-        cm_accumulative['tp'] += cm['tp']
-        cm_accumulative['tn'] += cm['tn']
-        cm_accumulative['fp'] += cm['fp']
-        cm_accumulative['fn'] += cm['fn']
+        # Initialize the window using the Initial scheme given a test dataset (normal or anomalous)
+        window = teg.initialize_window(full_ds)
 
         # Metrics to store the time during window processing
         time2window = 0
 
         # Compute the rest of the weeks on the testing data
-        while True:
-
-            window = slide_window.slide_window(full_ds) # Moves the window immediately after the original build process and the latest one
-
-            if window is None:
-                #print(f"No more data available for sliding window in dataset {testing}.")
-                break
+        while window is not None:
 
             time2window += teg.process_window(train_ds, n_bins + 2)
 
             # Make prediction on latest week
-            model_w = teg.get_mb()
-            outliers, obs, time2predict = teg.predict(window.iloc[-n_obs_per_period:], model_w)
+            outliers, obs, time2predict = teg.predict(window.iloc[-n_obs_per_period:], model)
 
             #Set ground true values
             if testing == "anomalous":
@@ -125,6 +98,8 @@ def build_and_predict(metric, n_bins, n_obs_per_period, alpha):
             cm_accumulative['tn'] += cm['tn']
             cm_accumulative['fp'] += cm['fp']
             cm_accumulative['fn'] += cm['fn']
+
+            window = teg.slide_window(full_ds) # Moves the window immediately after the original build process and the latest one
 
         #Collect detector configuration
         detector = {'metric': metric, 'n_bins': n_bins,'n_obs_per_period':n_obs_per_period,'alpha': alpha}
