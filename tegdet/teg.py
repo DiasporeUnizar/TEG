@@ -26,9 +26,7 @@ v1.1.0:
 ---> changed the `print_metrics` and `metrics_to_csv` functions in the `TEGDetector` class to print a more exhaustive report
 v1.1.1: --> possibly update the version (¿major changes? ¿v2.0.0?)
 ---> added the new class `Sliding Window` to perform the new training and test process
----> updated `TEGDetector`, new APIs:
-        `update_mb`  to update the model 
-        ... 
+---> updated `TEGDetector`,
     Old API "build_model" has been changed
 ---> updated `ModelBuilder` class adding the `update_data` to update the data of the model 
     ¿Has it been changed? 
@@ -66,9 +64,6 @@ class TEGDetector():
 
     def get_mb(self):
         return self.__mb
-
-    def update_mb(self, model):
-        self.__mb = model
 
     def get_ad(self):
         return self.__ad
