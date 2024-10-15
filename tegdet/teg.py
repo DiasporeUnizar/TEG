@@ -27,9 +27,8 @@ v1.1.0:
 v1.1.1: --> possibly update the version (¿major changes? ¿v2.0.0?)
 ---> added the new class `Sliding Window` to perform the new training and test process
 ---> updated `TEGDetector`,
+    New API added `get_sw`, `initialize_window`, `slide_window` and `process_window` functions
     Old API "build_model" has been changed
----> updated `ModelBuilder` class adding the `update_data` to update the data of the model 
-    ¿Has it been changed? 
 """
 
 from time import time
