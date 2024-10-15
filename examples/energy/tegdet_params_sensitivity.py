@@ -54,9 +54,6 @@ def build_and_predict(metric, n_bins, n_obs_per_period, alpha):
     #Build model
     model, time2build, time2graphs, time2global, time2metrics = teg.build_model(train_ds)
 
-    # Slide window method after the first build
-    slide_window_scheme = teg.get_sw()
-
     for testing in list_of_testing:
 
         # cm to store all cms generated during sliding window
