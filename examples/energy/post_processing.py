@@ -63,7 +63,7 @@ def generate_report_teg_variants(cwd):
     results_path = cwd + TEGDET_VARIANTS_RESULTS_PATH
     df = pd.read_csv(results_path)   
     #Remove parameters and testing_set columns
-    df = df[['detector','time2build', 'time2graphs', 'time2global', 'time2metrics','time2predict','tp','tn','fp','fn']]
+    df = df[['detector','time2build', 'time2graphs', 'time2global', 'time2metrics','time2predict','time2window','tp','tn','fp','fn']]
     #Group by detector and takes the sum (of the two testing sets results)
     df_grouped = df.groupby('detector').sum()
     
@@ -74,12 +74,14 @@ def generate_report_teg_variants(cwd):
     time2global = df_grouped['time2global'] * 500
     time2metrics = df_grouped['time2metrics'] * 500
     time2predict = df_grouped['time2predict'] * 500
+    time2window = df_grouped['time2window'] * 500
     #Timing statistics on stdout
     print("Time to build the model (ms):", time2build.describe())
     print("Time to generate TEGs (ms):", time2graphs.describe())
     print("Time to compute global graph (ms):", time2global.describe())
     print("Time to compute metrics (ms):", time2metrics.describe())
     print("Time to make predictions: (ms)", time2predict.describe())
+    print("Time to process all windows: (ms)", time2window.describe())
     print("------------------------------------------------------")
 
     #Get the detectors list
@@ -152,7 +154,7 @@ def generate_report_params_sensitivity(cwd,detector):
 
     #Remove detector and testing_set columns
     df = df[['n_bins','n_obs_per_period','alpha','time2build', 'time2graphs', 'time2global',
-            'time2metrics','time2predict','tp','tn','fp','fn']]
+            'time2metrics','time2predict', 'time2window','tp','tn','fp','fn']]
  
     #Performance sensitivity analysis
     #Get parameters ranges
@@ -162,7 +164,7 @@ def generate_report_params_sensitivity(cwd,detector):
 
     #Remove alpha and confusion matrix columns
     df_view = df[['n_bins','n_obs_per_period','time2build','time2graphs', 'time2global',
-            'time2metrics','time2predict']]
+            'time2metrics','time2predict','time2window']]
 
     #Group by parameter configuration and take mean times (converted in ms: * 1000)
     df_grouped = df_view.groupby(['n_obs_per_period','n_bins']).mean() * 1000 
@@ -174,6 +176,7 @@ def generate_report_params_sensitivity(cwd,detector):
     tmgl = df_grouped['time2global'].to_numpy()
     tmm = df_grouped['time2metrics'].to_numpy()
     tmp = df_grouped['time2predict'].to_numpy()
+    tmw = df_grouped['time2window'].to_numpy()
     df_grouped = df_view.groupby(['n_obs_per_period','n_bins']).mean()
 
     #Plot performance figures    
@@ -182,6 +185,7 @@ def generate_report_params_sensitivity(cwd,detector):
     plot_3D("n_bins","n_obs_per_period","time2global (ms)",n_bins,n_obs,tmgl)
     plot_3D("n_bins","n_obs_per_period","time2metrics (ms)",n_bins,n_obs,tmm)
     plot_3D("n_bins","n_obs_per_period","time2predict (ms)",n_bins,n_obs,tmp)
+    plot_3D("n_bins","n_obs_per_period","time2window (ms)",n_bins,n_obs,tmw)
 
 
     #Accuracy sensitivity analysis

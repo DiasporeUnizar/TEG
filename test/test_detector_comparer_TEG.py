@@ -46,7 +46,6 @@ n_bins = 30
 n_obs_per_period=336
 alpha=5
 
-
 def test_generate_results():
 
     cwd = os.getcwd() 
@@ -62,11 +61,20 @@ def test_generate_results():
 
         assert not train_ds.empty, "The training dataset is empty."
 
-        
         #Build model
         model, time2build, time2graphs, time2global, time2metrics = teg.build_model(train_ds)
 
+        # Slide window method after the first build
+        slide_window_scheme = teg.get_sw()
+
         for testing in list_of_testing:
+
+            # We preserve the schema from the model built, for anomalous and normal datasets
+            OriginalModel = model
+            teg.update_mb(OriginalModel)
+
+            # cm to store all cms generated during sliding window
+            cm_accumulative = {'tp': 0, 'tn': 0, 'fp': 0, 'fn': 0}
 
             #Path of the testing
             test_ds_path = cwd + TEST_DS_PATH + testing + ".csv"
@@ -76,8 +84,15 @@ def test_generate_results():
 
             assert not test_ds.empty, "The testing dataset is empty."
 
-            #Make prediction
-            outliers, obs, time2predict = teg.predict(test_ds, model)
+            # Full dataset with test and train
+            full_ds = pd.concat([train_ds, test_ds], ignore_index=True)
+
+            # Initialize the window using the Initial sheme given a test dataset (normal or anomalous)
+            slide_window = slide_window_scheme
+            slide_window.initialize_window(full_ds)
+
+            #Make prediction only on the first week
+            outliers, obs, time2predict = teg.predict(test_ds.head(n_obs_per_period), OriginalModel)
 
             #Set ground true values
             if testing == "anomalous":
@@ -88,16 +103,55 @@ def test_generate_results():
             #Compute confusion matrix
             cm = teg.compute_confusion_matrix(groundtrue, outliers)
 
+            # Accumulate the cms
+            cm_accumulative['tp'] += cm['tp']
+            cm_accumulative['tn'] += cm['tn']
+            cm_accumulative['fp'] += cm['fp']
+            cm_accumulative['fn'] += cm['fn']
+
+            # Metrics to store the time during window processing
+            time2window = 0
+
+            # Compute the rest of the weeks on the testing data
+            while True:
+
+                window = slide_window.slide_window(full_ds) # Moves the window immediately after the original build process and the latest one
+
+                if window is None:
+                    #print(f"No more data available for sliding window in dataset {testing}.")
+                    break
+
+                time2window += teg.process_window(train_ds, n_bins + 2)
+
+                # Make prediction on latest week
+                model_w = teg.get_mb()
+                outliers, obs, time2predict = teg.predict(window.iloc[-n_obs_per_period:], model_w)
+
+                #Set ground true values
+                if testing == "anomalous":
+                    groundtrue = np.ones(obs)        
+                else:
+                    groundtrue = np.zeros(obs)
+
+                #Compute confusion matrix
+                cm = teg.compute_confusion_matrix(groundtrue, outliers)
+
+                # Accumulate the cms
+                cm_accumulative['tp'] += cm['tp']
+                cm_accumulative['tn'] += cm['tn']
+                cm_accumulative['fp'] += cm['fp']
+                cm_accumulative['fn'] += cm['fn']
+
             #Collect detector configuration
             detector = {'metric': metric, 'n_bins': n_bins, 'n_obs_per_period':n_obs_per_period, 'alpha': alpha}
 
             #Collect performance metrics in a dictionary
-            perf = {'tmc': time2build, 'tmg': time2graphs, 'tmgl': time2global, 'tmm': time2metrics, 'tmp': time2predict}
+            perf = {'tmc': time2build, 'tmg': time2graphs, 'tmgl': time2global, 'tmm': time2metrics, 'tmp': time2predict, 'tmw': time2window}
 
             #Print and store basic metrics
-            teg.print_metrics(detector, testing, perf, cm)
+            teg.print_metrics(detector, testing, perf, cm_accumulative)
             results_path = cwd + RESULTS_PATH
-            teg.metrics_to_csv(detector, testing, perf, cm, results_path)
+            teg.metrics_to_csv(detector, testing, perf, cm_accumulative, results_path)
 
         assert os.path.exists(results_path), "Results file has not been created."
         assert os.path.getsize(results_path) > 0, "The result file is empty"
